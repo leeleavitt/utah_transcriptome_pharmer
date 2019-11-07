@@ -16,14 +16,22 @@ d3.csv("data/go_terms.csv").then(matchesCSV =>{
     
     
     //Now we need to figure out how many unique genes there are.
-    genesUnique = [...new Set(genes.map(item => item['Gene.name'])) ]
+    genesUnique = [...new Set(genes.map(item => item['Gene.stable.ID'])) ]
     
-    genesTotalUnique = [... new Set(matchesCSV.map(item => item['Gene.name']))]
+    //This is only to compare with the total ammount of genes
+    genesTotalUnique = [... new Set(matchesCSV.map(item => item['Gene.stable.ID']))]
     
     //This provides us with 2637 Unique genes that we can 
     //Now easily work with
     console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
 
+
     
+    //Now lets import the dataset into the new drPlot
+    var dataToPlot = d3.csv('data/GSE131230_counts_official.csv')
+    console.log(dataToPlot)
+
+    new drPlot(genesUnique, )
+
     
 })
