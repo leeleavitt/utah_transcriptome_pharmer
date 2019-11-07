@@ -33,8 +33,8 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
         //Now easily work with
         console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
 
-        // let heatmap = new Heatmap(heatmapData);
-        // heatmap.createHeatmap();
+        let heatmap = new Heatmap(heatmapData);
+        heatmap.createHeatmap();
 
     })
 })
