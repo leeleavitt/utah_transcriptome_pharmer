@@ -1,21 +1,18 @@
+
 class drPlot{
+
     constructor(dataSet){
+
+        // ocpu.seturl("//public.opencpu.org/ocpu/library/base/R")    
         this.genes = genes
         this.dataSet = dataSet
         console.log(dataSet)
-        //this.PCA = require('ml-pca');
-        var mydata = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 
-        //call R function: stats::sd(x=data)
-        var req = ocpu.rpc("sd",{
-            x : mydata
-        }, function(output){
-            alert("Standard Deviation equals: " + output);
-        });
-    }
+        dataSetMat = new ML.Matrix(dataSet)
     
-
-    // dimensionReduction(){
-    //     var dr = this.PCA(dataSet)
-    // }
+        var data = [[40,50,60],[50,70,60],[80,70,90],[50,60,80]];
+        var vectors = new ML.PCA(data);
+        console.log(vectors)
+        
+    }
 }
