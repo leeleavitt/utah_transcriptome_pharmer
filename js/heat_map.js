@@ -1,6 +1,6 @@
 class Heatmap{
 	  constructor(data){
-			    this.margin = {top: 100, right: 30, bottom: 30, left: 150};
+			    this.margin = {top: 125, right: 30, bottom: 30, left: 150};
 
 			    this.width = 1500 - this.margin.left - this.margin.right;
 
@@ -10,18 +10,32 @@ class Heatmap{
 
 					console.log(this.heatmapData);
 
-					this.sorted = false;
-
 			    this.cells = Object.keys(this.heatmapData[0]).splice(1);
 					this.cells.sort();
 
 			    this.genes = this.heatmapData.map(d => d[""]);
-			  }
 
+					this.newNorm = 'colvalue';
+
+					this.oldrow = null;
+					this.oldcol = null;
+				}
 	  createHeatmap() {
 
+			let dropdownWrap = d3.select('#heatmap').append('div').classed('dropdown-wrapper', true);
+
+			let cWrap = dropdownWrap.append('div').classed('dropdown-panel', true);
+
+			cWrap.append('div').classed('c-label', true)
+					.append('text')
+					.text('Normalize Data Over: ');
+
+			cWrap.append('div').attr('id', 'dropdown_c').classed('dropdown', true).append('div').classed('dropdown-content', true)
+					.append('select');
+
+			this.drawDropDown();
+
 					this.genes = this.heatmapData.map(d => d[""]);
-					console.log(this.genes);
 
 			    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
@@ -29,19 +43,43 @@ class Heatmap{
 			        .domain(this.cellsGroups);
 
 			    this.stretched_data = [];
+					let rowMinMax = {};
+					for (let i = 0; i < this.cells.length; i++){
+						let rowvals = [];
+						rowvals = this.heatmapData.map(d => parseFloat(d[this.cells[i]]));
+
+						rowMinMax[this.cells[i]] = [Math.min(...rowvals),Math.max(...rowvals)];
+					}
+
+					let allvals = [];
+					for (let i = 0; i < this.heatmapData.length; i++){
+			      for (let j = 0; j < this.cells.length; j++){
+											allvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
+							      }
+						}
+
+					let totalmax = Math.max(...allvals);
+					let totalmin = Math.min(...allvals);
 
 			    for (let i = 0; i < this.heatmapData.length; i++){
-						      let vals = []
+						      let colvals = []
 						      for (let j = 0; j < this.cells.length; j++){
-										        vals.push(parseFloat(this.heatmapData[i][this.cells[j]]))
+										        colvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
+														allvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
 										      }
 
-						      var max = Math.max(...vals);
-						      var min = Math.min(...vals);
+						      var colmax = Math.max(...colvals);
+						      var colmin = Math.min(...colvals);
+
+
+
 
 						      for (let j = 0; j < this.cells.length; j++){
 										        this.stretched_data.push({"gene": this.heatmapData[i][""], "cell": this.cells[j],
-															        "value": ((parseFloat(this.heatmapData[i][this.cells[j]]) - min)/(Math.max(1,(max - min)))), "actualValue": parseFloat(this.heatmapData[i][this.cells[j]])})
+															        "colvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
+																			"rowvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
+																			"totalvalue":((parseFloat(this.heatmapData[i][this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
+																			"actualValue": parseFloat(this.heatmapData[i][this.cells[j]])})
 										      }
 						    }
 
@@ -64,7 +102,7 @@ class Heatmap{
 					.attr("id","xAxis")
 			    .call(d3.axisTop(x))
 			    .selectAll("text")
-			    .attr("transform","translate(0,-20) rotate(-20)")
+			    .attr("transform","translate(" + x.bandwidth()/2 + ",-65) rotate(-90)")
 
 			// Build X scales and axis:
 			var y = d3.scaleBand()
@@ -91,7 +129,7 @@ class Heatmap{
 			d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
 
 			// Build color scale
-			var myColor = d3.scaleLinear()
+			this.myColor = d3.scaleLinear()
 			  .range(["white", "#69b3a2"])
 			  .domain([0,1])
 
@@ -116,7 +154,7 @@ class Heatmap{
 			      .attr("y", d => y(d.cell))
 			      .attr("width", x.bandwidth() )
 			      .attr("height", y.bandwidth() )
-			      .style("fill", d => myColor(d.value))
+			      .style("fill", d => this.myColor(d.colvalue))
 			      .on("mouseover", d => div.html(this.tooltipRender(d))
 							                              .style("opacity",1)
 							                              .style("left", (d3.event.pageX + 10) + "px")
@@ -125,7 +163,38 @@ class Heatmap{
 						console.log(this.heatmapData);
 			  }
 
-	  updateHeatmap() {
+				drawDropDown() {
+
+						let that = this;
+						let dropDownWrapper = d3.select('.dropdown-wrapper');
+						let dropData = [['Genes','colvalue'],['Cells','rowvalue'],['Whole Table','totalvalue']];
+
+
+						/* CIRCLE DROPDOWN */
+						let dropC = dropDownWrapper.select('#dropdown_c').select('.dropdown-content').select('select');
+
+						let optionsC = dropC.selectAll('option')
+								.data(dropData);
+
+
+						optionsC.exit().remove();
+
+						let optionsCEnter = optionsC.enter()
+								.append('option')
+								.attr('value', (d, i) => d[1]);
+
+						optionsCEnter.append('text')
+								.text((d, i) => d[0]);
+
+						optionsC = optionsCEnter.merge(optionsC);
+
+						dropC.on('change', function(d, i) {
+							that.newNorm = this.options[this.selectedIndex].value;
+							that.updateHeatmap(that.newNorm);
+						});
+					}
+
+	  updateHeatmap(normOver) {
 					this.genes = this.heatmapData.map(d => d[""]);
 
 					var x = d3.scaleBand()
@@ -157,21 +226,24 @@ class Heatmap{
 					.attr("y", d => y(d.cell))
 					.attr("width", x.bandwidth() )
 					.attr("height", y.bandwidth() )
+					.style("fill", d => this.myColor(d[normOver]))
 			  }
 
-	sortCols(cell){
-			if (this.sorted){
-						this.heatmapData = this.heatmapData.sort((a, b) =>
-										parseFloat(a[cell]) < parseFloat(b[cell]) ? -1 : 1);
+	sortCols(col){
+			if (this.oldcol === col){
+					this.oldcol = null;
+					this.heatmapData = this.heatmapData.sort((a, b) =>
+									parseFloat(a[col]) < parseFloat(b[col]) ? -1 : 1);
 					}else {
-								this.heatmapData = this.heatmapData.sort((a, b) =>
-											parseFloat(a[cell]) > parseFloat(b[cell]) ? -1 : 1);
-							}
+						this.oldcol = col;
+						this.heatmapData = this.heatmapData.sort((a, b) =>
+									parseFloat(a[col]) > parseFloat(b[col]) ? -1 : 1);
+					}
 
 
 			this.sorted = !this.sorted;
 
-			this.updateHeatmap();
+			this.updateHeatmap(this.newNorm);
 	}
 
 	sortRows(row) {
@@ -182,21 +254,22 @@ class Heatmap{
 					    sortable.push([cell, parseFloat(gene[cell])]);
 					}
 
-			if (this.sorted){
-						sortable = sortable.sort((a, b) =>
-									a[1] < b[1] ? -1 : 1);
+			if (row === this.oldrow){
+					this.oldrow = null;
+					sortable = sortable.sort((a, b) =>
+								a[1] < b[1] ? -1 : 1);
 					}else {
-								sortable = sortable.sort((a, b) =>
-											a[1] > b[1]  ? -1 : 1);
-							}
+						this.oldrow = row;
+						sortable = sortable.sort((a, b) =>
+									a[1] > b[1]  ? -1 : 1);
+					}
 
 			this.cells = [];
 			for (let i = 0; i < sortable.length; i++){
 						this.cells.push(sortable[i][0]);
 					}
 
-			this.sorted = !this.sorted;
-			this.updateHeatmap();
+			this.updateHeatmap(this.newNorm);
 	}
 
 	tooltipRender(data) {
@@ -312,4 +385,3 @@ class Heatmap{
 //     .style("fill", d => myColor(d.value));
 //
 	// }
-
