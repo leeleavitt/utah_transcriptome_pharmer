@@ -47,6 +47,7 @@ class SummaryPlot {
 				.enter().append("text")
 				.style("font-size", function(d) { return d.size + "px"; })
 				.style("font-family", "Impact")
+				.style("fill", function(d) { return that.colorScale(d.size); })
 				.attr("text-anchor", "middle")
 				.attr("transform", function(d) {
 					return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
