@@ -1,30 +1,33 @@
 //Load in the data from the CSV file
 d3.csv("data/go_terms.csv").then(matchesCSV => {
 
-    d3.csv("data/GSE131230_counts_official.csv").then(countsCSV =>{
+	d3.csv("data/GSE131230_counts_official.csv").then(countsCSV =>{
 
-        //These are terms to reduce the data on
-        terms = ['ion channel','G-protein']
+		//These are terms to reduce the data on
+		terms = ['ion channel','G-protein']
 
-        //Now we need to obtain genes that match our reducers above
-        genes = []
-        for(var i=0 ; i< terms.length; i++){
-            genesMatch = matchesCSV.filter(d => d["GO.term.name"].match(terms[i])!==null)
-            genes = genes.concat(genesMatch)
-        }
+		//Now we need to obtain genes that match our reducers above
+		genes = []
+		for(var i=0 ; i< terms.length; i++){
+			genesMatch = matchesCSV.filter(d => d["GO.term.name"].match(terms[i])!==null)
+			genes = genes.concat(genesMatch)
+		}
 
-        //One main issue is that it returns many duplicate genes.
-        //Because each gene can be described in a variety of ways.
-        console.log(`There are a total of ${genes.length} detected with the terms ${terms}`)
+		//One main issue is that it returns many duplicate genes.
+		//Because each gene can be described in a variety of ways.
+		console.log(`There are a total of ${genes.length} detected with the terms ${terms}`)
 
+		console.log("All data:");
+		console.log(genes);
 
-        //Now we need to figure out how many unique genes there are.
-        genesUnique = [...new Set(genes.map(item => item['Gene.name'])) ]
+		//Now we need to figure out how many unique genes there are.
+		genesUnique = [...new Set(genes.map(item => item['Gene.name'])) ]
 
-        genesIdUnique = [...new Set(genes.map(item => item['Gene.stable.ID'])) ]
+		genesIdUnique = [...new Set(genes.map(item => item['Gene.stable.ID'])) ]
 
-        genesTotalUnique = [... new Set(matchesCSV.map(item => item['Gene.name']))]
+		genesTotalUnique = [... new Set(matchesCSV.map(item => item['Gene.name']))]
 
+<<<<<<< HEAD
         heatmapData = countsCSV.filter(d => genesIdUnique.indexOf(d[""]) > -1);
         
         
@@ -56,13 +59,26 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
         
         
         let drplot =  new drPlot(heatmapData)
+=======
+		heatmapData = countsCSV.filter(d => genesIdUnique.indexOf(d[""]) > -1);
+		//This provides us with 2637 Unique genes that we can
+		//Now easily work with
+		console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
+>>>>>>> 7589e50f17e9c58a492fd630d60e7a3befc506b0
 
-        //This provides us with 2637 Unique genes that we can
-        //Now easily work with
-        console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
+		/* dr plot */
+		//let drplot =  new drPlot(heatmapData)
 
-        let heatmap = new Heatmap(heatmapData);
-        heatmap.createHeatmap();
+		/* heat map */
+		let heatmap = new Heatmap(heatmapData);
 
-    })
+		heatmap.createHeatmap();
+
+		/* summary plot */
+		let summaryPlotData = matchesCSV.map(d => d["GO.term.name"]).filter(function (e) { return e != "" });
+		let summaryPlot = new SummaryPlot(summaryPlotData);
+		summaryPlot.createSummaryPlot();
+
+
+	})
 })
