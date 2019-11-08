@@ -27,41 +27,29 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 
 		genesTotalUnique = [... new Set(matchesCSV.map(item => item['Gene.name']))]
 
-        heatmapData = countsCSV.filter(d => genesIdUnique.indexOf(d[""]) > -1);
-        
-        
-        // Playing with SVD decomposition in JS
-        //First rate the heatmapDat and extract only values
-        var dataSet = heatmapData
-        console.log(dataSet)
-        dataSetArray = dataSet.map(obj => Object.values(obj))
-        dataSetArray = dataSetArray.map(d =>{
-            d.shift()
-            return d
-        })
-        console.log(dataSetArray)
-        
-        //Start the SVD
-        dataSetArray = new ML.Matrix(dataSetArray) 
-        //dataSetArray = dataSetArray.transpose()
-        pca = new ML.PCA(dataSetArray.transpose());
-        
-        //Now compute PCA
-        
-
-
-        
-        
-        
-
-        
-        
-        
-        let drplot =  new drPlot(heatmapData)
 		heatmapData = countsCSV.filter(d => genesIdUnique.indexOf(d[""]) > -1);
-		//This provides us with 2637 Unique genes that we can
-		//Now easily work with
+
 		console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
+
+		// Playing with SVD decomposition in JS
+		//First rate the heatmapDat and extract only values
+		var dataSet = heatmapData
+		console.log(dataSet)
+		dataSetArray = dataSet.map(obj => Object.values(obj))
+		dataSetArray = dataSetArray.map(d =>{
+			d.shift()
+			return d
+		})
+		console.log(dataSetArray)
+
+		//Start the SVD
+		dataSetArray = new ML.Matrix(dataSetArray)
+		//dataSetArray = dataSetArray.transpose()
+		pca = new ML.PCA(dataSetArray.transpose());
+
+		//Now compute PCA
+
+		let drplot =  new drPlot(heatmapData)
 
 		/* dr plot */
 		//let drplot =  new drPlot(heatmapData)
