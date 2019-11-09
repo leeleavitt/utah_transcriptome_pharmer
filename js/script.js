@@ -75,6 +75,7 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		pc1 = geneSVD.U.data[0].map(d=> d * Math.pow(geneSVD.s[0], alphaVal))
 		pc2 = geneSVD.U.data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
 		//Compute the directional components. This is how the genes direct the data
+		//Need to determine if i am using the correct region, collumns or row.
 		dc1 = geneSVD.V.data[0].map(d=>d*Math.pow(geneSVD.s[0], 1-alphaVal))
 		dc2 = geneSVD.V.data[1].map(d=>d*Math.pow(geneSVD.s[1], 1-alphaVal))
 
