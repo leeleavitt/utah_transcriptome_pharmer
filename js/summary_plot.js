@@ -1,15 +1,28 @@
 class SummaryPlot {
 	constructor(data) {
 		let that = this;
-		this.data = data.slice(0,50);
-		this.data = this.data.map(function(d) {
-				return {text: d, size: 10 + Math.random() * 90};
-			});
+
+		let map = new Map();
+		let count;
+		data.forEach(function(e) {
+			count = map.get(e);
+			map.set(e, count ? count + 1 : 1);
+		});
+
+		map[Symbol.iterator] = function* () {
+			yield* [...this.entries()].sort((a, b) => b[1] - a[1]);
+		}
+
+		//for (let [key, value] of map) { console.log(key + ' ' + value);}
+		//console.log([...map]);              // sorted order
+		//console.log([...map.entries()]);    // original insertation order
+
+		this.data = [...map].map(function(d) {
+			return {text: d[0], size: d[1]*30};
+		});
 
 		/* set size */
-		this.margin = {top: 100, right: 30, bottom: 30, left: 120};
-		this.width = 1500 - this.margin.left - this.margin.right;
-		this.height = 900 - this.margin.top - this.margin.bottom;    
+		this.margin = {top: 30, right: 30, bottom: 30, left: 30};
 
 		/* scale */
 		this.colorScale = d3.scaleOrdinal()
@@ -20,8 +33,12 @@ class SummaryPlot {
 
 	}
 
-	createSummaryPlot() {
+	create() {
+		let width = 1000;
+		let height = 1000;
 		let that = this;
+		that.height = height;
+		that.width = width;
 		var layout = d3.layout.cloud()
 			.size([that.width, that.height])
 			.words(that.data)
@@ -37,10 +54,12 @@ class SummaryPlot {
 			/* set summary plot */
 			d3.select("#summaryPlot")
 				.append("svg")
+				.attr("viewBox", '0 0 2000 2000')
+				.attr("preserveAspectRatio","xMidYMid meet")
 				.attr("width", that.width + that.margin.left + that.margin.right)
 				.attr("height", that.height + that.margin.top + that.margin.bottom)
 				.append("g")
-				.attr("class","wordcloud")
+				.attr("id","wordcloud")
 				.attr("transform", "translate(" + that.width/2 + "," + that.height/2 + ")")
 				.selectAll("text")
 				.data(words)
@@ -54,8 +73,23 @@ class SummaryPlot {
 				})
 				.text(function(d) { return d.text; });
 		}
+
 	}
 
-	updateSummaryPlot() {
+	updateSize() {
+
+		let that = this;
+		window.onresize = function(event) {
+			let width = document.getElementById('summaryPlot').offsetWidth;
+			let height = document.getElementById('summaryPlot').offsetHeight;
+
+			d3.select("#summaryPlot").select('svg')
+				.attr("width", width + that.margin.left + that.margin.right)
+				.attr("height", height + that.margin.top + that.margin.bottom)
+			d3.select("#wordcloud")
+				.attr("transform", "translate(" + width/2 + "," + height/2 + ")")
+
+		};
 	}
+
 }
