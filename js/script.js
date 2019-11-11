@@ -34,19 +34,26 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		//Dimensional Reduction Plot
 		let drplot =  new drPlot(heatmapData);
 		drplot.svdCompute();
-		drplot.createPlot();
+        drplot.createPlot();
+        drplot.drawPlot();
 
-		/* heat map */
-		let heatmap = new Heatmap(heatmapData);
 
-		heatmap.createHeatmap();
 
-		/* summary plot */
-		let summaryPlotData = matchesCSV.map(d => d["GO.term.name"]).filter(function (e) { return e != "" });
-		summaryPlotData = summaryPlotData.slice(0, 200);
-		let summaryPlot = new SummaryPlot(summaryPlotData);
-		summaryPlot.create();
-		summaryPlot.updateSize();
+
+
+
+
+		// /* heat map */
+		// let heatmap = new Heatmap(heatmapData);
+
+		// heatmap.createHeatmap();
+
+		// /* summary plot */
+		// let summaryPlotData = matchesCSV.map(d => d["GO.term.name"]).filter(function (e) { return e != "" });
+		// summaryPlotData = summaryPlotData.slice(0, 200);
+		// let summaryPlot = new SummaryPlot(summaryPlotData);
+		// summaryPlot.create();
+		// summaryPlot.updateSize();
 
 	})
 })

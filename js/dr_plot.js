@@ -60,7 +60,20 @@ class drPlot{
 		// principal component 1 = (d_1^a * U1i)
 		// principal component 2 = (d_2^a * U2i)
 		this.pc1 = geneSVD.U.data[0].map(d=> d * Math.pow(geneSVD.s[0], alphaVal))
-		this.pc2 = geneSVD.U.data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
+        this.pc2 = geneSVD.U.data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
+        
+        //Make an object to hold this information
+        this.pComps = []
+        for(var i=0; i<this.pc1.length;i++){
+            var cell = {}
+            cell['cell'] =  this.cells[i]
+            cell['pc1'] = this.pc1[i]
+            cell['pc2'] = this.pc2[i]
+            this.pComps[i]=cell
+        }
+
+        console.log(this.pComps)
+
 		//Compute the directional components. This is how the genes direct the data
 		//Need to determine if i am using the correct region, collumns or row.
 		this.pd1 = geneSVD.V.data[0].map(d=>d*Math.pow(geneSVD.s[0], 1-alphaVal))
@@ -133,7 +146,7 @@ class drPlot{
         //Color scale for the cells
         this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
-        let cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
+        this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
             .domain(this.cellsGroups);
         
         //Start constructing the plot
@@ -170,11 +183,21 @@ class drPlot{
     }
 
     drawPlot(){
-        
         //setup the plot
 
-        d3.select('#plotSvg')
-            .append
+        var cellComp = d3.select('#plotSvg')
+            .selectAll('circle')
+            .data(this.pComps)
+            
+        var cellCompEnter = cellComp.enter()
+            .append('circle')
+
+        cellComp = cellCompEnter.merge(cellComp)
+            .attr('r',3)
+            .attr('cx', d=> d.pc1)
+            .attr('cy', d=> d.pc2)
+            .attr('fill', d=>this.cellsColorScale(d.cell.slice(0,-2)))
+
         
 
 
