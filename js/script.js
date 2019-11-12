@@ -32,7 +32,7 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
 
 		//Dimensional Reduction Plot
-		let drplot =  new drPlot(heatmapData);
+		let drplot =  new drPlot(heatmapData, genesUnique);
 		drplot.pcaCompute();
         drplot.createPlot();
         drplot.drawPlot();
@@ -63,16 +63,10 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		
 		// geneMat  = new ML.Matrix(geneMatrix)
 		// geneMat = geneMat.transpose()
-		
-
 
 		// new ML.PCA(geneMat,{scale:true})
 
 		/////////////////////////////////////////////////////////
-
-
-
-
 
 		/* heat map */
 		let heatmap = new Heatmap(heatmapData);

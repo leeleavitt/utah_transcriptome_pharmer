@@ -1,7 +1,8 @@
 
 class drPlot{
-    constructor(dataSet){
-        this.dataSet = dataSet        
+    constructor(dataSet, geneSet){
+        this.dataSet = dataSet 
+        this.geneSet = geneSet
         this.margin = {top:60, bottom:60, left:60, right:60}
         this.svgDim = {width:1000+this.margin.left+this.margin.right, height:1000+this.margin.top+this.margin.bottom}
         this.width = 1000;
@@ -78,6 +79,7 @@ class drPlot{
 		//Need to determine if i am using the correct region, collumns or row.
 		this.pd1 = geneSVD.V.data[0].map(d=>d*Math.pow(geneSVD.s[0], 1-alphaVal))
         this.pd2 = geneSVD.V.data[1].map(d=>d*Math.pow(geneSVD.s[1], 1-alphaVal))
+        
     }
 
     pcaCompute(){
@@ -102,7 +104,7 @@ class drPlot{
         var geneMat = new ML.Matrix(this.geneMatrix)
         geneMat = geneMat.transpose()
 
-        var genePCA = new ML.PCA(geneMat)
+        var genePCA = new ML.PCA(geneMat,{center:false})
         var principalComps = genePCA.predict(geneMat).transpose()
 
         this.pc1 = principalComps.data[0]
@@ -124,8 +126,18 @@ class drPlot{
         this.pd1 = pDirs.data[0]
         this.pd2 = pDirs.data[1]
 
+        this.pDims = []
+        for(var i=0; i<this.pd1.length; i++){
+            var gene = {}
+            gene['gene'] = this.geneSet[i]
+            gene['pd1'] = this.pd1[i]
+            gene['pd2'] = this.pd2[i]
+            this.pDims[i] = gene
+        }
+
 
     }
+
     createPlot(){
         //SVG to add plot to
         d3.select('#drPlot')
@@ -210,7 +222,6 @@ class drPlot{
             .attr('transform',`translate(${this.margin.left},${this.margin.bottom})`)
             .call(pc2Axis)
 
-                    //Start constructing the plot
         //PD2
         d3.select('#wrapperGroup')
             .append('g')
@@ -229,7 +240,7 @@ class drPlot{
     }
 
     drawPlot(){
-        //setup the plot
+        //Plot the cells
         console.log(this.pComps)
 
         var cellComp = d3.select('#plotSvg')
@@ -240,13 +251,30 @@ class drPlot{
             .append('circle')
 
         cellComp = cellCompEnter.merge(cellComp)
-            .attr('transform', `translate(${this.margin.left},${this.margin.top})`)
+            .attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
             .attr('r',10)
             .attr('cx', d=> this.pc1Scale(d.pc1))
             .attr('cy', d=> this.pc2Scale(d.pc2))
             .attr('fill', d=>this.cellsColorScale(d.cell.slice(0,-2)))
 
-        
+        //Plot the Genes
+        console.log(this.pDims)
+
+        var geneComp = d3.select('#plotSvg')
+            .selectAll('text')
+            .data('text')
+            .data(this.pDims)
+
+        var geneCompEnter = geneComp.enter()
+            .append('text')
+
+        geneComp = geneCompEnter.merge(geneComp)
+            .attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
+            .attr('font-size', 14)
+            .attr('opacity', .5)
+            .attr('x', d=> this.pd1Scale(d.pd1))
+            .attr('y', d=> this.pd2Scale(d.pd2))
+            .text(d=>d.gene)
 
 
     }
