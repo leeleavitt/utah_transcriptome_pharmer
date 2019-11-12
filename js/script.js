@@ -33,27 +33,58 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 
 		//Dimensional Reduction Plot
 		let drplot =  new drPlot(heatmapData);
-		drplot.svdCompute();
+		drplot.pcaCompute();
         drplot.createPlot();
         drplot.drawPlot();
 
 
+		// //////////////////////////////////////////////////////
+		////THE PROVING GROUND
+		/////////////////////////////////////////////////////////
+		// geneMatrix = heatmapData
+
+		// genes = geneMatrix.map(d=>d[""])
+		// cells = Object.getOwnPropertyNames(geneMatrix[0])
+		// cells.shift()
+		
+		// geneMatrix = geneMatrix.map(obj => Object.values(obj))
+		// geneMatrix = geneMatrix.map(d =>{
+		// 	d.shift()
+		// 	return d
+		// })
+
+		// geneMatrixCentered = geneMatrix.map(d=>{
+		// 	//Calcualte the mean of this array
+		// 	let colMean = d.reduce((a,b)=>a+b,0)/d.length
+		// 	//For each value in the array subtract the mean 
+		// 	d = d.map(e=> e - colMean)
+		// 	return(d)
+		// })
+		
+		// geneMat  = new ML.Matrix(geneMatrix)
+		// geneMat = geneMat.transpose()
+		
+
+
+		// new ML.PCA(geneMat,{scale:true})
+
+		/////////////////////////////////////////////////////////
 
 
 
 
 
-		// /* heat map */
-		// let heatmap = new Heatmap(heatmapData);
+		/* heat map */
+		let heatmap = new Heatmap(heatmapData);
 
-		// heatmap.createHeatmap();
+		heatmap.createHeatmap();
 
-		// /* summary plot */
-		// let summaryPlotData = matchesCSV.map(d => d["GO.term.name"]).filter(function (e) { return e != "" });
-		// summaryPlotData = summaryPlotData.slice(0, 200);
-		// let summaryPlot = new SummaryPlot(summaryPlotData);
-		// summaryPlot.create();
-		// summaryPlot.updateSize();
+		/* summary plot */
+		let summaryPlotData = matchesCSV.map(d => d["GO.term.name"]).filter(function (e) { return e != "" });
+		summaryPlotData = summaryPlotData.slice(0, 200);
+		let summaryPlot = new SummaryPlot(summaryPlotData);
+		summaryPlot.create();
+		summaryPlot.updateSize();
 
 	})
 })

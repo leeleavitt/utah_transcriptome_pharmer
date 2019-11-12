@@ -59,8 +59,8 @@ class drPlot{
 		var alphaVal = 1
 		// principal component 1 = (d_1^a * U1i)
 		// principal component 2 = (d_2^a * U2i)
-		this.pc1 = geneSVD.U.data[0].map(d=> d * Math.pow(geneSVD.s[0], alphaVal))
-        this.pc2 = geneSVD.U.data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
+		this.pc1 = geneSVD.U.transpose().data[0].map(d=> d * Math.pow(geneSVD.s[0], alphaVal))
+        this.pc2 = geneSVD.U.transpose().data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
         
         //Make an object to hold this information
         this.pComps = []
@@ -80,6 +80,52 @@ class drPlot{
         this.pd2 = geneSVD.V.data[1].map(d=>d*Math.pow(geneSVD.s[1], 1-alphaVal))
     }
 
+    pcaCompute(){
+        //Trying out PCA straight out of the box
+        this.geneMatrix = this.dataSet
+
+        //Find all genes
+        this.genes = this.geneMatrix.map(d=>d[""])
+        //Find all cells
+        this.cells = Object.getOwnPropertyNames(this.geneMatrix[0])
+        //First one is to define the gene, so remove it
+        this.cells.shift()
+        
+        //Transform this into an array of Arrays
+        this.geneMatrix = this.geneMatrix.map(obj => Object.values(obj))
+		//Remove the First value since it is the gene name
+		this.geneMatrix = this.geneMatrix.map(d =>{
+			d.shift()
+			return d
+        })
+        
+        var geneMat = new ML.Matrix(this.geneMatrix)
+        geneMat = geneMat.transpose()
+
+        var genePCA = new ML.PCA(geneMat)
+        var principalComps = genePCA.predict(geneMat).transpose()
+
+        this.pc1 = principalComps.data[0]
+        this.pc2 = principalComps.data[1]
+
+        this.pComps = []
+        for(var i=0; i<this.pc1.length;i++){
+            var cell = {}
+            cell['cell'] =  this.cells[i]
+            cell['pc1'] = this.pc1[i]
+            cell['pc2'] = this.pc2[i]
+            this.pComps[i]=cell
+        }
+
+        console.log(this.pComps)
+
+        var pDirs =  genePCA.U.transpose()
+        
+        this.pd1 = pDirs.data[0]
+        this.pd2 = pDirs.data[1]
+
+
+    }
     createPlot(){
         //SVG to add plot to
         d3.select('#drPlot')
@@ -184,6 +230,7 @@ class drPlot{
 
     drawPlot(){
         //setup the plot
+        console.log(this.pComps)
 
         var cellComp = d3.select('#plotSvg')
             .selectAll('circle')
@@ -193,9 +240,10 @@ class drPlot{
             .append('circle')
 
         cellComp = cellCompEnter.merge(cellComp)
-            .attr('r',3)
-            .attr('cx', d=> d.pc1)
-            .attr('cy', d=> d.pc2)
+            .attr('transform', `translate(${this.margin.left},${this.margin.top})`)
+            .attr('r',10)
+            .attr('cx', d=> this.pc1Scale(d.pc1))
+            .attr('cy', d=> this.pc2Scale(d.pc2))
             .attr('fill', d=>this.cellsColorScale(d.cell.slice(0,-2)))
 
         
