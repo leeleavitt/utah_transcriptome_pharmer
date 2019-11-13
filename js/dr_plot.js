@@ -104,7 +104,7 @@ class drPlot{
         var geneMat = new ML.Matrix(this.geneMatrix)
         geneMat = geneMat.transpose()
 
-        var genePCA = new ML.PCA(geneMat,{center:false})
+        var genePCA = new ML.PCA(geneMat,{center:true, scale:true})
         var principalComps = genePCA.predict(geneMat).transpose()
 
         this.pc1 = principalComps.data[0]
@@ -146,11 +146,30 @@ class drPlot{
             .attr('width',this.svgDim.width)
             .attr('height',this.svgDim.height)
         
-        //Add a wrapper group
+        //Add a wrapper group to hold the plot
         d3.select('#plotSvg')
             .append('g')
             .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
             .attr('id','wrapperGroup')
+
+        // Add a wrapper to hold the Cell Points
+        d3.select('#wrapperGroup')
+            .append('g')
+            .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
+            .attr('id', 'cellContainer')
+
+        // Add a Wrapper to hold the gens for the plot
+        d3.select('#wrapperGroup')
+            .append('g')
+            .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
+            .attr('id', 'geneContainer')
+        
+        //Add Brush Holder
+        d3.select('#wrapperGroup')
+            .append('g')
+            .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
+            .attr('id','brushContainer')
+        this.createBrush()
 
         ////////////////////////////////////////////////////////////////////
         //Principal Components scale
@@ -202,25 +221,39 @@ class drPlot{
 
         ///////////////////////////////////////////////////////////////
         //Color scale for the cells
+        ///////////////////////////////////////////////////////////////
         this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
         this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
             .domain(this.cellsGroups);
         
         //Start constructing the plot
-        //PC1
+        //PC1 X axis/ BOTTOM
         d3.select('#wrapperGroup')
             .append('g')
             .attr('id','pc1axis')
-            .attr('transform',`translate(${this.margin.left},${this.width - this.margin.top})`)
+            .attr('transform',`translate(${this.margin.left},${this.height - this.margin.top})`)
             .call(pc1Axis)
         
-        //PC2
+        d3.select('#wrapperGroup')
+            .append('text')
+            .attr('x', (this.width+this.margin.left)/2)
+            .attr('y', (this.height-this.margin.top+40))
+            .text('PC1')
+            
+        //PC2 y axis / LEFT
         d3.select('#wrapperGroup')
             .append('g')
             .attr('id','pc2Axis')
             .attr('transform',`translate(${this.margin.left},${this.margin.bottom})`)
             .call(pc2Axis)
+
+        d3.select('#wrapperGroup')
+            .append('text')
+            .attr('x', this.margin.left - 60 )
+            .attr('y', (this.height - this.margin.top)/2)
+            .text('PC2')
+
 
         //PD2
         d3.select('#wrapperGroup')
@@ -228,22 +261,48 @@ class drPlot{
             .attr('id','pd2axis')
             .attr('transform',`translate(${(this.width - this.margin.right)},${this.margin.top})`)
             .call(pd2Axis)
+
+        d3.select('#wrapperGroup')
+            .append('text')
+            .attr('x', (this.width - this.margin.left + 40))
+            .attr('y', (this.height - this.margin.top)/2)
+            .text('PD2')
     
-        //PD2
+        //PD1
         d3.select('#wrapperGroup')
             .append('g')
             .attr('id','pd1Axis')
             .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
             .call(pd1Axis)
 
+        d3.select('#wrapperGroup')
+            .append('text')
+            .attr('y', this.margin.top - 40)
+            .attr('x', (this.width - this.margin.left)/2)
+            .text('PD1')
 
+
+    }
+
+    createBrush(){
+        var geneBrush = d3.brush()
+            .extent([ [0, 0], [this.width-this.margin.left-this.margin.right,this.height-this.margin.top-this.margin.bottom] ])
+            .on('end', this.updateGenes)
+        
+        d3.select('#brushContainer').append('g').call(geneBrush)
+            
+
+    }
+
+    updateGenes(){
+        console.log(d3.event.selection)
     }
 
     drawPlot(){
         //Plot the cells
         console.log(this.pComps)
 
-        var cellComp = d3.select('#plotSvg')
+        var cellComp = d3.select('#cellContainer')
             .selectAll('circle')
             .data(this.pComps)
             
@@ -251,7 +310,7 @@ class drPlot{
             .append('circle')
 
         cellComp = cellCompEnter.merge(cellComp)
-            .attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
+            //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
             .attr('r',10)
             .attr('cx', d=> this.pc1Scale(d.pc1))
             .attr('cy', d=> this.pc2Scale(d.pc2))
@@ -260,7 +319,7 @@ class drPlot{
         //Plot the Genes
         console.log(this.pDims)
 
-        var geneComp = d3.select('#plotSvg')
+        var geneComp = d3.select('#geneContainer')
             .selectAll('text')
             .data('text')
             .data(this.pDims)
@@ -269,9 +328,9 @@ class drPlot{
             .append('text')
 
         geneComp = geneCompEnter.merge(geneComp)
-            .attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
-            .attr('font-size', 14)
-            .attr('opacity', .5)
+            //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
+            .attr('font-size', 10)
+            .attr('opacity', .2)
             .attr('x', d=> this.pd1Scale(d.pd1))
             .attr('y', d=> this.pd2Scale(d.pd2))
             .text(d=>d.gene)

@@ -27,12 +27,21 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 
 		genesTotalUnique = [... new Set(matchesCSV.map(item => item['Gene.name']))]
 
-		heatmapData = countsCSV.filter(d => genesIdUnique.indexOf(d[""]) > -1);
+		data = countsCSV.filter(d => genesIdUnique.indexOf(d[""]) > -1);
+
+		//Now Lets remove columns that are entirly 0
+		noZeroData = data.filter(d=>{
+			cellsVal = Object.values(d);
+			cellsVal.shift();
+			var logic = cellsVal.reduce((a,b)=>parseInt(a)+parseInt(b));
+			return logic >= 10000
+		})
+
 
 		console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
 
 		//Dimensional Reduction Plot
-		let drplot =  new drPlot(heatmapData, genesUnique);
+		let drplot =  new drPlot(noZeroData, genesUnique);
 		drplot.pcaCompute();
         drplot.createPlot();
         drplot.drawPlot();
@@ -41,7 +50,7 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		// //////////////////////////////////////////////////////
 		////THE PROVING GROUND
 		/////////////////////////////////////////////////////////
-		// geneMatrix = heatmapData
+		// geneMatrix = data
 
 		// genes = geneMatrix.map(d=>d[""])
 		// cells = Object.getOwnPropertyNames(geneMatrix[0])
@@ -69,7 +78,7 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		/////////////////////////////////////////////////////////
 
 		/* heat map */
-		let heatmap = new Heatmap(heatmapData);
+		let heatmap = new Heatmap(data);
 
 		heatmap.createHeatmap();
 
