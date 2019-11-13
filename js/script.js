@@ -3,6 +3,23 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 
 	d3.csv("data/GSE131230_counts_official.csv").then(countsCSV =>{
 
+		d3.csv("data/gene_descriptions.csv").then(genesCSV =>{
+
+		console.log(genesCSV);
+		var allgenes = [];
+
+		// for (var i = 0; i < genesCSV.length; i++){
+		// 	allgenes.push(genesCSV)
+		// }
+
+
+
+
+
+
+
+
+
 		//These are terms to reduce the data on
 		terms = ['ion channel','G-protein']
 
@@ -37,7 +54,6 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 			return logic >= 10000
 		})
 
-
 		console.log(`But there are only ${genesUnique.length} genes within this sampling. Compared with ${genesTotalUnique.length} Total Genes`)
 
 		//Dimensional Reduction Plot
@@ -55,7 +71,7 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		// genes = geneMatrix.map(d=>d[""])
 		// cells = Object.getOwnPropertyNames(geneMatrix[0])
 		// cells.shift()
-		
+
 		// geneMatrix = geneMatrix.map(obj => Object.values(obj))
 		// geneMatrix = geneMatrix.map(d =>{
 		// 	d.shift()
@@ -65,11 +81,11 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		// geneMatrixCentered = geneMatrix.map(d=>{
 		// 	//Calcualte the mean of this array
 		// 	let colMean = d.reduce((a,b)=>a+b,0)/d.length
-		// 	//For each value in the array subtract the mean 
+		// 	//For each value in the array subtract the mean
 		// 	d = d.map(e=> e - colMean)
 		// 	return(d)
 		// })
-		
+
 		// geneMat  = new ML.Matrix(geneMatrix)
 		// geneMat = geneMat.transpose()
 
@@ -89,5 +105,6 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		summaryPlot.create();
 		summaryPlot.updateSize();
 
+		})
 	})
 })

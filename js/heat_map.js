@@ -6,7 +6,7 @@ class Heatmap{
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapData = data.slice(0,50);
+			    this.heatmapData = data.slice(0,20);
 
 					console.log(this.heatmapData);
 
@@ -79,7 +79,7 @@ class Heatmap{
 															        "colvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
 																			"rowvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
 																			"totalvalue":((parseFloat(this.heatmapData[i][this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
-																			"actualValue": parseFloat(this.heatmapData[i][this.cells[j]])})
+																			"actualvalue": parseFloat(this.heatmapData[i][this.cells[j]])})
 										      }
 						    }
 
@@ -98,11 +98,17 @@ class Heatmap{
 			      .domain(this.genes)
 			      .padding(0.01);
 
-			  svg.append("g")
-					.attr("id","xAxis")
-			    .call(d3.axisTop(x))
-			    .selectAll("text")
-			    .attr("transform","translate(" + x.bandwidth()/2 + ",-65) rotate(-90)")
+				if (this.heatmapData.length < 150) {
+					svg.append("g")
+						.attr("id","xAxis")
+				    .call(d3.axisTop(x))
+				    .selectAll("text")
+				    .attr("transform","translate(" + (x.bandwidth()/4) + ",-65) rotate(-90)");
+
+					d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
+
+				}
+
 
 			// Build X scales and axis:
 			var y = d3.scaleBand()
@@ -126,7 +132,6 @@ class Heatmap{
 			  .attr("opacity",0.2);
 
 			d3.select('#yAxis').selectAll('rect').on('click',d => this.sortCols(d));
-			d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
 
 			// Build color scale
 			this.myColor = d3.scaleLinear()
@@ -146,6 +151,19 @@ class Heatmap{
 						.append('g')
 						.attr('id','rectGroup');
 
+						if (this.heatmapData.length < 50) {
+							rectGroup.selectAll()
+								.data(this.stretched_data)
+								.enter()
+								.append("text")
+								.attr("x", d => x(d.gene) + (x.bandwidth()/2))
+								.attr("y", d => y(d.cell) + (y.bandwidth()/2))
+								.text(d => d.actualvalue)
+								.attr("text-anchor","middle")
+								.attr("dominant-baseline","middle")
+								.attr("class","heatmapText")
+							}
+							
 				rectGroup.selectAll()
 			      .data(this.stretched_data)
 			      .enter()
@@ -160,7 +178,10 @@ class Heatmap{
 							                              .style("left", (d3.event.pageX + 10) + "px")
 							                              .style("top", (d3.event.pageY - 35) + "px"))
 			      .on("mouseout",d => div.style("opacity",0));
-						console.log(this.heatmapData);
+						console.log(this.stretched_data);
+
+
+
 			  }
 
 				drawDropDown() {
@@ -227,6 +248,16 @@ class Heatmap{
 					.attr("width", x.bandwidth() )
 					.attr("height", y.bandwidth() )
 					.style("fill", d => this.myColor(d[normOver]))
+
+					d3.select('#rectGroup')
+					.selectAll('text')
+					.join(this.stretched_data)
+					.transition()
+					.duration(1500)
+					.attr("x", d => x(d.gene) + (x.bandwidth()/2))
+					.attr("y", d => y(d.cell) + (y.bandwidth()/2))
+					.text(d => d.actualvalue)
+
 			  }
 
 	sortCols(col){
