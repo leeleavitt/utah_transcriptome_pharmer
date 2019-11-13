@@ -287,7 +287,7 @@ class drPlot{
     createBrush(){
         var geneBrush = d3.brush()
             .extent([ [0, 0], [this.width-this.margin.left-this.margin.right,this.height-this.margin.top-this.margin.bottom] ])
-            .on('end', this.updateGenes)
+            .on('end', this.updateGenes.bind(this))
         
         d3.select('#brushContainer').append('g').call(geneBrush)
             
@@ -295,7 +295,18 @@ class drPlot{
     }
 
     updateGenes(){
-        console.log(d3.event.selection)
+        console.log(this)
+        var brushDims = d3.event.selection
+        var pD1s = this.pDims.filter(d=>{
+            return this.pd1Scale(d.pd1) >= brushDims[0][0] && this.pd1Scale(d.pd1) <= brushDims[1][0]
+            })
+
+        var pD2s = this.pDims.filter(d=>{
+            return this.pd2Scale(d.pd2) >= brushDims[0][1] && this.pd2Scale(d.pd2) <= brushDims[1][1]
+        })
+        var pD1sgenes = pD1s.map(d=>d.gene)
+        var pD2sgenes = pD2s.map(d=>d.gene)
+        console.log(pD1sgenes.concat(pD2sgenes))
     }
 
     drawPlot(){
