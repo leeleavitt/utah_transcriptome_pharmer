@@ -42,6 +42,13 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	drplot.drawPlot();
 
 
+	/****************************************************************/
+	/*										  		Heat Map		  											*/
+	/****************************************************************/
+
+	//let heatmap = new Heatmap(genes);
+	//heatmap.createHeatmap();
+
 
 	/****************************************************************/
 	/*										  		Summary Plot	 											*/
