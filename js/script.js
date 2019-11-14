@@ -94,9 +94,7 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		/////////////////////////////////////////////////////////
 
 		/* heat map */
-		let heatmap = new Heatmap(data);
-
-		heatmap.createHeatmap();
+		
 
 		/* summary plot */
 		let summaryPlotData = matchesCSV.map(d => d["GO.term.name"]).filter(function (e) { return e != "" });

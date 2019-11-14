@@ -6,14 +6,14 @@ class Heatmap{
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapData = data.slice(0,20);
+			    this.heatmapData = data.slice(0,100);
 
 					console.log(this.heatmapData);
 
-			    this.cells = Object.keys(this.heatmapData[0]).splice(1);
+			    this.cells = Object.keys(this.heatmapData[0].cell_values);
 					this.cells.sort();
 
-			    this.genes = this.heatmapData.map(d => d[""]);
+			    this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 					this.newNorm = 'colvalue';
 
@@ -35,7 +35,7 @@ class Heatmap{
 
 			this.drawDropDown();
 
-					this.genes = this.heatmapData.map(d => d[""]);
+					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 			    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
@@ -46,7 +46,7 @@ class Heatmap{
 					let rowMinMax = {};
 					for (let i = 0; i < this.cells.length; i++){
 						let rowvals = [];
-						rowvals = this.heatmapData.map(d => parseFloat(d[this.cells[i]]));
+						rowvals = this.heatmapData.map(d => parseFloat(d.cell_values[this.cells[i]]));
 
 						rowMinMax[this.cells[i]] = [Math.min(...rowvals),Math.max(...rowvals)];
 					}
@@ -54,7 +54,7 @@ class Heatmap{
 					let allvals = [];
 					for (let i = 0; i < this.heatmapData.length; i++){
 			      for (let j = 0; j < this.cells.length; j++){
-											allvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
+											allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
 							      }
 						}
 
@@ -64,8 +64,8 @@ class Heatmap{
 			    for (let i = 0; i < this.heatmapData.length; i++){
 						      let colvals = []
 						      for (let j = 0; j < this.cells.length; j++){
-										        colvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
-														allvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
+										        colvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
+														allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
 										      }
 
 						      var colmax = Math.max(...colvals);
@@ -75,11 +75,11 @@ class Heatmap{
 
 
 						      for (let j = 0; j < this.cells.length; j++){
-										        this.stretched_data.push({"gene": this.heatmapData[i][""], "cell": this.cells[j],
-															        "colvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
-																			"rowvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
-																			"totalvalue":((parseFloat(this.heatmapData[i][this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
-																			"actualvalue": parseFloat(this.heatmapData[i][this.cells[j]])})
+										        this.stretched_data.push({"gene": this.heatmapData[i]["Gene.name"], "cell": this.cells[j],
+															        "colvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
+																			"rowvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
+																			"totalvalue":((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
+																			"actualvalue": parseFloat(this.heatmapData[i].cell_values[this.cells[j]])})
 										      }
 						    }
 
@@ -103,7 +103,11 @@ class Heatmap{
 						.attr("id","xAxis")
 				    .call(d3.axisTop(x))
 				    .selectAll("text")
-				    .attr("transform","translate(" + (x.bandwidth()/4) + ",-65) rotate(-90)");
+						.attr("y",0)
+						.attr("x",9)
+						.attr("dy",".35em")
+				    .attr("transform","translate(0,0) rotate(-90)")
+						.attr("text-anchor","start");
 
 					d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
 
@@ -167,7 +171,6 @@ class Heatmap{
 							                              .style("left", (d3.event.pageX + 10) + "px")
 							                              .style("top", (d3.event.pageY - 35) + "px"))
 			      .on("mouseout",d => div.style("opacity",0));
-						console.log(this.stretched_data);
 
 						if (this.heatmapData.length < 50) {
 							rectGroup.selectAll()
@@ -221,7 +224,7 @@ class Heatmap{
 					}
 
 	  updateHeatmap(normOver) {
-					this.genes = this.heatmapData.map(d => d[""]);
+					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 					var x = d3.scaleBand()
 						.range([ 0, this.width ])
@@ -269,11 +272,11 @@ class Heatmap{
 			if (this.oldcol === col){
 					this.oldcol = null;
 					this.heatmapData = this.heatmapData.sort((a, b) =>
-									parseFloat(a[col]) < parseFloat(b[col]) ? -1 : 1);
+									parseFloat(a.cell_values[col]) < parseFloat(b.cell_values[col]) ? -1 : 1);
 					}else {
 						this.oldcol = col;
 						this.heatmapData = this.heatmapData.sort((a, b) =>
-									parseFloat(a[col]) > parseFloat(b[col]) ? -1 : 1);
+									parseFloat(a.cell_values[col]) > parseFloat(b.cell_values[col]) ? -1 : 1);
 					}
 
 
@@ -284,7 +287,8 @@ class Heatmap{
 
 	sortRows(row) {
 			let gene = JSON.parse(JSON.stringify(this.heatmapData[this.genes.indexOf(row)]));
-			delete gene[""];
+			gene = gene.cell_values;
+
 			var sortable = [];
 			for (var cell in gene) {
 					    sortable.push([cell, parseFloat(gene[cell])]);
@@ -310,7 +314,7 @@ class Heatmap{
 
 	tooltipRender(data) {
 		    let text = "<h2>" + "Gene: " + data['gene'] + "<br>" + "Cell: " + data['cell'] +
-			    "<br>" + "Value: " + data['actualValue'] + "</h2>";
+			    "<br>" + "Value: " + data['actualvalue'] + "</h2>";
 		    return text;
 		  }
 }
