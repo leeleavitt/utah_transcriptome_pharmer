@@ -280,6 +280,11 @@ class drPlot{
     updateGenes(){
         console.log(this)
         var brushDims = d3.event.selection
+
+        if (d3.event.selection === null){
+          this.heatmapObject.brushHeatmap(null)
+        }
+        
         var pD1s = this.pDims.filter(d=>{
             return this.pd1Scale(d.pd1) >= brushDims[0][0] && this.pd1Scale(d.pd1) <= brushDims[1][0]
             })
@@ -291,6 +296,7 @@ class drPlot{
         var pD2sgenes = pD2s.map(d=>d.gene)
 
         console.log(pD1sgenes.concat(pD2sgenes))
+
 				this.heatmapObject.brushHeatmap(pD1sgenes.concat(pD2sgenes));
 
 				/* create new summary */

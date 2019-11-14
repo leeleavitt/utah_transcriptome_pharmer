@@ -29,7 +29,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	genesNoZeroData = genes.filter(d=>{
 		let cellVals = Object.values(d.cell_values)
 		let cellValsTot = cellVals.reduce((a,b)=>a+b);
-		return cellValsTot >= 0
+		return cellValsTot >= 50000
 	})
 
 
