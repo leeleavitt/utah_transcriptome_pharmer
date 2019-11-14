@@ -1,8 +1,7 @@
 
 class drPlot{
-    constructor(dataSet, geneSet){
+    constructor(dataSet){
         this.dataSet = dataSet 
-        this.geneSet = geneSet
         this.margin = {top:60, bottom:60, left:60, right:60}
         this.svgDim = {width:1000+this.margin.left+this.margin.right, height:1000+this.margin.top+this.margin.bottom}
         this.width = 1000;
@@ -14,23 +13,13 @@ class drPlot{
 		//I'm following this link for my SVD PCA guidance
 		//https://stats.stackexchange.com/questions/134282/relationship-between-svd-and-pca-how-to-use-svd-to-perform-pca
 		//First rate the heatmapDat and extract only values
-		var geneMatrix = this.dataSet
+		var geneMatrix = this.dataSet.map(d=>Object.values(d.cell_values))
 
         //Find all genes
-        this.genes = geneMatrix.map(d=>d[""])
+        this.genes = geneMatrix.map(d=>d['Gene.name'])
         //Find all cells
         this.cells = Object.getOwnPropertyNames(geneMatrix[0])
-        //First one is to define the gene, so remove it
-        this.cells.shift()
 
-		// Doing SVD decomposition in JS
-		//Since this is an array of objects, we need an array of arrays
-		geneMatrix = geneMatrix.map(obj => Object.values(obj))
-		//Remove the First value since it is the gene name
-		geneMatrix = geneMatrix.map(d =>{
-			d.shift()
-			return d
-		})
 		//Start the SVD,
 		//Do transpose this makes the data frame with cells/samples the rows, and collumns genes/obervations
 		//Before transpose we need to center it.
@@ -83,28 +72,19 @@ class drPlot{
     }
 
     pcaCompute(){
-        //Trying out PCA straight out of the box
-        this.geneMatrix = this.dataSet
+		this.geneMatrix = this.dataSet.map(d=>Object.values(d.cell_values))
 
+        console.log(this.dataSet)
         //Find all genes
-        this.genes = this.geneMatrix.map(d=>d[""])
+        this.geneSet = this.dataSet.map(d=>d['Gene.name'])
+        console.log(this.geneSet)
         //Find all cells
-        this.cells = Object.getOwnPropertyNames(this.geneMatrix[0])
-        //First one is to define the gene, so remove it
-        this.cells.shift()
-        
-        //Transform this into an array of Arrays
-        this.geneMatrix = this.geneMatrix.map(obj => Object.values(obj))
-		//Remove the First value since it is the gene name
-		this.geneMatrix = this.geneMatrix.map(d =>{
-			d.shift()
-			return d
-        })
-        
+        this.cells = Object.getOwnPropertyNames(this.dataSet[0].cell_values)
+
         var geneMat = new ML.Matrix(this.geneMatrix)
         geneMat = geneMat.transpose()
 
-        var genePCA = new ML.PCA(geneMat,{center:true, scale:true})
+        var genePCA = new ML.PCA(geneMat,{center:true, scale:false})
         var principalComps = genePCA.predict(geneMat).transpose()
 
         this.pc1 = principalComps.data[0]
@@ -134,6 +114,7 @@ class drPlot{
             gene['pd2'] = this.pd2[i]
             this.pDims[i] = gene
         }
+        console.log(this.pDims)
 
 
     }
@@ -222,6 +203,7 @@ class drPlot{
         ///////////////////////////////////////////////////////////////
         //Color scale for the cells
         ///////////////////////////////////////////////////////////////
+        console.log(this.cells)
         this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
         this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
@@ -307,6 +289,20 @@ class drPlot{
         var pD1sgenes = pD1s.map(d=>d.gene)
         var pD2sgenes = pD2s.map(d=>d.gene)
         console.log(pD1sgenes.concat(pD2sgenes))
+				
+				/* create new summary */
+				let allGoTerms = [];
+				let currentData = pD1sgenes.concat(pD2sgenes);
+				this.dataSet.filter(gene => {
+					if(currentData.includes(gene['Gene.name'])) {
+						allGoTerms = allGoTerms.concat(gene['GO.term.name']);
+					}
+				})
+				
+				//console.log("selectData:");
+				//console.log(allGoTerms);
+
+			  let summaryPlot = new SummaryPlot(allGoTerms);
     }
 
     drawPlot(){
