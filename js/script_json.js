@@ -32,15 +32,6 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		return cellValsTot >= 0
 	})
 
-	/****************************************************************/
-	/*									Dimensional Reduction Plot									*/
-	/****************************************************************/
-
-	let drplot = new drPlot(genesNoZeroData);
-	drplot.pcaCompute();
-	drplot.createPlot();
-	drplot.drawPlot();
-
 
 	/****************************************************************/
 	/*										  		Heat Map		  											*/
@@ -48,6 +39,17 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 
 	let heatmap = new Heatmap(genes);
 	heatmap.createHeatmap();
+
+
+	/****************************************************************/
+	/*									Dimensional Reduction Plot									*/
+	/****************************************************************/
+
+	let drplot = new drPlot(genesNoZeroData, heatmap);
+	drplot.pcaCompute();
+	drplot.createPlot();
+	drplot.drawPlot();
+
 
 
 	/****************************************************************/

@@ -170,7 +170,8 @@ class Heatmap{
 							                              .style("opacity",1)
 							                              .style("left", (d3.event.pageX + 10) + "px")
 							                              .style("top", (d3.event.pageY - 35) + "px"))
-			      .on("mouseout",d => div.style("opacity",0));
+			      .on("mouseout",d => div.style("opacity",0))
+						.classed("notselected",false);
 
 						if (this.heatmapData.length < 50) {
 							rectGroup.selectAll()
@@ -317,6 +318,13 @@ class Heatmap{
 			    "<br>" + "Value: " + data['actualvalue'] + "</h2>";
 		    return text;
 		  }
+
+
+	brushHeatmap(brushed) {
+		d3.select("#rectGroup").selectAll('rect').classed("notselected", (d) =>
+				(brushed.indexOf(d.gene) === -1)
+			)
+	}
 }
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current
 //version seems too cumbersome.
