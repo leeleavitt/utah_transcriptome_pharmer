@@ -32,13 +32,34 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		return cellValsTot >= 0
 	})
 
-	let drplot =  new drPlot(genesNoZeroData);
+	/****************************************************************/
+	/*									Dimensional Reduction Plot									*/
+	/****************************************************************/
+
+	let drplot = new drPlot(genesNoZeroData);
 	drplot.pcaCompute();
 	drplot.createPlot();
 	drplot.drawPlot();
 
 
 
+	/****************************************************************/
+	/*										  		Summary Plot	 											*/
+	/****************************************************************/
+
+	/*
+	//Get all go terms
+	let allGoTerms = [];
+	
+	genesNoZeroData.forEach((e) => {
+		allGoTerms = allGoTerms.concat(e["GO.term.name"]);
+	});
+
+	let tmpGoTerms = allGoTerms.slice(0,200)
+	let summaryPlot = new SummaryPlot(tmpGoTerms);
+	summaryPlot.create();
+	summaryPlot.updateSize();
+	*/
 
 
 });

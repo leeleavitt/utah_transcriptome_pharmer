@@ -289,6 +289,20 @@ class drPlot{
         var pD1sgenes = pD1s.map(d=>d.gene)
         var pD2sgenes = pD2s.map(d=>d.gene)
         console.log(pD1sgenes.concat(pD2sgenes))
+				
+				/* create new summary */
+				let allGoTerms = [];
+				let currentData = pD1sgenes.concat(pD2sgenes);
+				this.dataSet.filter(gene => {
+					if(currentData.includes(gene['Gene.name'])) {
+						allGoTerms = allGoTerms.concat(gene['GO.term.name']);
+					}
+				})
+				
+				//console.log("selectData:");
+				//console.log(allGoTerms);
+
+			  let summaryPlot = new SummaryPlot(allGoTerms);
     }
 
     drawPlot(){
