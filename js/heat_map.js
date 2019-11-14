@@ -151,19 +151,8 @@ class Heatmap{
 						.append('g')
 						.attr('id','rectGroup');
 
-						if (this.heatmapData.length < 50) {
-							rectGroup.selectAll()
-								.data(this.stretched_data)
-								.enter()
-								.append("text")
-								.attr("x", d => x(d.gene) + (x.bandwidth()/2))
-								.attr("y", d => y(d.cell) + (y.bandwidth()/2))
-								.text(d => d.actualvalue)
-								.attr("text-anchor","middle")
-								.attr("dominant-baseline","middle")
-								.attr("class","heatmapText")
-							}
-							
+
+
 				rectGroup.selectAll()
 			      .data(this.stretched_data)
 			      .enter()
@@ -180,7 +169,23 @@ class Heatmap{
 			      .on("mouseout",d => div.style("opacity",0));
 						console.log(this.stretched_data);
 
-
+						if (this.heatmapData.length < 50) {
+							rectGroup.selectAll()
+								.data(this.stretched_data)
+								.enter()
+								.append("text")
+								.attr("x", d => x(d.gene) + (x.bandwidth()/2))
+								.attr("y", d => y(d.cell) + (y.bandwidth()/2))
+								.text(d => d.actualvalue)
+								.attr("text-anchor","middle")
+								.attr("dominant-baseline","middle")
+								.attr("class","heatmapText")
+								.on("mouseover", d => div.html(this.tooltipRender(d))
+									                              .style("opacity",1)
+									                              .style("left", (d3.event.pageX + 10) + "px")
+									                              .style("top", (d3.event.pageY - 35) + "px"))
+					      .on("mouseout",d => div.style("opacity",0));
+							}
 
 			  }
 
