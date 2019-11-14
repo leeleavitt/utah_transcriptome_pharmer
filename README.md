@@ -1,5 +1,7 @@
 # Utah Transcriptome Pharmer
 
+[DEMO](https://printfer.github.io/utah_transcriptome_pharmer/)
+
 ## run
 
 `python -m http.server`
