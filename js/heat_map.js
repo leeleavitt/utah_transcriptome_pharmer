@@ -19,6 +19,8 @@ class Heatmap{
 
 					this.oldrow = null;
 					this.oldcol = null;
+
+					this.brushed = this.genes;
 				}
 	  createHeatmap() {
 
@@ -140,7 +142,11 @@ class Heatmap{
 			// Build color scale
 			this.myColor = d3.scaleLinear()
 			  .range(["white", "#69b3a2"])
-			  .domain([0,1])
+			  .domain([0,1]);
+
+			this.grayColor = d3.scaleLinear()
+			  .range(["white", "#878787"])
+			  .domain([0,1]);
 
 
 			  d3.select(".tooltip").remove();
@@ -240,12 +246,20 @@ class Heatmap{
 					d3.select('#xAxis')
 					.transition()
 					.duration(1500)
-					.call(d3.axisTop(x));
+					.call(d3.axisTop(x))
+					.selectAll("text")
+					.attr("y",0)
+					.attr("x",9)
+					.attr("dy",".35em")
+					.attr("transform","translate(0,0) rotate(-90)")
+					.attr("text-anchor","start");;
 
 					d3.select('#yAxis')
 					.transition()
 					.duration(1500)
 					.call(d3.axisLeft(y));
+
+					let that = this;
 
 					d3.select('#rectGroup')
 					.selectAll('rect')
@@ -256,7 +270,13 @@ class Heatmap{
 					.attr("y", d => y(d.cell))
 					.attr("width", x.bandwidth() )
 					.attr("height", y.bandwidth() )
-					.style("fill", d => this.myColor(d[normOver]))
+					.style("fill", function(d) {
+						if (that.brushed.indexOf(d.gene) === -1) {
+							return that.grayColor(d[that.newNorm])
+						} else {
+							return that.myColor(d[that.newNorm])
+						}
+					})
 
 					d3.select('#rectGroup')
 					.selectAll('text')
@@ -321,9 +341,31 @@ class Heatmap{
 
 
 	brushHeatmap(brushed) {
-		d3.select("#rectGroup").selectAll('rect').classed("notselected", (d) =>
-				(brushed.indexOf(d.gene) === -1)
-			)
+		this.brushed = brushed;
+		let that = this;
+		if (brushed === null){
+			d3.select("#rectGroup").selectAll('rect')
+			.style("fill", d => that.myColor(d[that.newNorm]))
+			.attr("opacity",1);
+		}else {
+			d3.select("#rectGroup").selectAll('rect')
+			.style("fill", function(d) {
+				if (brushed.indexOf(d.gene) === -1) {
+					return that.grayColor(d[that.newNorm])
+				} else {
+					return that.myColor(d[that.newNorm])
+				}
+			})
+			.attr("opacity", function(d) {
+				if (brushed.indexOf(d.gene) === -1) {
+					return 0.3
+				} else {
+					return 1
+				}
+			})
+		}
+
+
 	}
 }
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current
