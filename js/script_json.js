@@ -29,12 +29,33 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	genesNoZeroData = genes.filter(d=>{
 		let cellVals = Object.values(d.cell_values)
 		let cellValsTot = cellVals.reduce((a,b)=>a+b);
-<<<<<<< HEAD
-		return cellValsTot >= 10
-=======
 		return cellValsTot >= 50000
->>>>>>> b3e05f235a5a8b5fe571187f9d779174714fe53f
 	})
+
+	///////////////////////////////////////////////////////
+	//PROVING GROUND
+	//////////////////////////////////////////////////////
+	//Testing out the hcluster method
+	geneMatrix = genesNoZeroData.map(d=>Object.values(d.cell_values))
+
+	//Find all genes
+	geneSet = genesNoZeroData.map(d=>d['Gene.name'])
+	console.log(geneSet)
+	//Find all cells
+	cells = Object.getOwnPropertyNames(genesNoZeroData[0].cell_values)
+	console.log(cells)
+
+	geneMat = new ML.Matrix(geneMatrix)
+	geneMat = geneMat.transpose()
+
+	//COmpute the euclidean distance matrix for the clustering
+	geneMatDistEuc = ML.distanceMatrix(geneMat.transpose().data, ML.Distance.euclidean)
+	
+	//Now compute the agnes heirarchal clsutering
+	bob = ML.HClust.agnes(geneMatDistEuc, {isDistanceMatrix:true})
+
+
+	//////////////////////////////////////////////////////
 
 
 	/****************************************************************/
