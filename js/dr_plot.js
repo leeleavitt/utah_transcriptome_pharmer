@@ -1,12 +1,23 @@
+//TODOs:
+//1 genes on click need to have 
+//1a go terms list out
+//1b gene description
+
+//2 Subset the cells to go through
+//2a this would be a 
+
+
+
+
 
 class drPlot{
     constructor(dataSet, heatmap){
         this.heatmapObject = heatmap;
         this.dataSet = dataSet
+        this.width = 750;
+        this.height = 750;
         this.margin = {top:60, bottom:60, left:60, right:60}
-        this.svgDim = {width:1000+this.margin.left+this.margin.right, height:1000+this.margin.top+this.margin.bottom}
-        this.width = 1000;
-        this.height = 1000;
+        this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
         console.log
     }
 
@@ -320,10 +331,26 @@ class drPlot{
 
         cellComp = cellCompEnter.merge(cellComp)
             //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
-            .attr('r',10)
+            .attr('r',6)
             .attr('cx', d=> this.pc1Scale(d.pc1))
             .attr('cy', d=> this.pc2Scale(d.pc2))
             .attr('fill', d=>this.cellsColorScale(d.cell.slice(0,-2)))
+        
+        //Cell Labels
+        var cellLabs = d3.select('#cellContainer')
+            .selectAll('text')
+            .data(this.pComps)
+        
+        var cellLabelsEnter = cellLabs.enter()
+            .append('text')
+        
+        cellLabs = cellLabelsEnter.merge(cellLabs)
+            .attr('x', d=> this.pc1Scale(d.pc1)+5)
+            .attr('y', d=> this.pc2Scale(d.pc2)-5)
+            .attr('font-size', 9)
+            .attr('font-width',3)
+            .text(d=>d.cell.slice(0,-2))
+
 
         //Plot the Genes
         console.log(this.pDims)
@@ -339,7 +366,7 @@ class drPlot{
         geneComp = geneCompEnter.merge(geneComp)
             //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
             .attr('font-size', 10)
-            .attr('opacity', .2)
+            .attr('opacity', .5)
             .attr('x', d=> this.pd1Scale(d.pd1))
             .attr('y', d=> this.pd2Scale(d.pd2))
             .text(d=>d.gene)
