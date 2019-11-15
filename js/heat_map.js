@@ -1,6 +1,6 @@
 class Heatmap{
 	  constructor(data){
-			    this.margin = {top: 125, right: 30, bottom: 30, left: 150};
+			    this.margin = {top: 50, right: 30, bottom: 30, left: 150};
 
 			    this.width = 1500 - this.margin.left - this.margin.right;
 
@@ -21,10 +21,24 @@ class Heatmap{
 					this.oldcol = null;
 
 					this.brushed = this.genes;
+
+					this.expanded = false;
 				}
 	  createHeatmap() {
+			// let button = this.renderSwitch(d3.select("#buttons"), "Hierarchical Clustering");
 
-			let dropdownWrap = d3.select('#heatmap').append('div').classed('dropdown-wrapper', true);
+			document.getElementById("switch").addEventListener("click", () => {
+				if (this.expanded === false){
+					this.hClustering();
+					this.expanded = true;
+				}else {
+					d3.select("#hCluster").remove().transition().duration(1500);
+					this.expanded = false;
+				}
+
+      });
+
+			let dropdownWrap = d3.select('#buttons').append('div').classed('dropdown-wrapper', true);
 
 			let cWrap = dropdownWrap.append('div').classed('dropdown-panel', true);
 
@@ -36,6 +50,7 @@ class Heatmap{
 					.append('select');
 
 			this.drawDropDown();
+
 
 					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
@@ -230,6 +245,12 @@ class Heatmap{
 						});
 					}
 
+		// renderSwitch(div, labelText) {
+    //   let button = div.append("label").classed("switch").append("input").attr("type", "checkbox").append("span").classed("slider round", true);
+		//
+    //   return button;
+    // }
+
 	  updateHeatmap(normOver) {
 					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
@@ -366,6 +387,70 @@ class Heatmap{
 		}
 
 
+	}
+	hClustering(){
+		this.geneMatrix = this.heatmapData.map(d=>Object.values(d.cell_values))
+
+		var geneMat = new ML.Matrix(this.geneMatrix)
+
+		let distMat = ML.distanceMatrix(geneMat.data, ML.Distance.euclidean);
+
+		bob = ML.HClust.agnes(distMat, {isDistanceMatrix:true})
+
+		// append the svg object above the heatmap
+		var svg = d3.select("#dendrogram")
+			.append("g")
+			.append("svg")
+			.attr("id","hCluster")
+			.transition()
+			.duration(1500)
+			.attr("width", this.width + this.margin.left + this.margin.right)
+			.attr("height", 400 + this.margin.top)
+			.attr("transform",
+										"translate(" + this.margin.left + "," + this.margin.top + ")");
+
+		function separation(a, b) {
+		  return a.parent == b.parent ? 1 : 1;
+		}
+
+		var cluster = d3.cluster()
+			.size([this.width, 400])
+			.separation(separation);
+
+
+		var root = d3.hierarchy(bob, function(d) {
+				return d.children;
+		});
+		cluster(root);
+
+		let nodes = root.descendants().slice(1);
+
+		let endNodes = nodes.filter(d => d.children === undefined);
+
+		endNodes = endNodes.sort((a, b) =>
+						parseFloat(a.x) < parseFloat(b.x) ? -1 : 1);
+
+		let indices = endNodes.map(d => d.data.index);
+
+		d3.select("#hCluster").selectAll('path')
+			.data( root.descendants().slice(1) )
+			.enter()
+			.append('path')
+			.attr("d", function(d) {
+					return "M" + d.x + "," + d.y
+									+ "L" + d.x + "," + d.parent.y
+									+ " " + d.parent.x + "," + d.parent.y;
+								})
+			.style("fill", 'none')
+			.attr("stroke", '#ccc')
+
+		this.newData = [];
+
+		indices.forEach(d => this.newData.push(this.heatmapData[d]))
+
+		this.heatmapData = this.newData;
+
+		this.updateHeatmap();
 	}
 }
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current
