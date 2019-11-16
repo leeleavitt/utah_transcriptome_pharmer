@@ -83,7 +83,6 @@ class drPlot{
     }
 
     pcaCompute(cellTypesSelected){
-        console.log(cellTypesSelected)
         //passing in the cellTypesLogic allows us to 
         // Only compute the PCs on these still selected cells
 
@@ -100,7 +99,6 @@ class drPlot{
 
         //Unpack the loigc object input to this function
         var cellsSelectedUnpack = cellTypesSelected.filter(d=>d.logic).map(d=>d.cells)
-        console.log(cellsSelectedUnpack)
         //Set it to filter through
         var cellsSelected = new Set(cellsSelectedUnpack)
 
@@ -123,9 +121,18 @@ class drPlot{
             geneMatNew.push(geneMat.data[i])
         }
         
-        //geneMat = new ML.Matrix(geneMatNew)
+        geneMat = new ML.Matrix(geneMatNew)
         console.log(geneMat)
 
+        //Now calculate the new cells to work with
+        var newCells = []
+        for(var i=0; i<cellsSelectedAll.length; i++){
+            let index = cellsSelectedAll[i]
+            newCells[i] = this.cells[index]
+        }
+
+        this.cells = newCells
+        
         //Perform PCA, this make the directions
         var genePCA = new ML.PCA(geneMat,{center:true, scale:false, ignoreZeroVariance:true})
         //Calculate the components from the PCA space
@@ -159,8 +166,6 @@ class drPlot{
             gene['pd2'] = this.pd2[i]
             this.pDims[i] = gene
         }
-        console.log(this.pDims)
-        console.log(this.pComps)
 
     }
 
@@ -373,6 +378,8 @@ class drPlot{
         var cellCompEnter = cellComp.enter()
             .append('circle')
 
+        cellComp.exit().remove()
+        
         cellComp = cellCompEnter.merge(cellComp)
             //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
             .attr('r',6)
@@ -388,6 +395,8 @@ class drPlot{
         var cellLabelsEnter = cellLabs.enter()
             .append('text')
         
+        cellLabs.exit().remove()
+
         cellLabs = cellLabelsEnter.merge(cellLabs)
             .attr('x', d=> this.pc1Scale(d.pc1)+5)
             .attr('y', d=> this.pc2Scale(d.pc2)-5)
