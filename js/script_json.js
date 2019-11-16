@@ -31,7 +31,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		let cellValsTot = cellVals.reduce((a,b)=>a+b);
 		return cellValsTot >= 0
 	})
-
+	
 	let drplot =  new drPlot(genesNoZeroData);
 	drplot.pcaCompute();
 	drplot.createPlot();

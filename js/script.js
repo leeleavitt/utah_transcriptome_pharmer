@@ -12,14 +12,6 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		// 	allgenes.push(genesCSV)
 		// }
 
-
-
-
-
-
-
-
-
 		//These are terms to reduce the data on
 		terms = ['ion channel','G-protein']
 
