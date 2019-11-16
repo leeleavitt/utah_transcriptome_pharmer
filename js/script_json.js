@@ -140,7 +140,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 
 		//Now that we have updated the logic we need to do the PCA calculation again
 		drplot.pcaCompute(cellsLogic);
-		drplot.createPlot();
+		//drplot.createPlot();
 		drplot.drawPlot();
 		}
 

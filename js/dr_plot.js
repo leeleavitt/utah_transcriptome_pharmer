@@ -113,16 +113,17 @@ class drPlot{
         var geneMat = new ML.Matrix(this.geneMatrix)
         //Transpose for cells to now be rows
         geneMat = geneMat.transpose()
-        console.log(geneMat)
+        //console.log(geneMat)
 
         //Now Select the rows by cellsSelectedAll above,
         var geneMatNew = []
         for(var i=0; i< cellsSelectedAll.length; i++){
-            geneMatNew.push(geneMat.data[i])
+            let index = cellsSelectedAll[i]
+            geneMatNew.push(geneMat.data[index])
         }
         
         geneMat = new ML.Matrix(geneMatNew)
-        console.log(geneMat)
+        //console.log(geneMat)
 
         //Now calculate the new cells to work with
         var newCells = []
@@ -132,7 +133,13 @@ class drPlot{
         }
 
         this.cells = newCells
+
+        //console.log(this.cells)
+    
         
+        //////////////////////////////////////////////////////////////////
+
+
         //Perform PCA, this make the directions
         var genePCA = new ML.PCA(geneMat,{center:true, scale:false, ignoreZeroVariance:true})
         //Calculate the components from the PCA space
@@ -166,6 +173,61 @@ class drPlot{
             gene['pd2'] = this.pd2[i]
             this.pDims[i] = gene
         }
+        //////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////
+        //Principal Components scale
+        ////////////////////////////////////////////////////////////////////
+        //PC1
+        var pc1Max = Math.max(...this.pc1)
+        var pc1Min = Math.min(...this.pc1)
+
+        this.pc1Scale = d3.scaleLinear()
+            .domain([pc1Min, pc1Max])
+            .range([0, (this.width - this.margin.left - this.margin.right)])
+            .nice();
+
+        this.pc1Axis = d3.axisBottom(this.pc1Scale)
+
+        //PC2 SCALE
+        var pc2Max = Math.max(...this.pc2)
+        var pc2Min = Math.min(...this.pc2)
+
+        this.pc2Scale = d3.scaleLinear()
+            .domain([pc2Min, pc2Max])
+            .range([0, (this.height- this.margin.top - this.margin.bottom)])
+            .nice();
+
+        this.pc2Axis = d3.axisLeft(this.pc2Scale)
+
+        ////////////////////////////////////////////////////////////////
+        //Principal Directions scale
+        ////////////////////////////////////////////////////////////////
+        //PD1 Scale
+        var pd1Max = Math.max(...this.pd1)
+        var pd1Min = Math.min(...this.pd1)
+
+        this.pd1Scale = d3.scaleLinear()
+            .domain([pd1Min, pd1Max])
+            .range([0, (this.height - this.margin.top - this.margin.bottom)])
+
+        this.pd1Axis = d3.axisTop(this.pd1Scale)
+
+        //PD2 Scale
+        var pd2Max = Math.max(...this.pd2)
+        var pd2Min = Math.min(...this.pd2)
+
+        this.pd2Scale = d3.scaleLinear()
+            .domain([pd2Min, pd2Max])
+            .range([0, (this.width - this.margin.left - this.margin.right)])
+
+        this.pd2Axis = d3.axisRight(this.pd2Scale)
+
+
+
+        //console.log(this.pDims)
+        console.log(this.pComps)
+
 
     }
 
@@ -202,70 +264,14 @@ class drPlot{
             .attr('id','brushContainer');
         this.createBrush()
 
-        ////////////////////////////////////////////////////////////////////
-        //Principal Components scale
-        ////////////////////////////////////////////////////////////////////
-        //PC1
-        var pc1Max = Math.max(...this.pc1)
-        var pc1Min = Math.min(...this.pc1)
-
-        this.pc1Scale = d3.scaleLinear()
-            .domain([pc1Min, pc1Max])
-            .range([0, (this.width - this.margin.left - this.margin.right)])
-            .nice();
-
-        var pc1Axis = d3.axisBottom(this.pc1Scale)
-
-        //PC2 SCALE
-        var pc2Max = Math.max(...this.pc2)
-        var pc2Min = Math.min(...this.pc2)
-
-        this.pc2Scale = d3.scaleLinear()
-            .domain([pc2Min, pc2Max])
-            .range([0, (this.height- this.margin.top - this.margin.bottom)])
-            .nice();
-
-        var pc2Axis = d3.axisLeft(this.pc2Scale)
-
-        ////////////////////////////////////////////////////////////////
-        //Principal Directions scale
-        ////////////////////////////////////////////////////////////////
-        //PD1 Scale
-        var pd1Max = Math.max(...this.pd1)
-        var pd1Min = Math.min(...this.pd1)
-
-        this.pd1Scale = d3.scaleLinear()
-            .domain([pd1Min, pd1Max])
-            .range([0, (this.height - this.margin.top - this.margin.bottom)])
-
-        var pd1Axis = d3.axisTop(this.pd1Scale)
-
-        //PD2 Scale
-        var pd2Max = Math.max(...this.pd2)
-        var pd2Min = Math.min(...this.pd2)
-
-        this.pd2Scale = d3.scaleLinear()
-            .domain([pd2Min, pd2Max])
-            .range([0, (this.width - this.margin.left - this.margin.right)])
-
-        var pd2Axis = d3.axisRight(this.pd2Scale)
-
-        ///////////////////////////////////////////////////////////////
-        //Color scale for the cells
-        ///////////////////////////////////////////////////////////////
-        console.log(this.cells)
-        this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
-
-        this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
-            .domain(this.cellsGroups);
 
         //Start constructing the plot
         //PC1 X axis/ BOTTOM
         d3.select('#wrapperGroup')
             .append('g')
-            .attr('id','pc1axis')
+            .attr('id','pc1Axis')
             .attr('transform',`translate(${this.margin.left},${this.height - this.margin.top})`)
-            .call(pc1Axis)
+            //.call(pc1Axis)
 
         d3.select('#wrapperGroup')
             .append('text')
@@ -278,7 +284,7 @@ class drPlot{
             .append('g')
             .attr('id','pc2Axis')
             .attr('transform',`translate(${this.margin.left},${this.margin.bottom})`)
-            .call(pc2Axis)
+            //.call(pc2Axis)
 
         d3.select('#wrapperGroup')
             .append('text')
@@ -290,9 +296,9 @@ class drPlot{
         //PD2
         d3.select('#wrapperGroup')
             .append('g')
-            .attr('id','pd2axis')
+            .attr('id','pd2Axis')
             .attr('transform',`translate(${(this.width - this.margin.right)},${this.margin.top})`)
-            .call(pd2Axis)
+            //.call(pd2Axis)
 
         d3.select('#wrapperGroup')
             .append('text')
@@ -305,13 +311,23 @@ class drPlot{
             .append('g')
             .attr('id','pd1Axis')
             .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
-            .call(pd1Axis)
+            //.call(pd1Axis)
 
         d3.select('#wrapperGroup')
             .append('text')
             .attr('y', this.margin.top - 40)
             .attr('x', (this.width - this.margin.left)/2)
             .text('PD1')
+
+        ///////////////////////////////////////////////////////////////
+        //Color scale for the cells
+        ///////////////////////////////////////////////////////////////
+        console.log(this.cells)
+        this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
+
+        this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
+            .domain(this.cellsGroups);
+
 
     }
 
@@ -368,8 +384,21 @@ class drPlot{
     }
 
     drawPlot(){
+
+        d3.select('#pc1Axis')
+            .call(this.pc1Axis)
+        
+        d3.select('#pc2Axis')
+            .call(this.pc2Axis)
+        
+        d3.select('#pd2Axis')
+            .call(this.pd2Axis)
+        
+        d3.select('#pd1Axis')
+            .call(this.pd1Axis)
+
         //Plot the cells
-        console.log(this.pComps)
+        //console.log(this.pComps)
 
         var cellComp = d3.select('#cellContainer')
             .selectAll('circle')
@@ -378,14 +407,24 @@ class drPlot{
         var cellCompEnter = cellComp.enter()
             .append('circle')
 
-        cellComp.exit().remove()
+        cellComp.exit()
+            .style('opacity', 1)
+            .transition()
+            .duration(1000)
+            .style('opacity',0)
+            .remove()
         
         cellComp = cellCompEnter.merge(cellComp)
-            //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
+            .transition().duration(1000)
+            .on('start', () => d3.select(this))
+            .ease(d3.easeElastic)
+            .delay( 500 )
             .attr('r',6)
             .attr('cx', d=> this.pc1Scale(d.pc1))
             .attr('cy', d=> this.pc2Scale(d.pc2))
             .attr('fill', d=>this.cellsColorScale(d.cell.slice(0,-2)))
+            .on('end', () => d3.select(this).transition().duration(500));
+
         
         //Cell Labels
         var cellLabs = d3.select('#cellContainer')
@@ -395,18 +434,29 @@ class drPlot{
         var cellLabelsEnter = cellLabs.enter()
             .append('text')
         
-        cellLabs.exit().remove()
+        cellLabs.exit()
+            .style('opacity', 1)
+            .transition()
+            .duration(1000)
+            .style('opacity',0)
+            .remove()
 
         cellLabs = cellLabelsEnter.merge(cellLabs)
+            .transition().duration(1000)
+            .on('start', () => d3.select(this))
+            .ease(d3.easeElastic)
+            .delay( 500 )
             .attr('x', d=> this.pc1Scale(d.pc1)+5)
             .attr('y', d=> this.pc2Scale(d.pc2)-5)
             .attr('font-size', 9)
             .attr('font-width',3)
             .text(d=>d.cell.slice(0,-2))
+            .on('end', () => d3.select(this).transition().duration(500));
+
 
 
         //Plot the Genes
-        console.log(this.pDims)
+        //console.log(this.pDims)
 
         var geneComp = d3.select('#geneContainer')
             .selectAll('text')
@@ -414,6 +464,14 @@ class drPlot{
 
         var geneCompEnter = geneComp.enter()
             .append('text')
+
+        geneComp.exit()
+            .style('opacity', 1)
+            .transition()
+            .duration(1000)
+            .style('opacity',0)
+            .remove()
+
 
         geneComp = geneCompEnter.merge(geneComp)
             //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
