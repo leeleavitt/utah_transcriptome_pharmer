@@ -1,28 +1,44 @@
 class Heatmap{
 	  constructor(data){
-			    this.margin = {top: 125, right: 30, bottom: 30, left: 150};
+			    this.margin = {top: 50, right: 30, bottom: 30, left: 150};
 
 			    this.width = 1500 - this.margin.left - this.margin.right;
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapData = data.slice(0,20);
+			    this.heatmapData = data.slice(0,100);
 
 					console.log(this.heatmapData);
 
-			    this.cells = Object.keys(this.heatmapData[0]).splice(1);
+			    this.cells = Object.keys(this.heatmapData[0].cell_values);
 					this.cells.sort();
 
-			    this.genes = this.heatmapData.map(d => d[""]);
+			    this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 					this.newNorm = 'colvalue';
 
 					this.oldrow = null;
 					this.oldcol = null;
+
+					this.brushed = this.genes;
+
+					this.expanded = false;
 				}
 	  createHeatmap() {
+			// let button = this.renderSwitch(d3.select("#buttons"), "Hierarchical Clustering");
 
-			let dropdownWrap = d3.select('#heatmap').append('div').classed('dropdown-wrapper', true);
+			document.getElementById("switch").addEventListener("click", () => {
+				if (this.expanded === false){
+					this.hClustering();
+					this.expanded = true;
+				}else {
+					d3.select("#hCluster").remove().transition().duration(1500);
+					this.expanded = false;
+				}
+
+      });
+
+			let dropdownWrap = d3.select('#buttons').append('div').classed('dropdown-wrapper', true);
 
 			let cWrap = dropdownWrap.append('div').classed('dropdown-panel', true);
 
@@ -35,7 +51,8 @@ class Heatmap{
 
 			this.drawDropDown();
 
-					this.genes = this.heatmapData.map(d => d[""]);
+
+					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 			    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
@@ -46,7 +63,7 @@ class Heatmap{
 					let rowMinMax = {};
 					for (let i = 0; i < this.cells.length; i++){
 						let rowvals = [];
-						rowvals = this.heatmapData.map(d => parseFloat(d[this.cells[i]]));
+						rowvals = this.heatmapData.map(d => parseFloat(d.cell_values[this.cells[i]]));
 
 						rowMinMax[this.cells[i]] = [Math.min(...rowvals),Math.max(...rowvals)];
 					}
@@ -54,7 +71,7 @@ class Heatmap{
 					let allvals = [];
 					for (let i = 0; i < this.heatmapData.length; i++){
 			      for (let j = 0; j < this.cells.length; j++){
-											allvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
+											allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
 							      }
 						}
 
@@ -64,8 +81,8 @@ class Heatmap{
 			    for (let i = 0; i < this.heatmapData.length; i++){
 						      let colvals = []
 						      for (let j = 0; j < this.cells.length; j++){
-										        colvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
-														allvals.push(parseFloat(this.heatmapData[i][this.cells[j]]));
+										        colvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
+														allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
 										      }
 
 						      var colmax = Math.max(...colvals);
@@ -75,11 +92,11 @@ class Heatmap{
 
 
 						      for (let j = 0; j < this.cells.length; j++){
-										        this.stretched_data.push({"gene": this.heatmapData[i][""], "cell": this.cells[j],
-															        "colvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
-																			"rowvalue": ((parseFloat(this.heatmapData[i][this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
-																			"totalvalue":((parseFloat(this.heatmapData[i][this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
-																			"actualvalue": parseFloat(this.heatmapData[i][this.cells[j]])})
+										        this.stretched_data.push({"gene": this.heatmapData[i]["Gene.name"], "cell": this.cells[j],
+															        "colvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
+																			"rowvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
+																			"totalvalue":((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
+																			"actualvalue": parseFloat(this.heatmapData[i].cell_values[this.cells[j]])})
 										      }
 						    }
 
@@ -103,7 +120,11 @@ class Heatmap{
 						.attr("id","xAxis")
 				    .call(d3.axisTop(x))
 				    .selectAll("text")
-				    .attr("transform","translate(" + (x.bandwidth()/4) + ",-65) rotate(-90)");
+						.attr("y",0)
+						.attr("x",9)
+						.attr("dy",".35em")
+				    .attr("transform","translate(0,0) rotate(-90)")
+						.attr("text-anchor","start");
 
 					d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
 
@@ -136,7 +157,11 @@ class Heatmap{
 			// Build color scale
 			this.myColor = d3.scaleLinear()
 			  .range(["white", "#69b3a2"])
-			  .domain([0,1])
+			  .domain([0,1]);
+
+			this.grayColor = d3.scaleLinear()
+			  .range(["white", "#878787"])
+			  .domain([0,1]);
 
 
 			  d3.select(".tooltip").remove();
@@ -166,8 +191,8 @@ class Heatmap{
 							                              .style("opacity",1)
 							                              .style("left", (d3.event.pageX + 10) + "px")
 							                              .style("top", (d3.event.pageY - 35) + "px"))
-			      .on("mouseout",d => div.style("opacity",0));
-						console.log(this.stretched_data);
+			      .on("mouseout",d => div.style("opacity",0))
+						.classed("notselected",false);
 
 						if (this.heatmapData.length < 50) {
 							rectGroup.selectAll()
@@ -220,8 +245,14 @@ class Heatmap{
 						});
 					}
 
+		// renderSwitch(div, labelText) {
+    //   let button = div.append("label").classed("switch").append("input").attr("type", "checkbox").append("span").classed("slider round", true);
+		//
+    //   return button;
+    // }
+
 	  updateHeatmap(normOver) {
-					this.genes = this.heatmapData.map(d => d[""]);
+					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 					var x = d3.scaleBand()
 						.range([ 0, this.width ])
@@ -236,12 +267,20 @@ class Heatmap{
 					d3.select('#xAxis')
 					.transition()
 					.duration(1500)
-					.call(d3.axisTop(x));
+					.call(d3.axisTop(x))
+					.selectAll("text")
+					.attr("y",0)
+					.attr("x",9)
+					.attr("dy",".35em")
+					.attr("transform","translate(0,0) rotate(-90)")
+					.attr("text-anchor","start");;
 
 					d3.select('#yAxis')
 					.transition()
 					.duration(1500)
 					.call(d3.axisLeft(y));
+
+					let that = this;
 
 					d3.select('#rectGroup')
 					.selectAll('rect')
@@ -252,7 +291,13 @@ class Heatmap{
 					.attr("y", d => y(d.cell))
 					.attr("width", x.bandwidth() )
 					.attr("height", y.bandwidth() )
-					.style("fill", d => this.myColor(d[normOver]))
+					.style("fill", function(d) {
+						if (that.brushed.indexOf(d.gene) === -1) {
+							return that.grayColor(d[that.newNorm])
+						} else {
+							return that.myColor(d[that.newNorm])
+						}
+					})
 
 					d3.select('#rectGroup')
 					.selectAll('text')
@@ -269,11 +314,11 @@ class Heatmap{
 			if (this.oldcol === col){
 					this.oldcol = null;
 					this.heatmapData = this.heatmapData.sort((a, b) =>
-									parseFloat(a[col]) < parseFloat(b[col]) ? -1 : 1);
+									parseFloat(a.cell_values[col]) < parseFloat(b.cell_values[col]) ? -1 : 1);
 					}else {
 						this.oldcol = col;
 						this.heatmapData = this.heatmapData.sort((a, b) =>
-									parseFloat(a[col]) > parseFloat(b[col]) ? -1 : 1);
+									parseFloat(a.cell_values[col]) > parseFloat(b.cell_values[col]) ? -1 : 1);
 					}
 
 
@@ -284,7 +329,8 @@ class Heatmap{
 
 	sortRows(row) {
 			let gene = JSON.parse(JSON.stringify(this.heatmapData[this.genes.indexOf(row)]));
-			delete gene[""];
+			gene = gene.cell_values;
+
 			var sortable = [];
 			for (var cell in gene) {
 					    sortable.push([cell, parseFloat(gene[cell])]);
@@ -310,9 +356,102 @@ class Heatmap{
 
 	tooltipRender(data) {
 		    let text = "<h2>" + "Gene: " + data['gene'] + "<br>" + "Cell: " + data['cell'] +
-			    "<br>" + "Value: " + data['actualValue'] + "</h2>";
+			    "<br>" + "Value: " + data['actualvalue'] + "</h2>";
 		    return text;
 		  }
+
+
+	brushHeatmap(brushed) {
+		this.brushed = brushed;
+		let that = this;
+		if (brushed === null){
+			d3.select("#rectGroup").selectAll('rect')
+			.style("fill", d => that.myColor(d[that.newNorm]))
+			.attr("opacity",1);
+		}else {
+			d3.select("#rectGroup").selectAll('rect')
+			.style("fill", function(d) {
+				if (brushed.indexOf(d.gene) === -1) {
+					return that.grayColor(d[that.newNorm])
+				} else {
+					return that.myColor(d[that.newNorm])
+				}
+			})
+			.attr("opacity", function(d) {
+				if (brushed.indexOf(d.gene) === -1) {
+					return 0.3
+				} else {
+					return 1
+				}
+			})
+		}
+
+
+	}
+	hClustering(){
+		this.geneMatrix = this.heatmapData.map(d=>Object.values(d.cell_values))
+
+		var geneMat = new ML.Matrix(this.geneMatrix)
+
+		let distMat = ML.distanceMatrix(geneMat.data, ML.Distance.euclidean);
+
+		bob = ML.HClust.agnes(distMat, {isDistanceMatrix:true})
+
+		// append the svg object above the heatmap
+		var svg = d3.select("#dendrogram")
+			.append("g")
+			.append("svg")
+			.attr("id","hCluster")
+			.transition()
+			.duration(1500)
+			.attr("width", this.width + this.margin.left + this.margin.right)
+			.attr("height", 400 + this.margin.top)
+			.attr("transform",
+										"translate(" + this.margin.left + "," + this.margin.top + ")");
+
+		function separation(a, b) {
+		  return a.parent == b.parent ? 1 : 1;
+		}
+
+		var cluster = d3.cluster()
+			.size([this.width, 400])
+			.separation(separation);
+
+
+		var root = d3.hierarchy(bob, function(d) {
+				return d.children;
+		});
+		cluster(root);
+
+		let nodes = root.descendants().slice(1);
+
+		let endNodes = nodes.filter(d => d.children === undefined);
+
+		endNodes = endNodes.sort((a, b) =>
+						parseFloat(a.x) < parseFloat(b.x) ? -1 : 1);
+
+		let indices = endNodes.map(d => d.data.index);
+
+		d3.select("#hCluster").selectAll('path')
+			.data( root.descendants().slice(1) )
+			.enter()
+			.append('path')
+			.attr("d", function(d) {
+					return "M" + d.x + "," + d.y
+									+ "L" + d.x + "," + d.parent.y
+									+ " " + d.parent.x + "," + d.parent.y;
+								})
+			.style("fill", 'none')
+			.attr("stroke", '#ccc')
+
+		this.newData = [];
+
+		indices.forEach(d => this.newData.push(this.heatmapData[d]))
+
+		this.heatmapData = this.newData;
+
+		this.updateHeatmap();
+	}
 }
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current
 //version seems too cumbersome.
