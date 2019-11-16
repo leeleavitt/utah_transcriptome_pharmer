@@ -31,6 +31,46 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		let cellValsTot = cellVals.reduce((a,b)=>a+b);
 		return cellValsTot >= 50000
 	})
+	///////////////////////////////////////////////////
+	//Add Buttons for cell selection
+	///////////////////////////////////////////////////
+	cells = Object.getOwnPropertyNames(dataTotal[0].cell_values)
+	cellsUnique = [...new Set(cells.map(d=>d.slice(0,-2)))]
+
+	//Append Cell buttons
+	d3.select('#buttons')
+		.append('div')
+		.attr('id','cellButtons')
+	
+	cellButtonHolder = d3.select('#cellButtons')
+
+	cellButtonHolder
+		.append('h6')
+		.text('Cell Types')
+	
+	cellButton = cellButtonHolder.selectAll('button')
+		.data(cellsUnique)
+
+	cellButtonEnter = cellButton.enter()
+
+	cellButton = cellButtonEnter.merge(cellButton)
+		.append('button')
+		.attr('class','btn btn-primary cellButton active')
+		.attr('id',d=> `${d}Button`)
+		.attr('background-color','red')
+		.attr('data-toggle','button')
+		.attr('aria-pressed','true')
+		.on('click', d=> buttonChecker(d))
+		.text(d=>d)
+
+
+	///////////////////////////////////////////////////
+
+
+	buttonchecker = function(d){
+		console.log(d)
+	}
+
 
 	///////////////////////////////////////////////////////
 	//PROVING GROUND
@@ -62,7 +102,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	/*										  		Heat Map		  											*/
 	/****************************************************************/
 
-	let heatmap = new Heatmap(genes);
+	let heatmap = new Heatmap(genesNoZeroData);
 	heatmap.createHeatmap();
 
 

@@ -84,24 +84,29 @@ class drPlot{
     }
 
     pcaCompute(){
+        //Extract the cell values out of the matrix
 		this.geneMatrix = this.dataSet.map(d=>Object.values(d.cell_values))
 
-        console.log(this.dataSet)
         //Find all genes
         this.geneSet = this.dataSet.map(d=>d['Gene.name'])
-        console.log(this.geneSet)
         //Find all cells
         this.cells = Object.getOwnPropertyNames(this.dataSet[0].cell_values)
 
+        //Make the array of arrays a matrix
         var geneMat = new ML.Matrix(this.geneMatrix)
+        //Transpose for cells to now be rows
         geneMat = geneMat.transpose()
 
-        var genePCA = new ML.PCA(geneMat,{center:true, scale:false})
+        //Perform PCA, this make the directions
+        var genePCA = new ML.PCA(geneMat,{center:true, scale:false, ignoreZeroVariance:true})
+        //Calculate the components from the PCA space
         var principalComps = genePCA.predict(geneMat).transpose()
 
+        //Snag the new components
         this.pc1 = principalComps.data[0]
         this.pc2 = principalComps.data[1]
 
+        //Make an object for the D3 plotting
         this.pComps = []
         for(var i=0; i<this.pc1.length;i++){
             var cell = {}
@@ -111,13 +116,12 @@ class drPlot{
             this.pComps[i]=cell
         }
 
-        console.log(this.pComps)
-
+        //Snag the principal directions
         var pDirs =  genePCA.U.transpose()
-
         this.pd1 = pDirs.data[0]
         this.pd2 = pDirs.data[1]
 
+        //Create a principal directions for d3 plotting
         this.pDims = []
         for(var i=0; i<this.pd1.length; i++){
             var gene = {}
@@ -126,8 +130,6 @@ class drPlot{
             gene['pd2'] = this.pd2[i]
             this.pDims[i] = gene
         }
-        console.log(this.pDims)
-
 
     }
 
@@ -275,7 +277,6 @@ class drPlot{
             .attr('x', (this.width - this.margin.left)/2)
             .text('PD1')
 
-
     }
 
     createBrush(){
@@ -284,7 +285,6 @@ class drPlot{
             .on('end', this.updateGenes.bind(this))
 
         d3.select('#brushContainer').append('g').call(geneBrush)
-
 
     }
 
@@ -314,21 +314,21 @@ class drPlot{
 				this.drawSummaryPlot(pD1sgenes.concat(pD2sgenes));
     }
 
-		drawSummaryPlot(currentData) {
-				/* create new summary */
-				let allGoTerms = [];
-				//let currentData = pD1sgenes.concat(pD2sgenes);
-				this.dataSet.filter(gene => {
-					if(currentData.includes(gene['Gene.name'])) {
-						allGoTerms = allGoTerms.concat(gene['GO.term.name']);
-					}
-				})
+    drawSummaryPlot(currentData) {
+            /* create new summary */
+            let allGoTerms = [];
+            //let currentData = pD1sgenes.concat(pD2sgenes);
+            this.dataSet.filter(gene => {
+                if(currentData.includes(gene['Gene.name'])) {
+                    allGoTerms = allGoTerms.concat(gene['GO.term.name']);
+                }
+            })
 
-				//console.log("selectData:");
-				//console.log(allGoTerms);
+            //console.log("selectData:");
+            //console.log(allGoTerms);
 
-			  let summaryPlot = new SummaryPlot(allGoTerms);
-		}
+            let summaryPlot = new SummaryPlot(allGoTerms);
+    }
 
     drawPlot(){
         //Plot the cells
@@ -369,7 +369,6 @@ class drPlot{
 
         var geneComp = d3.select('#geneContainer')
             .selectAll('text')
-            .data('text')
             .data(this.pDims)
 
         var geneCompEnter = geneComp.enter()
