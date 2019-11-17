@@ -34,6 +34,14 @@ div.tooltip {
   height: 0;
 }
 
+.selected {
+  fill: red;
+  font-weight: bold; 
+  opacity:1;
+}
+
+
+
 /* The slider */
 .slider {
   position: absolute;

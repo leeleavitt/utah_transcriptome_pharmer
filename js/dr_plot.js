@@ -7,9 +7,6 @@
 //2a this would be a 
 
 
-
-
-
 class drPlot{
     constructor(dataSet, heatmap){
         this.heatmapObject = heatmap;
@@ -341,25 +338,45 @@ class drPlot{
     }
 
     updateGenes(){
+        var margin = .1
+
         console.log(this)
         var brushDims = d3.event.selection
 
         if (d3.event.selection === null){
           this.heatmapObject.brushHeatmap(null)
         }
-        
+
+        var pd1Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd1)))    
+        console.log(pd1Max)
+        var pd1Margin = pd1Max*margin
+        console.log(pd1Margin)
+
         var pD1s = this.pDims.filter(d=>{
-            return this.pd1Scale(d.pd1) >= brushDims[0][0] && this.pd1Scale(d.pd1) <= brushDims[1][0]
+            var selectedGenes = this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd1Margin) && this.pd1Scale(d.pd1) >= brushDims[0][0] && this.pd1Scale(d.pd1) <= brushDims[1][0]
+            return selectedGenes
             })
 
+        var pd2Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd2)))    
+        console.log(pd2Max)
+        var pd2Margin = pd2Max*margin
+        console.log(pd2Margin)
+
         var pD2s = this.pDims.filter(d=>{
-            return this.pd2Scale(d.pd2) >= brushDims[0][1] && this.pd2Scale(d.pd2) <= brushDims[1][1]
+            var selectedGenes = this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd2Margin) && this.pd2Scale(d.pd2) >= brushDims[0][1] && this.pd2Scale(d.pd2) <= brushDims[1][1]
+            return selectedGenes
         })
         var pD1sgenes = pD1s.map(d=>d.gene)
         var pD2sgenes = pD2s.map(d=>d.gene)
 
         var genesSel = [...new Set(pD1sgenes.concat(pD2sgenes))]
         console.log(genesSel)
+
+        for(var i=0; i<genesSel.length;i++){
+            console.log(genesSel[i])
+            console.log(d3.select(`genePlot${genesSel[i]}`))
+            d3.select(`.genePlot${genesSel[i]}`).classed('selected',true)
+        }
 
 		this.heatmapObject.brushHeatmap(genesSel);
 
@@ -479,6 +496,7 @@ class drPlot{
             .attr('opacity', .5)
             .attr('x', d=> this.pd1Scale(d.pd1))
             .attr('y', d=> this.pd2Scale(d.pd2))
+            .attr('class', d=>`genePlot${d.gene}`)
             .text(d=>d.gene)
 
 
