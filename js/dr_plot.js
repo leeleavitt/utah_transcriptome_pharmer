@@ -338,50 +338,62 @@ class drPlot{
     }
 
     updateGenes(){
-        var margin = .1
+        //Turn Off all Selected Genes
+        d3.selectAll('.selected').classed('selected',false)
+        //Set up the margin
+        var margin = .05
 
-        console.log(this)
+        //Find the Brushes Dimension
         var brushDims = d3.event.selection
 
+        //Not sure what this is
         if (d3.event.selection === null){
           this.heatmapObject.brushHeatmap(null)
         }
 
+        //Find genes that are outside of the margin
         var pd1Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd1)))    
-        console.log(pd1Max)
         var pd1Margin = pd1Max*margin
-        console.log(pd1Margin)
-
         var pD1s = this.pDims.filter(d=>{
-            var selectedGenes = this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd1Margin) && this.pd1Scale(d.pd1) >= brushDims[0][0] && this.pd1Scale(d.pd1) <= brushDims[1][0]
+            var selectedGenes = 
+                this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd1Margin) && 
+                this.pd1Scale(d.pd1) >= brushDims[0][0] && 
+                this.pd1Scale(d.pd1) <= brushDims[1][0];
+
             return selectedGenes
             })
 
+        //Find Genes within the margin
         var pd2Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd2)))    
-        console.log(pd2Max)
         var pd2Margin = pd2Max*margin
-        console.log(pd2Margin)
-
         var pD2s = this.pDims.filter(d=>{
-            var selectedGenes = this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd2Margin) && this.pd2Scale(d.pd2) >= brushDims[0][1] && this.pd2Scale(d.pd2) <= brushDims[1][1]
+            var selectedGenes = 
+                this.pd1Scale(Math.abs(d.pd2)) > this.pd1Scale(pd2Margin) && 
+                this.pd2Scale(d.pd2) >= brushDims[0][1] && 
+                this.pd2Scale(d.pd2) <= brushDims[1][1]
+
             return selectedGenes
         })
+        //This returns the gene names
         var pD1sgenes = pD1s.map(d=>d.gene)
         var pD2sgenes = pD2s.map(d=>d.gene)
 
+        //This ensure the genes are unique
         var genesSel = [...new Set(pD1sgenes.concat(pD2sgenes))]
         console.log(genesSel)
 
+        //This Turns the Selected genes Red
         for(var i=0; i<genesSel.length;i++){
             console.log(genesSel[i])
             console.log(d3.select(`genePlot${genesSel[i]}`))
             d3.select(`.genePlot${genesSel[i]}`).classed('selected',true)
         }
 
+        //This activates the HeatMap and the Summary Plot
 		this.heatmapObject.brushHeatmap(genesSel);
 
 	    /* create new summary */
-		this.drawSummaryPlot(genesSel);
+		//this.drawSummaryPlot(genesSel);
     }
 
     drawSummaryPlot(currentData) {
@@ -435,7 +447,7 @@ class drPlot{
             .transition().duration(1000)
             .on('start', () => d3.select(this))
             .ease(d3.easeElastic)
-            .delay( 500 )
+            .delay( 1500 )
             .attr('r',6)
             .attr('cx', d=> this.pc1Scale(d.pc1))
             .attr('cy', d=> this.pc2Scale(d.pc2))
@@ -462,11 +474,12 @@ class drPlot{
             .transition().duration(1000)
             .on('start', () => d3.select(this))
             .ease(d3.easeElastic)
-            .delay( 500 )
+            .delay( 1500 )
             .attr('x', d=> this.pc1Scale(d.pc1)+5)
             .attr('y', d=> this.pc2Scale(d.pc2)-5)
             .attr('font-size', 9)
-            .attr('font-width',3)
+            .attr('font-weight','bold')
+            .attr('text-decoration','underline')
             .text(d=>d.cell.slice(0,-2))
             .on('end', () => d3.select(this).transition().duration(500));
 
@@ -491,13 +504,18 @@ class drPlot{
 
 
         geneComp = geneCompEnter.merge(geneComp)
-            //.attr('transform', `translate(${this.margin.left+this.margin.right},${this.margin.top+this.margin.bottom})`)
+            .transition().duration(1000)
+            .on('start', () => d3.select(this))
+            .ease(d3.easeElastic)
+            .delay( 500 )
             .attr('font-size', 10)
             .attr('opacity', .5)
             .attr('x', d=> this.pd1Scale(d.pd1))
             .attr('y', d=> this.pd2Scale(d.pd2))
             .attr('class', d=>`genePlot${d.gene}`)
             .text(d=>d.gene)
+            .on('end', () => d3.select(this).transition().duration(500));
+
 
 
     }
