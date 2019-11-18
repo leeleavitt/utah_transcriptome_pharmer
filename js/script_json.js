@@ -111,8 +111,6 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	//Add Buttons for cell selection
 	///////////////////////////////////////////////////
 	
-<<<<<<< HEAD
-=======
 	//This function update the button logic as well as the pca plot for now
 	buttonChecker = function(cells){
 		//Get the button clicked
@@ -174,7 +172,4 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 
 	//////////////////////////////////////////////////////
 
-
-
->>>>>>> ee9834ef089eea74d24b72f00375270761865ddd
 });
