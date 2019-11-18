@@ -12,14 +12,6 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		// 	allgenes.push(genesCSV)
 		// }
 
-
-
-
-
-
-
-
-
 		//These are terms to reduce the data on
 		terms = ['ion channel','G-protein']
 
@@ -94,9 +86,7 @@ d3.csv("data/go_terms.csv").then(matchesCSV => {
 		/////////////////////////////////////////////////////////
 
 		/* heat map */
-		let heatmap = new Heatmap(data);
-
-		heatmap.createHeatmap();
+		
 
 		/* summary plot */
 		let summaryPlotData = matchesCSV.map(d => d["GO.term.name"]).filter(function (e) { return e != "" });

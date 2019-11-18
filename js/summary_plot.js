@@ -1,6 +1,28 @@
 class SummaryPlot {
+	/* input an array of go terms, sort go terms by number of occurrences */
 	constructor(data) {
+
 		let that = this;
+
+		this.clear();
+
+		this.reduceData(data);
+
+		/* set size */
+		this.margin = {top: 30, right: 30, bottom: 30, left: 30};
+
+		/* scale */
+		this.colorScale = d3.scaleOrdinal()
+			.range(d3.schemeSet2);
+		this.fontSizeScale = d3.scaleLinear()
+			.domain([0, 100])
+			.range([0, 100]);
+
+		/* create go term summary */
+		this.create();
+	}
+
+	reduceData(data) {
 
 		let map = new Map();
 		let count;
@@ -20,16 +42,6 @@ class SummaryPlot {
 		this.data = [...map].map(function(d) {
 			return {text: d[0], size: d[1]*30};
 		});
-
-		/* set size */
-		this.margin = {top: 30, right: 30, bottom: 30, left: 30};
-
-		/* scale */
-		this.colorScale = d3.scaleOrdinal()
-			.range(d3.schemeSet2);
-		this.fontSizeScale = d3.scaleLinear()
-			.domain([0, 100])
-			.range([0, 100]);
 
 	}
 
@@ -74,6 +86,18 @@ class SummaryPlot {
 				.text(function(d) { return d.text; });
 		}
 
+	}
+
+	update(data) {
+		this.clear();
+
+		this.reduceData(data);
+		this.create();
+
+	}
+
+	clear() {
+		d3.select("#summaryPlot").selectAll("*").remove();
 	}
 
 	updateSize() {

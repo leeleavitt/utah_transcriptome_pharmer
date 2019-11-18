@@ -31,15 +31,10 @@
 		<!-- <script src="https://cdn.jsdelivr.net/npm/pca-js@1.0.0/pca.min.js"></script> -->
 		<!-- ml.js -->
 		<script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script>
-		<!-- lalolib -->
-		<script src="http://mlweb.loria.fr/lalolib.js"></script>
 		<script type="application/javascript" src="js/summary_plot.js"></script>
 		<script type="application/javascript" src="js/dr_plot.js"></script>
 		<script type="application/javascript" src="js/heat_map.js"></script>
-		<!-- this file will be remove in the future -->
-		<script type="application/javascript" src="js/script.js"></script>
 		<script type="application/javascript" src="js/script_json.js"></script>
-
 	</head>
 
 	<body>
@@ -53,8 +48,18 @@
 		<!-- Search -->
 		<div id="search"></div>
 
+		<!-- Buttons -->
+		<div id="buttons">
+		<label class="switch">Hierarchical Clustering
+		<input type="checkbox">
+		<span class="slider round" id="switch"></span>
+		</label>
+		</div>
 		<!-- Dimensional Reduction Plot -->
 		<div id="drPlot"></div>
+
+		<!-- Dendrogram -->
+		<div id="dendrogram"></div>
 
 		<!-- Heatmap/Table -->
 		<div id="heatmap"></div>
