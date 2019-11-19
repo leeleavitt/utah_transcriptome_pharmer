@@ -46,8 +46,8 @@ class SummaryPlot {
 	}
 
 	create() {
-		let width = 1000;
-		let height = 1000;
+		let width = 700;
+		let height = 700;
 		let that = this;
 		that.height = height;
 		that.width = width;
