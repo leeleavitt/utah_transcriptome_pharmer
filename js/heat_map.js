@@ -6,12 +6,18 @@ class Heatmap{
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapData = data.slice(0,100);
+			    this.heatmapData = data.slice(0,50);
+
+					this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
 
 					console.log(this.heatmapData);
 
 			    this.cells = Object.keys(this.heatmapData[0].cell_values);
 					this.cells.sort();
+
+					this.selectedCells = Object.keys(this.heatmapData[0].cell_values);
+					this.selectedCells.sort();
+					this.init = false;
 
 			    this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
@@ -25,18 +31,6 @@ class Heatmap{
 					this.expanded = false;
 				}
 	  createHeatmap() {
-			// let button = this.renderSwitch(d3.select("#buttons"), "Hierarchical Clustering");
-
-			document.getElementById("switch").addEventListener("click", () => {
-				if (this.expanded === false){
-					this.hClustering();
-					this.expanded = true;
-				}else {
-					d3.select("#hCluster").remove().transition().duration(1500);
-					this.expanded = false;
-				}
-
-      });
 
 			let dropdownWrap = d3.select('#buttons').append('div').classed('dropdown-wrapper', true);
 
@@ -241,7 +235,7 @@ class Heatmap{
 
 						dropC.on('change', function(d, i) {
 							that.newNorm = this.options[this.selectedIndex].value;
-							that.updateHeatmap(that.newNorm);
+							that.updateHeatmap();
 						});
 					}
 
@@ -251,8 +245,14 @@ class Heatmap{
     //   return button;
     // }
 
-	  updateHeatmap(normOver) {
+	  updateHeatmap() {
+
 					this.genes = this.heatmapData.map(d => d["Gene.name"]);
+
+
+					if (this.init === true){
+						this.cells.sort((a,b) => this.selectedCells.indexOf(b) - this.selectedCells.indexOf(a));
+					}
 
 					var x = d3.scaleBand()
 						.range([ 0, this.width ])
@@ -282,22 +282,61 @@ class Heatmap{
 
 					let that = this;
 
-					d3.select('#rectGroup')
-					.selectAll('rect')
-					.join(this.stretched_data)
-					.transition()
-					.duration(1500)
-					.attr("x", d => x(d.gene))
-					.attr("y", d => y(d.cell))
-					.attr("width", x.bandwidth() )
-					.attr("height", y.bandwidth() )
-					.style("fill", function(d) {
-						if (that.brushed.indexOf(d.gene) === -1) {
-							return that.grayColor(d[that.newNorm])
-						} else {
-							return that.myColor(d[that.newNorm])
-						}
-					})
+					if (that.brushed === null){
+						d3.select('#rectGroup')
+						.selectAll('rect')
+						.join(this.stretched_data)
+						.transition()
+						.duration(1500)
+						.attr("x", d => x(d.gene))
+						.attr("y", d => y(d.cell))
+						.attr("width", x.bandwidth() )
+						.attr("height", y.bandwidth() )
+						.style("fill", function(d) {
+							if (that.selectedCells.indexOf(d.cell) === -1) {
+								return "gray";
+							}else {
+								return that.myColor(d[that.newNorm]);
+							}
+						})
+						.attr("opacity", 1)
+					}else {
+						d3.select('#rectGroup')
+						.selectAll('rect')
+						.join(this.stretched_data)
+						.transition()
+						.duration(1500)
+						.attr("x", d => x(d.gene))
+						.attr("y", d => y(d.cell))
+						.attr("width", x.bandwidth() )
+						.attr("height", y.bandwidth() )
+						.style("fill", function(d) {
+							if (that.brushed.indexOf(d.gene) === -1) {
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return "gray";
+								}else {
+									return that.grayColor(d[that.newNorm])
+								}
+							} else {
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return "gray";
+								}else {
+									return that.myColor(d[that.newNorm])
+								}
+							}
+						})
+						.attr("opacity", function(d) {
+							if (that.brushed.indexOf(d.gene) === -1) {
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return 1;
+								}else {
+									return 0.3;
+								}
+							} else {
+								return 1
+							}
+						})
+					}
 
 					d3.select('#rectGroup')
 					.selectAll('text')
@@ -324,7 +363,7 @@ class Heatmap{
 
 			this.sorted = !this.sorted;
 
-			this.updateHeatmap(this.newNorm);
+			this.updateHeatmap();
 	}
 
 	sortRows(row) {
@@ -351,7 +390,7 @@ class Heatmap{
 						this.cells.push(sortable[i][0]);
 					}
 
-			this.updateHeatmap(this.newNorm);
+			this.updateHeatmap();
 	}
 
 	tooltipRender(data) {
@@ -362,93 +401,112 @@ class Heatmap{
 
 
 	brushHeatmap(brushed) {
+		console.log(brushed);
 		this.brushed = brushed;
-		let that = this;
-		if (brushed === null){
-			d3.select("#rectGroup").selectAll('rect')
-			.style("fill", d => that.myColor(d[that.newNorm]))
-			.attr("opacity",1);
-		}else {
-			d3.select("#rectGroup").selectAll('rect')
-			.style("fill", function(d) {
-				if (brushed.indexOf(d.gene) === -1) {
-					return that.grayColor(d[that.newNorm])
-				} else {
-					return that.myColor(d[that.newNorm])
-				}
-			})
-			.attr("opacity", function(d) {
-				if (brushed.indexOf(d.gene) === -1) {
-					return 0.3
-				} else {
-					return 1
-				}
-			})
-		}
 
-
+		this.updateHeatmap();
 	}
+
 	hClustering(){
-		this.geneMatrix = this.heatmapData.map(d=>Object.values(d.cell_values))
+		if (this.expanded === true){
+			d3.select("#hCluster").remove().transition().duration(1500);
+			this.expanded = false;
+		}else{
+			if (this.expanded === "yes"){
+				d3.select("#hCluster").remove().transition().duration(1500);
+			}
+			this.geneMatrix = this.clusterData.map(d=>Object.values(d.cell_values))
 
-		var geneMat = new ML.Matrix(this.geneMatrix)
+			var geneMat = new ML.Matrix(this.geneMatrix)
 
-		let distMat = ML.distanceMatrix(geneMat.data, ML.Distance.euclidean);
+			let distMat = ML.distanceMatrix(geneMat.data, ML.Distance.euclidean);
 
-		bob = ML.HClust.agnes(distMat, {isDistanceMatrix:true})
+			let bob = ML.HClust.agnes(distMat, {isDistanceMatrix:true})
 
-		// append the svg object above the heatmap
-		var svg = d3.select("#dendrogram")
-			.append("g")
-			.append("svg")
-			.attr("id","hCluster")
-			.transition()
-			.duration(1500)
-			.attr("width", this.width + this.margin.left + this.margin.right)
-			.attr("height", 400 + this.margin.top)
-			.attr("transform",
-										"translate(" + this.margin.left + "," + this.margin.top + ")");
+			// append the svg object above the heatmap
+			var svg = d3.select("#dendrogram")
+				.append("g")
+				.append("svg")
+				.attr("id","hCluster")
+				.transition()
+				.duration(1500)
+				.attr("width", this.width + this.margin.left + this.margin.right)
+				.attr("height", 400 + this.margin.top)
+				.attr("transform",
+											"translate(" + this.margin.left + "," + this.margin.top + ")");
 
-		function separation(a, b) {
-		  return a.parent == b.parent ? 1 : 1;
+			function separation(a, b) {
+			  return a.parent == b.parent ? 1 : 1;
+			}
+
+			var cluster = d3.cluster()
+				.size([this.width, 400])
+				.separation(separation);
+
+
+			var root = d3.hierarchy(bob, function(d) {
+					return d.children;
+			});
+			cluster(root);
+
+			let nodes = root.descendants().slice(1);
+
+			let endNodes = nodes.filter(d => d.children === undefined);
+
+			endNodes = endNodes.sort((a, b) =>
+							parseFloat(a.x) < parseFloat(b.x) ? -1 : 1);
+
+			let indices = endNodes.map(d => d.data.index);
+
+			d3.select("#hCluster").selectAll('path')
+				.data( root.descendants().slice(1) )
+				.enter()
+				.append('path')
+				.attr("d", function(d) {
+						return "M" + d.x + "," + d.y
+										+ "L" + d.x + "," + d.parent.y
+										+ " " + d.parent.x + "," + d.parent.y;
+									})
+				.style("fill", 'none')
+				.attr("stroke", '#ccc')
+
+			this.newData = [];
+
+			indices.forEach(d => this.newData.push(this.heatmapData[d]))
+
+			this.heatmapData = this.newData;
+
+			this.expanded = true;
+
+			this.updateHeatmap();
+		}
+	}
+
+	removeCell(cellType){
+		this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
+
+		if (this.cellsGroups.indexOf(cellType) !== -1){
+			this.cellsGroups = this.cellsGroups.filter(e => e !== cellType);
+		}else{
+			this.cellsGroups.push(cellType);
 		}
 
-		var cluster = d3.cluster()
-			.size([this.width, 400])
-			.separation(separation);
+		var notSelectedCells = this.cells.filter(e => this.cellsGroups.indexOf(e.slice(0,-2)) === -1);
 
+		this.selectedCells = this.cells.filter(e => this.cellsGroups.indexOf(e.slice(0,-2)) !== -1);
 
-		var root = d3.hierarchy(bob, function(d) {
-				return d.children;
-		});
-		cluster(root);
+		this.init = true;
 
-		let nodes = root.descendants().slice(1);
+		for (var i = 0; i < this.clusterData.length; i++){
+			for (var j = 0; j < notSelectedCells.length; j++){
+				delete this.clusterData[i].cell_values[notSelectedCells[j]]
+			}
+		}
 
-		let endNodes = nodes.filter(d => d.children === undefined);
-
-		endNodes = endNodes.sort((a, b) =>
-						parseFloat(a.x) < parseFloat(b.x) ? -1 : 1);
-
-		let indices = endNodes.map(d => d.data.index);
-
-		d3.select("#hCluster").selectAll('path')
-			.data( root.descendants().slice(1) )
-			.enter()
-			.append('path')
-			.attr("d", function(d) {
-					return "M" + d.x + "," + d.y
-									+ "L" + d.x + "," + d.parent.y
-									+ " " + d.parent.x + "," + d.parent.y;
-								})
-			.style("fill", 'none')
-			.attr("stroke", '#ccc')
-
-		this.newData = [];
-
-		indices.forEach(d => this.newData.push(this.heatmapData[d]))
-
-		this.heatmapData = this.newData;
+		if(document.getElementById("hClustButton").classList.contains("active")){
+			this.expanded = "yes";
+			this.hClustering();
+		};
 
 		this.updateHeatmap();
 	}
