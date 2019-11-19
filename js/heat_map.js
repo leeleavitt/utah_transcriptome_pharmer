@@ -50,7 +50,7 @@ class Heatmap{
 
 			    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
-			    let cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
+			    this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
 			        .domain(this.cellsGroups);
 
 			    this.stretched_data = [];
@@ -143,7 +143,7 @@ class Heatmap{
 			  .attr("y", -(y.bandwidth()/2))
 			  .attr("height", y.bandwidth())
 			  .attr("width", 150)
-			  .style("fill", d => cellsColorScale(d.slice(0,-2)))
+			  .style("fill", d => this.cellsColorScale(d.slice(0,-2)))
 			  .attr("opacity",0.2);
 
 			d3.select('#yAxis').selectAll('rect').on('click',d => this.sortCols(d));
@@ -250,9 +250,12 @@ class Heatmap{
 					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 
-					if (this.init === true){
-						this.cells.sort((a,b) => this.selectedCells.indexOf(b) - this.selectedCells.indexOf(a));
-					}
+						let inCells = this.cells.filter(d => this.selectedCells.indexOf(d) !== -1);
+						inCells.sort();
+						let outCells = this.cells.filter(d => this.selectedCells.indexOf(d) === -1);
+						outCells.sort();
+						this.cells = inCells.concat(outCells);
+
 
 					var x = d3.scaleBand()
 						.range([ 0, this.width ])
@@ -282,6 +285,18 @@ class Heatmap{
 
 					let that = this;
 
+					d3.select('#yAxis')
+						.selectAll('g')
+						.selectAll('rect')
+						.style("fill", function(d) {
+							if (that.selectedCells.indexOf(d) === -1){
+								return "gray";
+							}else{
+								return that.cellsColorScale(d.slice(0,-2));
+							}
+						});
+
+
 					if (that.brushed === null){
 						d3.select('#rectGroup')
 						.selectAll('rect')
@@ -294,7 +309,7 @@ class Heatmap{
 						.attr("height", y.bandwidth() )
 						.style("fill", function(d) {
 							if (that.selectedCells.indexOf(d.cell) === -1) {
-								return "gray";
+								return that.grayColor(d[that.newNorm]);
 							}else {
 								return that.myColor(d[that.newNorm]);
 							}
@@ -313,13 +328,13 @@ class Heatmap{
 						.style("fill", function(d) {
 							if (that.brushed.indexOf(d.gene) === -1) {
 								if (that.selectedCells.indexOf(d.cell) === -1) {
-									return "gray";
+									return that.grayColor(d[that.newNorm]);
 								}else {
 									return that.grayColor(d[that.newNorm])
 								}
 							} else {
 								if (that.selectedCells.indexOf(d.cell) === -1) {
-									return "gray";
+									return that.grayColor(d[that.newNorm]);
 								}else {
 									return that.myColor(d[that.newNorm])
 								}
@@ -328,12 +343,16 @@ class Heatmap{
 						.attr("opacity", function(d) {
 							if (that.brushed.indexOf(d.gene) === -1) {
 								if (that.selectedCells.indexOf(d.cell) === -1) {
-									return 1;
+									return 0.3;
 								}else {
 									return 0.3;
 								}
 							} else {
-								return 1
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return 0.3
+								}else {
+									return 1
+								}
 							}
 						})
 					}
