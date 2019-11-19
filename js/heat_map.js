@@ -99,8 +99,13 @@ class Heatmap{
 			      .attr("width", this.width + this.margin.left + this.margin.right)
 			      .attr("height", this.height + this.margin.top + this.margin.bottom)
 			      .append("g")
+						.attr("id","heatmapSVG")
 			      .attr("transform",
 							            "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+				svg.append('g')
+				.attr("id","lineGroup");
+
 
 			  let genes_trunc = this.genes.map(d => d.slice(-5));
 
@@ -314,7 +319,13 @@ class Heatmap{
 								return that.myColor(d[that.newNorm]);
 							}
 						})
-						.attr("opacity", 1)
+						.attr("opacity", function(d) {
+							if (that.selectedCells.indexOf(d.cell) === -1) {
+								return 0.3
+							}else{
+								return 1
+							}
+						})
 					}else {
 						d3.select('#rectGroup')
 						.selectAll('rect')
@@ -365,6 +376,27 @@ class Heatmap{
 					.attr("x", d => x(d.gene) + (x.bandwidth()/2))
 					.attr("y", d => y(d.cell) + (y.bandwidth()/2))
 					.text(d => d.actualvalue)
+
+				if (outCells.length !== 0){
+					let lineData = [y(outCells[0])];
+					console.log(lineData);
+
+					let selection = d3.select('#lineGroup')
+					.selectAll('line')
+					.data(lineData)
+					.join('line')
+					.transition()
+					.duration(1500)
+					.style("stroke","black")
+					.style("stroke-width","3px")
+					.attr("x1",0)
+					.attr("x2",this.width)
+					.attr("y1",d => d)
+					.attr("y2",d => d);
+
+				}else{
+					d3.select('#lineGroup').selectAll('line').remove();
+				}
 
 			  }
 
@@ -510,15 +542,15 @@ class Heatmap{
 			this.cellsGroups.push(cellType);
 		}
 
-		var notSelectedCells = this.cells.filter(e => this.cellsGroups.indexOf(e.slice(0,-2)) === -1);
+		this.notSelectedCells = this.cells.filter(e => this.cellsGroups.indexOf(e.slice(0,-2)) === -1);
 
 		this.selectedCells = this.cells.filter(e => this.cellsGroups.indexOf(e.slice(0,-2)) !== -1);
 
 		this.init = true;
 
 		for (var i = 0; i < this.clusterData.length; i++){
-			for (var j = 0; j < notSelectedCells.length; j++){
-				delete this.clusterData[i].cell_values[notSelectedCells[j]]
+			for (var j = 0; j < this.notSelectedCells.length; j++){
+				delete this.clusterData[i].cell_values[this.notSelectedCells[j]]
 			}
 		}
 
