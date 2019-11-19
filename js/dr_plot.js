@@ -396,22 +396,6 @@ class drPlot{
 		//this.drawSummaryPlot(genesSel);
     }
 
-    drawSummaryPlot(currentData) {
-            /* create new summary */
-            let allGoTerms = [];
-            //let currentData = pD1sgenes.concat(pD2sgenes);
-            this.dataSet.filter(gene => {
-                if(currentData.includes(gene['Gene.name'])) {
-                    allGoTerms = allGoTerms.concat(gene['GO.term.name']);
-                }
-            })
-
-            //console.log("selectData:");
-            //console.log(allGoTerms);
-
-            let summaryPlot = new SummaryPlot(allGoTerms);
-    }
-
     drawPlot(){
 
         d3.select('#pc1Axis')
@@ -516,8 +500,26 @@ class drPlot{
             .text(d=>d.gene)
             .on('end', () => d3.select(this).transition().duration(500));
 
-
-
     }
+
+		/*********************/
+		/* draw summary plot */
+		/*********************/
+    drawSummaryPlot(currentData) {
+            /* create new summary */
+            let allGoTerms = [];
+            //let currentData = pD1sgenes.concat(pD2sgenes);
+            this.dataSet.filter(gene => {
+                if(currentData.includes(gene['Gene.name'])) {
+                    allGoTerms = allGoTerms.concat(gene['GO.term.name']);
+                }
+            })
+
+            //console.log("selectData:");
+            //console.log(allGoTerms);
+
+            let summaryPlot = new SummaryPlot(allGoTerms);
+    }
+
 
 }
