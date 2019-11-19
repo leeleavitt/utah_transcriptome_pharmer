@@ -67,7 +67,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 
 	cellButton = cellButtonEnter.merge(cellButton)
 		.append('button')
-		.attr('class','btn btn-primary cellButton active')
+		.attr('class','btn btn-outline-primary cellButton active')
 		.attr('id',d=> `${d}Button`)
 		.attr('background-color','red')
 		.attr('data-toggle','button')
@@ -142,7 +142,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		drplot.pcaCompute(cellsLogic);
 		//drplot.createPlot();
 		drplot.drawPlot();
-		}
+	}
 
 
 
