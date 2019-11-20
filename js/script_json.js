@@ -117,7 +117,8 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	//Now compute the agnes heirarchal clsutering
 	bob = ML.HClust.agnes(geneMatDistEuc, {isDistanceMatrix:true})
 
-
+	buttonClasses = 0
+	buttonLogic = 0
 	//////////////////////////////////////////////////////
 
 });
