@@ -4,12 +4,14 @@ class SummaryPlot {
 
 		let that = this;
 
+		/* pre process */
 		this.clear();
-
 		this.reduceData(data);
 
 		/* set size */
 		this.margin = {top: 30, right: 30, bottom: 30, left: 30};
+		this.height = 700;
+		this.width = 700;
 
 		/* scale */
 		this.colorScale = d3.scaleOrdinal()
@@ -22,6 +24,16 @@ class SummaryPlot {
 		this.create();
 	}
 
+	setSize(height, width) {
+		this.height = height;
+		this.width = width;
+	}
+
+	/* reduceData(data)
+	 * input: data
+	 * return: {text, size}
+	 * count the number of each element in given data 
+	 */
 	reduceData(data) {
 
 		let map = new Map();
@@ -46,8 +58,8 @@ class SummaryPlot {
 	}
 
 	create() {
-		let width = 1000;
-		let height = 1000;
+		let width = this.width;
+		let height = this.height;
 		let that = this;
 		that.height = height;
 		that.width = width;
@@ -88,18 +100,14 @@ class SummaryPlot {
 
 	}
 
-	update(data) {
-		this.clear();
-
-		this.reduceData(data);
-		this.create();
-
-	}
-
 	clear() {
 		d3.select("#summaryPlot").selectAll("*").remove();
 	}
 
+
+
+
+	/* abandoned functions (need to be delete soon) */
 	updateSize() {
 
 		let that = this;
@@ -115,5 +123,14 @@ class SummaryPlot {
 
 		};
 	}
+
+	update(data) {
+		this.clear();
+
+		this.reduceData(data);
+		this.create();
+
+	}
+
 
 }
