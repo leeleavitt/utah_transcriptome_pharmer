@@ -8,26 +8,27 @@
 
 
 class drPlot{
-    constructor(dataSet, heatmap){
-        this.heatmapObject = heatmap;
-        this.dataSet = dataSet
-        this.width = 750;
-        this.height = 750;
-        this.margin = {top:60, bottom:60, left:60, right:60}
-        this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
-    }
+	constructor(dataSet, heatmap){
+		this.heatmapObject = heatmap;
+		this.dataSet = dataSet
+		this.width = 750;
+		this.height = 750;
+		this.margin = {top:60, bottom:60, left:60, right:60}
+		this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
 
-    //Attempt to Compute PCA on SVD
-    svdCompute(){
+		this.clickListener();
+	}
+
+	svdCompute(){
 		//I'm following this link for my SVD PCA guidance
 		//https://stats.stackexchange.com/questions/134282/relationship-between-svd-and-pca-how-to-use-svd-to-perform-pca
 		//First rate the heatmapDat and extract only values
 		var geneMatrix = this.dataSet.map(d=>Object.values(d.cell_values))
 
-        //Find all genes
-        this.genes = geneMatrix.map(d=>d['Gene.name'])
-        //Find all cells
-        this.cells = Object.getOwnPropertyNames(geneMatrix[0])
+		//Find all genes
+		this.genes = geneMatrix.map(d=>d['Gene.name'])
+		//Find all cells
+		this.cells = Object.getOwnPropertyNames(geneMatrix[0])
 
 		//Start the SVD,
 		//Do transpose this makes the data frame with cells/samples the rows, and collumns genes/obervations
@@ -39,14 +40,14 @@ class drPlot{
 			//For each value in the array subtract the mean
 			d = d.map(e=> e - colMean)
 			return(d)
-        })
+		})
 
-        ////////////////////////////////////////////////////////////
-        //Regularize TODO
-        ////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////
+		//Regularize TODO
+		////////////////////////////////////////////////////////////
 
-		//At this point we need to transform it into a matrix that the SVD can perform on
-		var geneMatrixCentered = new ML.Matrix(geneMatrixCentered)
+			//At this point we need to transform it into a matrix that the SVD can perform on
+			var geneMatrixCentered = new ML.Matrix(geneMatrixCentered)
 		//Now transpose so our samples/cells are the rows, and the genes/features are collumns
 		var geneMatCentTrans = geneMatrixCentered.transpose()
 
@@ -59,26 +60,26 @@ class drPlot{
 		// principal component 1 = (d_1^a * U1i)
 		// principal component 2 = (d_2^a * U2i)
 		this.pc1 = geneSVD.U.transpose().data[0].map(d=> d * Math.pow(geneSVD.s[0], alphaVal))
-        this.pc2 = geneSVD.U.transpose().data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
+		this.pc2 = geneSVD.U.transpose().data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
 
-        //Make an object to hold this information
-        this.pComps = []
-        for(var i=0; i<this.pc1.length;i++){
-            var cell = {}
-            cell['cell'] =  this.cells[i]
-            cell['pc1'] = this.pc1[i]
-            cell['pc2'] = this.pc2[i]
-            this.pComps[i]=cell
-        }
+		//Make an object to hold this information
+		this.pComps = []
+		for(var i=0; i<this.pc1.length;i++){
+			var cell = {}
+			cell['cell'] =  this.cells[i]
+			cell['pc1'] = this.pc1[i]
+			cell['pc2'] = this.pc2[i]
+			this.pComps[i]=cell
+		}
 
-        console.log(this.pComps)
+		console.log(this.pComps)
 
 		//Compute the directional components. This is how the genes direct the data
 		//Need to determine if i am using the correct region, collumns or row.
 		this.pd1 = geneSVD.V.data[0].map(d=>d*Math.pow(geneSVD.s[0], 1-alphaVal))
-        this.pd2 = geneSVD.V.data[1].map(d=>d*Math.pow(geneSVD.s[1], 1-alphaVal))
+		this.pd2 = geneSVD.V.data[1].map(d=>d*Math.pow(geneSVD.s[1], 1-alphaVal))
 
-    }
+	}
 
     //Successful PCA compute this function also takes in which cells hav
     //been selected
@@ -86,23 +87,23 @@ class drPlot{
         //passing in the cellTypesLogic allows us to 
         // Only compute the PCs on these still selected cells
 
-        //Extract the cell values out of the matrix
+		//Extract the cell values out of the matrix
 		this.geneMatrix = this.dataSet.map(d=>Object.values(d.cell_values))
 
-        //Find all genes
-        this.geneSet = this.dataSet.map(d=>d['Gene.name'])
-        //Find all cells
-        this.cells = Object.getOwnPropertyNames(this.dataSet[0].cell_values)
+		//Find all genes
+		this.geneSet = this.dataSet.map(d=>d['Gene.name'])
+		//Find all cells
+		this.cells = Object.getOwnPropertyNames(this.dataSet[0].cell_values)
 
 		//Now we need find which match up with the cells in the dataframe
 		var cellsGenericNames = this.cells.map(d=>d.slice(0,-2))
 
-        //Unpack the loigc object input to this function
-        var cellsSelectedUnpack = cellTypesSelected.filter(d=>d.logic).map(d=>d.cells)
-        //Set it to filter through
-        var cellsSelected = new Set(cellsSelectedUnpack)
+		//Unpack the loigc object input to this function
+		var cellsSelectedUnpack = cellTypesSelected.filter(d=>d.logic).map(d=>d.cells)
+		//Set it to filter through
+		var cellsSelected = new Set(cellsSelectedUnpack)
 
-        //This return the rows of each selected cell type
+		//This return the rows of each selected cell type
 		var cellsSelectedAll = cellsGenericNames.map((d,i)=>{
 			if(cellsSelected.has(d)){
 				return i
@@ -623,5 +624,24 @@ class drPlot{
             let summaryPlot = new SummaryPlot(allGoTerms);
     }
 
+		this.dataSet.filter(gene => {
+			if(selectGene === gene['Gene.name']) {
+				//console.log(gene);
+				let geneDescription = new GeneDescription(gene);
+			}
+		})
+	}
+
+	clickListener(){
+		let that = this;
+
+		$(document).click(function(event) {
+			if(event.target.matches('.geneTextPlot')) {
+				//console.log(event.target.id);
+				//console.log(event.target.id.slice(8));
+				that.drawGeneDescription(event.target.id.slice(8));
+			}
+		});
+	}
 
 }
