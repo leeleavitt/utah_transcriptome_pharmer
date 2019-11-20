@@ -39,6 +39,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	//Remove the number identifier at the and and obtain a unique set
 	cellsUnique = [...new Set(cells.map(d=>d.slice(0,-2)))]
 
+	//Creat a list of cell types objects with logic of the buttons
 	cellsLogic = []
 	cellsUnique.map((d,i)=>{
 		cellsUniqueLogic = {}
@@ -46,7 +47,6 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		cellsUniqueLogic['logic'] = true
 		cellsLogic[i] = cellsUniqueLogic
 	})
-<<<<<<< HEAD
 	
 	//Button Time!
 	//Append Cell buttons
@@ -74,8 +74,6 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		.attr('aria-pressed','true')
 		.on('click', d=> buttonChecker(d))
 		.text(d=>d)
-=======
->>>>>>> 8051a3fefd87c268dacdbe60c121c5eddf0a5513
 
 	///////////////////////////////////////////////////
 
@@ -91,13 +89,6 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	drplot.pcaCompute(cellsLogic);
 	drplot.createPlot();
 	drplot.drawPlot();
-
-	/****************************************************************/
-	/*					  Button Setup and Data Manipulation  							*/
-	/****************************************************************/
-	let setup = new Setup(genesNoZeroData, heatmap, drplot);
-	setup.initial();
-
 	/****************************************************************/
 	/*										  		Summary Plot	 											*/
 	/****************************************************************/
@@ -119,7 +110,6 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	///////////////////////////////////////////////////
 	//Add Buttons for cell selection
 	///////////////////////////////////////////////////
-<<<<<<< HEAD
 	
 	//This function update the button logic as well as the pca plot for now
 	buttonChecker = function(cells){
@@ -152,11 +142,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		drplot.pcaCompute(cellsLogic);
 		//drplot.createPlot();
 		drplot.drawPlot();
-	}
-=======
-
-
->>>>>>> 8051a3fefd87c268dacdbe60c121c5eddf0a5513
+		}
 
 
 
@@ -179,7 +165,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 
 	//COmpute the euclidean distance matrix for the clustering
 	geneMatDistEuc = ML.distanceMatrix(geneMat.transpose().data, ML.Distance.euclidean)
-
+	
 	//Now compute the agnes heirarchal clsutering
 	bob = ML.HClust.agnes(geneMatDistEuc, {isDistanceMatrix:true})
 
