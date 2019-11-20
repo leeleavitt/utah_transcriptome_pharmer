@@ -77,7 +77,7 @@ class Setup{
       var dataButtonVals = ['Center','Scale','Row_Normalize', 'Collumn_Normalize', 'Whole_Table_Normalize']
 
       //Use my logic object technique
-      var datasLogic = []
+      var dataLogic = []
       dataButtonVals.map((d,i)=>{
         let buttonLogic = {}
         buttonLogic['dataButton'] = d
@@ -97,22 +97,22 @@ class Setup{
         .text('Data Transformations')
 
       let dataButton = dataButtonHolder.selectAll('button')
-        .data(datasLogic)
+        .data(dataLogic)
 
       let dataButtonEnter = dataButton.enter()
 
-      databutton = dataButtonEnter.merge(dataButton)
+      dataButton = dataButtonEnter.merge(dataButton)
         .append('button')
-        .attr('class','btn btn-secondary dataButton active')
+        .attr('class','btn btn-secondary dataButton')
         .attr('id', d=>`${d}Button`)
         .attr('data-toggle','button')
         .on('click', function(d) {
           that.buttonChecker(d);
           that.heatmap.removeCell(d);
         })
-        .text(d=>d.replace('_',' '))
+        .text(d=>d.dataButton.replace('_',' '))
         .on('click', d=>{
-          print(d)
+          console.log(d)
         })
 
 
