@@ -28,12 +28,12 @@ class Setup{
       var cellsUnique = [...new Set(cells.map(d=>d.slice(0,-2)))]
 
       //Creat a list of cell types objects with logic of the buttons
-      var cellsLogic = []
+      this.cellsLogic = []
       cellsUnique.map((d,i)=>{
         let cellsUniqueLogic = {}
         cellsUniqueLogic['cells']= d
         cellsUniqueLogic['logic'] = true
-        cellsLogic[i] = cellsUniqueLogic
+        this.cellsLogic[i] = cellsUniqueLogic
       })
 
       //Button Time!
@@ -63,7 +63,7 @@ class Setup{
         .attr('data-toggle','button')
         .attr('aria-pressed','true')
         .on('click', function(d) {
-          that.buttonChecker(d);
+          that.cellButtonChecker(d);
           that.heatmap.removeCell(d);
         })
         .text(d=>d)
@@ -77,12 +77,12 @@ class Setup{
       var dataButtonVals = ['Center','Scale','Row_Normalize', 'Collumn_Normalize', 'Whole_Table_Normalize']
 
       //Use my logic object technique
-      var dataLogic = []
+      this.dataLogic = []
       dataButtonVals.map((d,i)=>{
         let buttonLogic = {}
-        buttonLogic['dataButton'] = d
+        buttonLogic['dataButtonName'] = d
         buttonLogic['logic'] = false
-        dataLogic[i] = buttonLogic
+        this.dataLogic[i] = buttonLogic
       })
 
       //Make div for the data button
@@ -97,33 +97,24 @@ class Setup{
         .text('Data Transformations')
 
       let dataButton = dataButtonHolder.selectAll('button')
-        .data(dataLogic)
+        .data(this.dataLogic)
 
       let dataButtonEnter = dataButton.enter()
 
       dataButton = dataButtonEnter.merge(dataButton)
         .append('button')
         .attr('class','btn btn-secondary dataButton')
-        .attr('id', d=>`${d}Button`)
+        .attr('id', d=>`${d.dataButtonName}Button`)
         .attr('data-toggle','button')
-        .on('click', function(d) {
-          that.buttonChecker(d);
-          that.heatmap.removeCell(d);
-        })
-        .text(d=>d.dataButton.replace('_',' '))
+        .text(d=>d.dataButtonName.replace('_',' '))
         .on('click', d=>{
-          console.log(d)
+          that.dataButtonChecker(d)
         })
-
-
-      
-
 
     }
 
-
     //This function update the button logic as well as the pca plot for now
-  	buttonChecker(cells){
+  	cellButtonChecker(cells){
   		//Get the button clicked
   		let buttonSel = document.getElementById(`${cells}Button`)
   		//Is the button Clicked?
@@ -133,24 +124,24 @@ class Setup{
   		if(buttonLogic){
   			let buttonPressed = buttonSel.innerText
   			console.log(buttonPressed)
-  			cellsLogic.filter(d=>d.cells === buttonPressed)[0].logic = false
-  			console.log(cellsLogic.filter(d=>d.cells === buttonPressed))
+  			this.cellsLogic.filter(d=>d.cells === buttonPressed)[0].logic = false
+  			console.log(this.cellsLogic.filter(d=>d.cells === buttonPressed))
   		}else{
   			let buttonPressed = buttonSel.innerText
-  			cellsLogic.filter(d=>d.cells === buttonPressed)[0].logic = true
+  			this.cellsLogic.filter(d=>d.cells === buttonPressed)[0].logic = true
   		}
 
-  		console.log(cellsLogic)
+  		console.log(this.cellsLogic)
   		//Now that we have the button logic figured out, grab the cells that are within
   		//these groups
-  		let cellsSelected = cellsLogic.map((d,i)=>{
+  		let cellsSelected = this.cellsLogic.map((d,i)=>{
               if(d.logic){return d.cells}
   		}).filter(d=>d !== undefined)
 
   		console.log(cellsSelected)
 
   		//Now that we have updated the logic we need to do the PCA calculation again
-  		this.drPlot.pcaCompute(cellsLogic);
+  		this.drPlot.pcaCompute(this.cellsLogic);
   		//drplot.createPlot();
   		this.drPlot.drawPlot();
       }
@@ -158,7 +149,41 @@ class Setup{
     /////////////////////////////////////////////////////////////////////////
     //Data Operations
     ////////////////////////////////////////////////////////////////////////
-    
+    dataButtonChecker(dataSel){
+      console.log(dataSel)
+      //Find button clicked
+      let buttonSel = document.getElementById(`${dataSel.dataButtonName}Button`)
+      console.log(buttonSel)
+      //Is it clicked?
+      let buttonLogic = buttonSel.classList.contains('active')
+      // If button is clicked
+      // unclick all other buttons
+      if(buttonLogic){
+        //turn off all other buttons
+        d3.selectAll('.dataButton').classes('active',false)
+        //Turn off the logic for everything
+        this.dataLogic(d=>d.logic = false)
+        //Except for the input, keep on
+        this.dataLogic[dataSel.dataButtonName] = true
+      }
+
+
+
+
+
+
+
+
+
+      
+
+
+      }
+
+
+
+
+    }
 
 
 

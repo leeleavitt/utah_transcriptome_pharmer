@@ -17,6 +17,7 @@ class drPlot{
         this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
     }
 
+    //Attempt to Compute PCA on SVD
     svdCompute(){
 		//I'm following this link for my SVD PCA guidance
 		//https://stats.stackexchange.com/questions/134282/relationship-between-svd-and-pca-how-to-use-svd-to-perform-pca
@@ -79,6 +80,8 @@ class drPlot{
 
     }
 
+    //Successful PCA compute this function also takes in which cells hav
+    //been selected
     pcaCompute(cellTypesSelected){
         //passing in the cellTypesLogic allows us to 
         // Only compute the PCs on these still selected cells
@@ -228,6 +231,7 @@ class drPlot{
 
     }
 
+    //This draws the plot adds the brus
     createPlot(){
         //SVG to add plot to
         d3.select('#drPlot')
@@ -325,9 +329,9 @@ class drPlot{
         this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
             .domain(this.cellsGroups);
 
-
     }
 
+    //This makes the brush
     createBrush(){
         var geneBrush = d3.brush()
             .extent([ [0, 0], [this.width-this.margin.left-this.margin.right,this.height-this.margin.top-this.margin.bottom] ])
@@ -337,6 +341,7 @@ class drPlot{
 
     }
 
+    //Function the brush uses to select cells and genes.
     updateGenes(){
         //Turn Off all Selected Genes
         d3.selectAll('.selected').classed('selected',false)
@@ -502,9 +507,9 @@ class drPlot{
 
     }
 
-		/*********************/
-		/* draw summary plot */
-		/*********************/
+    /*********************/
+    /* draw summary plot */
+    /*********************/
     drawSummaryPlot(currentData) {
             /* create new summary */
             let allGoTerms = [];
