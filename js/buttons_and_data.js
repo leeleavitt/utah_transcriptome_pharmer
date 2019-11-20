@@ -218,7 +218,6 @@ class Setup{
     
     ////////////////////////////////////////////////////////////////////////////
     geneMat = new ML.Matrix(geneMatNew)
-    console.log(geneMat)
     ////////////////////////////////////////////////////////////////////////////
 
     //Now calculate the new cells to work with
@@ -233,9 +232,30 @@ class Setup{
     ////////////////////////////////////////////////////////////////////////////
     
     ////////////////////////////////////////////////////////////////////////////
-    //Center the data. This means to subtract the 
-    
-    
+    //Center the data. This means to subtract the collumn means
+    //Transpose to access the collumns
+
+    console.log(geneMat.data[1])
+
+    geneMat = geneMat.transpose()
+    //Calculate and subtract the mean
+    let geneMatCentered = geneMat.data.map(d=>{
+      let colMean = d.reduce((a,b)=>a+b)/d.length
+      d = d.map(e=> e - colMean)
+      return(d)
+    })
+
+    geneMatCentered = new ML.Matrix(geneMatCentered)
+    ////////////////////////////////////////////////////
+    geneMatCentered = geneMatCentered.transpose()
+    console.log(geneMatCentered.data[1])
+    ////////////////////////////////////////////////////
+    this.drPlot.pcaCompute2(geneMatCentered, cells, this.geneSet)
+    this.drPlot.drawPlot()
+    //drplot.createPlot();
+    this.drPlot.drawPlot();
+
+    console.log('hi')
   }
 
 

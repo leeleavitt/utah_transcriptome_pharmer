@@ -141,7 +141,7 @@ class drPlot{
 
 
         //Perform PCA, this make the directions
-        var genePCA = new ML.PCA(geneMat,{center:true, scale:false, ignoreZeroVariance:true})
+        var genePCA = new ML.PCA(geneMat,{center:false, scale:false, ignoreZeroVariance:false})
         //Calculate the components from the PCA space
         var principalComps = genePCA.predict(geneMat).transpose()
 
@@ -230,6 +230,106 @@ class drPlot{
 
 
     }
+
+    //Successful PCA compute this function also takes in which cells hav
+    //been selected
+    pcaCompute2(mat, cells, genes){
+        console.log('hello')
+        //////////////////////////////////////////////////////////////////
+        var geneMat = mat
+        this.cells = cells
+        this.geneSet = genes
+
+
+        //Perform PCA, this make the directions
+        var genePCA = new ML.PCA(geneMat,{center:false, scale:false, ignoreZeroVariance:false})
+        //Calculate the components from the PCA space
+        var principalComps = genePCA.predict(geneMat).transpose()
+
+        //Snag the new components
+        this.pc1 = principalComps.data[0]
+        this.pc2 = principalComps.data[1]
+
+        //Make an object for the D3 plotting
+        this.pComps = []
+        for(var i=0; i<this.pc1.length;i++){
+            var cell = {}
+            cell['cell'] =  this.cells[i]
+            cell['pc1'] = this.pc1[i]
+            cell['pc2'] = this.pc2[i]
+            this.pComps[i]=cell
+        }
+
+        //Snag the principal directions
+        var pDirs =  genePCA.U.transpose()
+        this.pd1 = pDirs.data[0]
+        this.pd2 = pDirs.data[1]
+
+        //Create a principal directions for d3 plotting
+        this.pDims = []
+        for(var i=0; i<this.pd1.length; i++){
+            var gene = {}
+            gene['gene'] = this.geneSet[i]
+            gene['pd1'] = this.pd1[i]
+            gene['pd2'] = this.pd2[i]
+            this.pDims[i] = gene
+        }
+        //////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////
+        //Principal Components scale
+        ////////////////////////////////////////////////////////////////////
+        //PC1
+        var pc1Max = Math.max(...this.pc1)
+        var pc1Min = Math.min(...this.pc1)
+
+        this.pc1Scale = d3.scaleLinear()
+            .domain([pc1Min, pc1Max])
+            .range([0, (this.width - this.margin.left - this.margin.right)])
+            .nice();
+
+        this.pc1Axis = d3.axisBottom(this.pc1Scale)
+
+        //PC2 SCALE
+        var pc2Max = Math.max(...this.pc2)
+        var pc2Min = Math.min(...this.pc2)
+
+        this.pc2Scale = d3.scaleLinear()
+            .domain([pc2Min, pc2Max])
+            .range([0, (this.height- this.margin.top - this.margin.bottom)])
+            .nice();
+
+        this.pc2Axis = d3.axisLeft(this.pc2Scale)
+
+        ////////////////////////////////////////////////////////////////
+        //Principal Directions scale
+        ////////////////////////////////////////////////////////////////
+        //PD1 Scale
+        var pd1Max = Math.max(...this.pd1)
+        var pd1Min = Math.min(...this.pd1)
+
+        this.pd1Scale = d3.scaleLinear()
+            .domain([pd1Min, pd1Max])
+            .range([0, (this.height - this.margin.top - this.margin.bottom)])
+
+        this.pd1Axis = d3.axisTop(this.pd1Scale)
+
+        //PD2 Scale
+        var pd2Max = Math.max(...this.pd2)
+        var pd2Min = Math.min(...this.pd2)
+
+        this.pd2Scale = d3.scaleLinear()
+            .domain([pd2Min, pd2Max])
+            .range([0, (this.width - this.margin.left - this.margin.right)])
+
+        this.pd2Axis = d3.axisRight(this.pd2Scale)
+
+        //console.log(this.pDims)
+        console.log(this.pComps)
+
+
+    }
+
 
     //This draws the plot adds the brus
     createPlot(){
@@ -472,8 +572,6 @@ class drPlot{
             .text(d=>d.cell.slice(0,-2))
             .on('end', () => d3.select(this).transition().duration(500));
 
-
-
         //Plot the Genes
         //console.log(this.pDims)
 
@@ -490,7 +588,6 @@ class drPlot{
             .duration(1000)
             .style('opacity',0)
             .remove()
-
 
         geneComp = geneCompEnter.merge(geneComp)
             .transition().duration(1000)
