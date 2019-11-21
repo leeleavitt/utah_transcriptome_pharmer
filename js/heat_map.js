@@ -97,9 +97,10 @@ class Heatmap{
 			    var svg = d3.select("#heatmap")
 			      .append("svg")
 			      .attr("width", this.width + this.margin.left + this.margin.right)
-			      .attr("height", this.height + this.margin.top + this.margin.bottom)
-			      .append("g")
+			      .attr("height", this.height + 400 + this.margin.top + this.margin.bottom)
 						.attr("id","heatmapSVG")
+			      .append("g")
+						.attr("id","heatmapSVGgroup")
 			      .attr("transform",
 							            "translate(" + this.margin.left + "," + this.margin.top + ")");
 
@@ -460,7 +461,16 @@ class Heatmap{
 
 	hClustering(){
 		if (this.expanded === true){
-			d3.select("#hCluster").remove().transition().duration(1500);
+			d3.select("#hCluster")
+			.transition()
+			.duration(1500)
+			.attr("opacity",0)
+			.transition()
+			.duration(1)
+			.remove();
+
+			d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform",
+										"translate(" + this.margin.left + "," + this.margin.top + ")");
 			this.expanded = false;
 		}else{
 			if (this.expanded === "yes"){
@@ -475,16 +485,14 @@ class Heatmap{
 			let bob = ML.HClust.agnes(distMat, {isDistanceMatrix:true})
 
 			// append the svg object above the heatmap
-			var svg = d3.select("#dendrogram")
+			var svg = d3.select("#heatmapSVG")
 				.append("g")
-				.append("svg")
 				.attr("id","hCluster")
+				.attr("transform","translate(150,0)")
+				.attr("opacity",0)
 				.transition()
 				.duration(1500)
-				.attr("width", this.width + this.margin.left + this.margin.right)
-				.attr("height", 400 + this.margin.top)
-				.attr("transform",
-											"translate(" + this.margin.left + "," + this.margin.top + ")");
+				.attr("opacity",1);
 
 			function separation(a, b) {
 			  return a.parent == b.parent ? 1 : 1;
@@ -520,6 +528,8 @@ class Heatmap{
 									})
 				.style("fill", 'none')
 				.attr("stroke", '#ccc')
+
+			d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,450)");
 
 			this.newData = [];
 
