@@ -622,7 +622,6 @@ class drPlot{
             //console.log(allGoTerms);
 
             let summaryPlot = new SummaryPlot(allGoTerms);
-    }
 
 		this.dataSet.filter(gene => {
 			if(selectGene === gene['Gene.name']) {

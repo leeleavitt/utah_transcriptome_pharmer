@@ -74,7 +74,7 @@ class Setup{
     // Row normalize
     // Collumn normalize
     // Whole Table Normalize
-    var dataButtonVals = ['Center','Scale','Row_Normalize', 'Collumn_Normalize', 'Whole_Table_Normalize']
+    var dataButtonVals = ['Center','Scale','Ignore_Zero']
 
     //Use my logic object technique
     this.dataLogic = []
@@ -150,42 +150,36 @@ class Setup{
   //Data Operations
   ////////////////////////////////////////////////////////////////////////
   dataButtonChecker(dataSel){
-    console.log(dataSel)
     //Find button clicked
     let buttonSel = document.getElementById(`${dataSel}Button`)
-    console.log(buttonSel)
     //Is it clicked?
     buttonLogic = buttonSel.classList.contains('active')
-    // If button is clicked
-    // unclick all other buttons
+    //If clicked change the logic
     if(!buttonLogic){
-      //turn off all other buttons
-      d3.selectAll('.dataButton').classed('active',false)
-      d3.select(`.${dataSel}Button`).classed('active',true)
-      //Turn off the logic for everything
-      this.dataLogic.map(d=>d.logic = false)
-      //Except for the input, keep on
       this.dataLogic[dataSel.dataButtonName] = true
     }
-
+  
+    //
     if(dataSel == 'Center'){
+      //This updates the cells and cells index to work with
+      this.cellOps()
+
+      //This subsets the matrix based on cell types
+      this.matrixSubsetter()
+
+      //THis will take the newly updated this.geneMat and center the matrix
       this.dataCenter()
+
+      //This will do the pca plot now
+      this.pcaExecutor()
+      
     }
 
   }
 
-  dataCenter(){
-    //passing in the cellTypesLogic allows us to 
-    // Only compute the PCs on these still selected cells
-
-    //Extract the cell values out of the matrix
-    var geneMatrix = this.data.map(d=>Object.values(d.cell_values))
-
-    ////////////////////////////////////////////////////////////////////////////
-    //Find all genes
-    this.geneSet = this.data.map(d=>d['Gene.name'])
-    ////////////////////////////////////////////////////////////////////////////
-    
+  //Function to Subset the cells based on the buttons clicked
+  //Should retrun rownames of the data
+  cellOps(){
     //Find all cells
     var cells = Object.getOwnPropertyNames(this.data[0].cell_values)
 
@@ -204,6 +198,27 @@ class Setup{
       }
     }).filter(d=>d!==undefined)
 
+    //Now calculate the new cells to work with
+    var newCells = []
+    for(var i=0; i<cellsSelectedAll.length; i++){
+        let index = cellsSelectedAll[i]
+        newCells[i] = cells[index]
+    }
+    
+    this.cellsIndex = cellsSelectedAll
+    this.cells = newCells
+    ////////////////////////////////////////////////////////////////////////////
+  }
+
+  //THis subsets the matrix based on what is goin on in cellops
+  //Also outputs the genes
+  matrixSubsetter(){
+    //////////////////////////////////////////////
+    //Matrix Ops
+    //////////////////////////////////////////////////
+    //Extract the cell values out of the matrix
+    var geneMatrix = this.data.map(d=>Object.values(d.cell_values))
+
     //Make the array of arrays a matrix
     var geneMat = new ML.Matrix(geneMatrix)
     //Transpose for cells to now be rows
@@ -211,35 +226,28 @@ class Setup{
 
     //Now Select the rows by cellsSelectedAll above,
     var geneMatNew = []
-    for(var i=0; i< cellsSelectedAll.length; i++){
-        let index = cellsSelectedAll[i]
+    for(var i=0; i< this.cellsIndex.length; i++){
+        let index = this.cellsIndex[i]
         geneMatNew.push(geneMat.data[index])
     }
     
     ////////////////////////////////////////////////////////////////////////////
-    geneMat = new ML.Matrix(geneMatNew)
+    this.geneMat = new ML.Matrix(geneMatNew)
     ////////////////////////////////////////////////////////////////////////////
 
-    //Now calculate the new cells to work with
-    var newCells = []
-    for(var i=0; i<cellsSelectedAll.length; i++){
-        let index = cellsSelectedAll[i]
-        newCells[i] = cells[index]
-    }
-
-    ////////////////////////////////////////////////////////////////////////////  
-    var cells = newCells
     ////////////////////////////////////////////////////////////////////////////
-    
+    //Gene Ops
+    this.geneSet = this.data.map(d=>d['Gene.name'])
+    ////////////////////////////////////////////////////////////////////////////
+  }
+
+  dataCenter(){
     ////////////////////////////////////////////////////////////////////////////
     //Center the data. This means to subtract the collumn means
     //Transpose to access the collumns
-
-    console.log(geneMat.data[1])
-
-    geneMat = geneMat.transpose()
+    var geneMatTmp = this.geneMat.transpose()
     //Calculate and subtract the mean
-    let geneMatCentered = geneMat.data.map(d=>{
+    let geneMatCentered = geneMatTmp.data.map(d=>{
       let colMean = d.reduce((a,b)=>a+b)/d.length
       d = d.map(e=> e - colMean)
       return(d)
@@ -250,13 +258,36 @@ class Setup{
     geneMatCentered = geneMatCentered.transpose()
     console.log(geneMatCentered.data[1])
     ////////////////////////////////////////////////////
-    this.drPlot.pcaCompute2(geneMatCentered, cells, this.geneSet)
-    this.drPlot.drawPlot()
-    //drplot.createPlot();
-    this.drPlot.drawPlot();
-
-    console.log('hi')
+    this.geneMat = geneMatCentered
   }
+
+  dataScale(){
+    ////////////////////////////////////////////////////////////////////////////
+    //Center the data. This means to subtract the collumn means
+    //Transpose to access the collumns
+    var geneMatTmp = this.geneMat.transpose()
+    //Calculate and subtract the mean
+    let geneMatCentered = geneMatTmp.data.map(d=>{
+      let colMean = d.reduce((a,b)=>a+b)/d.length
+      d = d.map(e=> e - colMean)
+      return(d)
+    })
+
+    geneMatCentered = new ML.Matrix(geneMatCentered)
+    ////////////////////////////////////////////////////
+    geneMatCentered = geneMatCentered.transpose()
+    console.log(geneMatCentered.data[1])
+    ////////////////////////////////////////////////////
+    this.geneMat = geneMatCentered
+  }
+
+
+  pcaExecutor(){
+    this.drPlot.pcaCompute2(this.geneMat, this.cells, this.geneSet)
+    this.drPlot.drawPlot()
+  }
+
+
 
 
 }
