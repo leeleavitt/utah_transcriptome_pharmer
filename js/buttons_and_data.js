@@ -150,17 +150,36 @@ class Setup{
   //Data Operations
   ////////////////////////////////////////////////////////////////////////
   dataButtonChecker(dataSel){
-    //Find button clicked
-    let buttonSel = document.getElementById(`${dataSel}Button`)
-    //Is it clicked?
-    buttonLogic = buttonSel.classList.contains('active')
-    //If clicked change the logic
-    if(!buttonLogic){
-      this.dataLogic[dataSel.dataButtonName] = true
-    }
-  
+    //Change the button logic
+    this.dataLogic.map(d=>{
+      if(d.dataButtonName === dataSel){
+        if(d.logic === true){
+          d.logic = false
+        }else{
+          d.logic = true
+        }
+      }
+    })
+
+    var selectedVals = this.dataLogic.filter(d=>d.logic).map(d=>d.dataButtonName)
+    console.log(selectedVals)
+    bob= selectedVals
     //
-    if(dataSel == 'Center'){
+    if(selectedVals.includes('Center') && selectedVals.includes('Scale')){
+      //This updates the cells and cells index to work with
+      this.cellOps()
+
+      //This subsets the matrix based on cell types
+      this.matrixSubsetter()
+
+      //THis will take the newly updated this.geneMat and center the matrix
+      this.dataCenter()
+      this.dataScale()
+
+      //This will do the pca plot now
+      this.pcaExecutor()
+
+    }else if( selectedVals.includes('Center') ){
       //This updates the cells and cells index to work with
       this.cellOps()
 
@@ -173,6 +192,21 @@ class Setup{
       //This will do the pca plot now
       this.pcaExecutor()
       
+    }else if( selectedVals.includes('Scale')){
+      this.cellOps()
+
+      this.matrixSubsetter()
+
+      this.dataScale()
+
+      this.pcaExecutor()
+    }else{
+      this.cellOps()
+
+      this.matrixSubsetter()
+
+      this.pcaExecutor()
+
     }
 
   }
@@ -256,7 +290,6 @@ class Setup{
     geneMatCentered = new ML.Matrix(geneMatCentered)
     ////////////////////////////////////////////////////
     geneMatCentered = geneMatCentered.transpose()
-    console.log(geneMatCentered.data[1])
     ////////////////////////////////////////////////////
     this.geneMat = geneMatCentered
   }
@@ -267,18 +300,17 @@ class Setup{
     //Transpose to access the collumns
     var geneMatTmp = this.geneMat.transpose()
     //Calculate and subtract the mean
-    let geneMatCentered = geneMatTmp.data.map(d=>{
-      let colMean = d.reduce((a,b)=>a+b)/d.length
-      d = d.map(e=> e - colMean)
+    let geneMatScaled = geneMatTmp.data.map((d,i)=>{
+      let colstd = math.std([...d])
+      d = d.map(e=> e/colstd)
       return(d)
     })
 
-    geneMatCentered = new ML.Matrix(geneMatCentered)
+    geneMatScaled = new ML.Matrix(geneMatScaled)
     ////////////////////////////////////////////////////
-    geneMatCentered = geneMatCentered.transpose()
-    console.log(geneMatCentered.data[1])
+    geneMatScaled = geneMatScaled.transpose()
     ////////////////////////////////////////////////////
-    this.geneMat = geneMatCentered
+    this.geneMat = geneMatScaled
   }
 
 

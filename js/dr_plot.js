@@ -347,6 +347,13 @@ class drPlot{
             .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
             .attr('id','wrapperGroup')
 
+        //Add Brush Holder
+        d3.select('#wrapperGroup')
+            .append('g')
+            .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
+            .attr('id','brushContainer');
+            this.createBrush()
+
         // Add a wrapper to hold the Cell Points
         d3.select('#wrapperGroup')
             .append('g')
@@ -358,13 +365,6 @@ class drPlot{
             .append('g')
             .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
             .attr('id', 'geneContainer');
-
-        //Add Brush Holder
-        d3.select('#wrapperGroup')
-            .append('g')
-            .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
-            .attr('id','brushContainer');
-        this.createBrush()
 
 
         //Start constructing the plot
@@ -393,7 +393,6 @@ class drPlot{
             .attr('x', this.margin.left - 60 )
             .attr('y', (this.height - this.margin.top)/2)
             .text('PC2')
-
 
         //PD2
         d3.select('#wrapperGroup')
@@ -515,10 +514,9 @@ class drPlot{
         
         d3.select('#pd1Axis')
             .call(this.pd1Axis)
-
+        
+        ///////////////////////////////////////////////////////////////////
         //Plot the cells
-        //console.log(this.pComps)
-
         var cellComp = d3.select('#cellContainer')
             .selectAll('circle')
             .data(this.pComps)
@@ -544,7 +542,7 @@ class drPlot{
             .attr('fill', d=>this.cellsColorScale(d.cell.slice(0,-2)))
             .on('end', () => d3.select(this).transition().duration(500));
 
-        
+        ///////////////////////////////////////////////////////////////////
         //Cell Labels
         var cellLabs = d3.select('#cellContainer')
             .selectAll('text')
@@ -572,10 +570,9 @@ class drPlot{
             .attr('text-decoration','underline')
             .text(d=>d.cell.slice(0,-2))
             .on('end', () => d3.select(this).transition().duration(500));
-
+        
+        ///////////////////////////////////////////////////////////////////
         //Plot the Genes
-        //console.log(this.pDims)
-
         var geneComp = d3.select('#geneContainer')
             .selectAll('text')
             .data(this.pDims)
@@ -602,6 +599,37 @@ class drPlot{
             .attr('class', d=>`genePlot${d.gene}`)
             .text(d=>d.gene)
             .on('end', () => d3.select(this).transition().duration(500));
+
+        //Gene Directions
+        var geneDirs = d3.select('#geneContainer')
+            .selectAll('line')
+            .data(this.pDims)
+
+        var geneDirsEnter = geneDirs.enter()
+            .append('line')
+        
+        geneDirs.exit()
+            .style('opacity', 1)
+            .transition()
+            .duration(1000)
+            .style('opacity',0)
+            .remove()
+        
+        geneDirs = geneDirsEnter.merge(geneDirs)
+            .transition().duration(1000)
+            .on('start', () => d3.select(this))
+            .ease(d3.easeElastic)
+            .delay( 500 )
+            .attr('x1', this.pd1Scale(0))
+            .attr('y1', this.pd2Scale(0))
+            .attr('x2', d => this.pd1Scale(d.pd1))
+            .attr('y2', d => this.pd2Scale(d.pd2))
+            .attr('stroke-width', .5)
+            .attr('stroke', 'black')
+            .attr('opacity', .5)
+
+
+
 
     }
 
