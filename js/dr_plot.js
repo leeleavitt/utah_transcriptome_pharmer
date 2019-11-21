@@ -8,25 +8,27 @@
 
 
 class drPlot{
-    constructor(dataSet, heatmap){
-        this.heatmapObject = heatmap;
-        this.dataSet = dataSet
-        this.width = 750;
-        this.height = 750;
-        this.margin = {top:60, bottom:60, left:60, right:60}
-        this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
-    }
+	constructor(dataSet, heatmap){
+		this.heatmapObject = heatmap;
+		this.dataSet = dataSet
+		this.width = 750;
+		this.height = 750;
+		this.margin = {top:60, bottom:60, left:60, right:60}
+		this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
 
-    svdCompute(){
+		this.clickListener();
+	}
+
+	svdCompute(){
 		//I'm following this link for my SVD PCA guidance
 		//https://stats.stackexchange.com/questions/134282/relationship-between-svd-and-pca-how-to-use-svd-to-perform-pca
 		//First rate the heatmapDat and extract only values
 		var geneMatrix = this.dataSet.map(d=>Object.values(d.cell_values))
 
-        //Find all genes
-        this.genes = geneMatrix.map(d=>d['Gene.name'])
-        //Find all cells
-        this.cells = Object.getOwnPropertyNames(geneMatrix[0])
+		//Find all genes
+		this.genes = geneMatrix.map(d=>d['Gene.name'])
+		//Find all cells
+		this.cells = Object.getOwnPropertyNames(geneMatrix[0])
 
 		//Start the SVD,
 		//Do transpose this makes the data frame with cells/samples the rows, and collumns genes/obervations
@@ -38,14 +40,14 @@ class drPlot{
 			//For each value in the array subtract the mean
 			d = d.map(e=> e - colMean)
 			return(d)
-        })
+		})
 
-        ////////////////////////////////////////////////////////////
-        //Regularize TODO
-        ////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////
+		//Regularize TODO
+		////////////////////////////////////////////////////////////
 
-		//At this point we need to transform it into a matrix that the SVD can perform on
-		var geneMatrixCentered = new ML.Matrix(geneMatrixCentered)
+			//At this point we need to transform it into a matrix that the SVD can perform on
+			var geneMatrixCentered = new ML.Matrix(geneMatrixCentered)
 		//Now transpose so our samples/cells are the rows, and the genes/features are collumns
 		var geneMatCentTrans = geneMatrixCentered.transpose()
 
@@ -58,48 +60,50 @@ class drPlot{
 		// principal component 1 = (d_1^a * U1i)
 		// principal component 2 = (d_2^a * U2i)
 		this.pc1 = geneSVD.U.transpose().data[0].map(d=> d * Math.pow(geneSVD.s[0], alphaVal))
-        this.pc2 = geneSVD.U.transpose().data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
+		this.pc2 = geneSVD.U.transpose().data[1].map(d=> d * Math.pow(geneSVD.s[1], alphaVal))
 
-        //Make an object to hold this information
-        this.pComps = []
-        for(var i=0; i<this.pc1.length;i++){
-            var cell = {}
-            cell['cell'] =  this.cells[i]
-            cell['pc1'] = this.pc1[i]
-            cell['pc2'] = this.pc2[i]
-            this.pComps[i]=cell
-        }
+		//Make an object to hold this information
+		this.pComps = []
+		for(var i=0; i<this.pc1.length;i++){
+			var cell = {}
+			cell['cell'] =  this.cells[i]
+			cell['pc1'] = this.pc1[i]
+			cell['pc2'] = this.pc2[i]
+			this.pComps[i]=cell
+		}
 
-        console.log(this.pComps)
+		console.log(this.pComps)
 
 		//Compute the directional components. This is how the genes direct the data
 		//Need to determine if i am using the correct region, collumns or row.
 		this.pd1 = geneSVD.V.data[0].map(d=>d*Math.pow(geneSVD.s[0], 1-alphaVal))
-        this.pd2 = geneSVD.V.data[1].map(d=>d*Math.pow(geneSVD.s[1], 1-alphaVal))
+		this.pd2 = geneSVD.V.data[1].map(d=>d*Math.pow(geneSVD.s[1], 1-alphaVal))
 
-    }
+	}
 
+    //Successful PCA compute this function also takes in which cells hav
+    //been selected
     pcaCompute(cellTypesSelected){
         //passing in the cellTypesLogic allows us to 
         // Only compute the PCs on these still selected cells
 
-        //Extract the cell values out of the matrix
+		//Extract the cell values out of the matrix
 		this.geneMatrix = this.dataSet.map(d=>Object.values(d.cell_values))
 
-        //Find all genes
-        this.geneSet = this.dataSet.map(d=>d['Gene.name'])
-        //Find all cells
-        this.cells = Object.getOwnPropertyNames(this.dataSet[0].cell_values)
+		//Find all genes
+		this.geneSet = this.dataSet.map(d=>d['Gene.name'])
+		//Find all cells
+		this.cells = Object.getOwnPropertyNames(this.dataSet[0].cell_values)
 
 		//Now we need find which match up with the cells in the dataframe
 		var cellsGenericNames = this.cells.map(d=>d.slice(0,-2))
 
-        //Unpack the loigc object input to this function
-        var cellsSelectedUnpack = cellTypesSelected.filter(d=>d.logic).map(d=>d.cells)
-        //Set it to filter through
-        var cellsSelected = new Set(cellsSelectedUnpack)
+		//Unpack the loigc object input to this function
+		var cellsSelectedUnpack = cellTypesSelected.filter(d=>d.logic).map(d=>d.cells)
+		//Set it to filter through
+		var cellsSelected = new Set(cellsSelectedUnpack)
 
-        //This return the rows of each selected cell type
+		//This return the rows of each selected cell type
 		var cellsSelectedAll = cellsGenericNames.map((d,i)=>{
 			if(cellsSelected.has(d)){
 				return i
@@ -135,7 +139,7 @@ class drPlot{
     
         //////////////////////////////////////////////////////////////////
         //Perform PCA, this make the directions
-        var genePCA = new ML.PCA(geneMat,{center:true, scale:false, ignoreZeroVariance:true})
+        var genePCA = new ML.PCA(geneMat,{center:false, scale:false, ignoreZeroVariance:false})
         //Calculate the components from the PCA space
         var principalComps = genePCA.predict(geneMat).transpose()
 
@@ -225,6 +229,107 @@ class drPlot{
 
     }
 
+    //Successful PCA compute this function also takes in which cells hav
+    //been selected
+    pcaCompute2(mat, cells, genes){
+        console.log('hello')
+        //////////////////////////////////////////////////////////////////
+        var geneMat = mat
+        this.cells = cells
+        this.geneSet = genes
+
+
+        //Perform PCA, this make the directions
+        var genePCA = new ML.PCA(geneMat,{center:false, scale:false, ignoreZeroVariance:false})
+        //Calculate the components from the PCA space
+        var principalComps = genePCA.predict(geneMat).transpose()
+
+        //Snag the new components
+        this.pc1 = principalComps.data[0]
+        this.pc2 = principalComps.data[1]
+
+        //Make an object for the D3 plotting
+        this.pComps = []
+        for(var i=0; i<this.pc1.length;i++){
+            var cell = {}
+            cell['cell'] =  this.cells[i]
+            cell['pc1'] = this.pc1[i]
+            cell['pc2'] = this.pc2[i]
+            this.pComps[i]=cell
+        }
+
+        //Snag the principal directions
+        var pDirs =  genePCA.U.transpose()
+        this.pd1 = pDirs.data[0]
+        this.pd2 = pDirs.data[1]
+
+        //Create a principal directions for d3 plotting
+        this.pDims = []
+        for(var i=0; i<this.pd1.length; i++){
+            var gene = {}
+            gene['gene'] = this.geneSet[i]
+            gene['pd1'] = this.pd1[i]
+            gene['pd2'] = this.pd2[i]
+            this.pDims[i] = gene
+        }
+        //////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////
+        //Principal Components scale
+        ////////////////////////////////////////////////////////////////////
+        //PC1
+        var pc1Max = Math.max(...this.pc1)
+        var pc1Min = Math.min(...this.pc1)
+
+        this.pc1Scale = d3.scaleLinear()
+            .domain([pc1Min, pc1Max])
+            .range([0, (this.width - this.margin.left - this.margin.right)])
+            .nice();
+
+        this.pc1Axis = d3.axisBottom(this.pc1Scale)
+
+        //PC2 SCALE
+        var pc2Max = Math.max(...this.pc2)
+        var pc2Min = Math.min(...this.pc2)
+
+        this.pc2Scale = d3.scaleLinear()
+            .domain([pc2Min, pc2Max])
+            .range([0, (this.height- this.margin.top - this.margin.bottom)])
+            .nice();
+
+        this.pc2Axis = d3.axisLeft(this.pc2Scale)
+
+        ////////////////////////////////////////////////////////////////
+        //Principal Directions scale
+        ////////////////////////////////////////////////////////////////
+        //PD1 Scale
+        var pd1Max = Math.max(...this.pd1)
+        var pd1Min = Math.min(...this.pd1)
+
+        this.pd1Scale = d3.scaleLinear()
+            .domain([pd1Min, pd1Max])
+            .range([0, (this.height - this.margin.top - this.margin.bottom)])
+
+        this.pd1Axis = d3.axisTop(this.pd1Scale)
+
+        //PD2 Scale
+        var pd2Max = Math.max(...this.pd2)
+        var pd2Min = Math.min(...this.pd2)
+
+        this.pd2Scale = d3.scaleLinear()
+            .domain([pd2Min, pd2Max])
+            .range([0, (this.width - this.margin.left - this.margin.right)])
+
+        this.pd2Axis = d3.axisRight(this.pd2Scale)
+
+        //console.log(this.pDims)
+        console.log(this.pComps)
+
+
+    }
+
+
+    //This draws the plot adds the brus
     createPlot(){
         //SVG to add plot to
         d3.select('#drPlot')
@@ -239,6 +344,13 @@ class drPlot{
             .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
             .attr('id','wrapperGroup')
 
+        //Add Brush Holder
+        d3.select('#wrapperGroup')
+            .append('g')
+            .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
+            .attr('id','brushContainer');
+            this.createBrush()
+
         // Add a wrapper to hold the Cell Points
         d3.select('#wrapperGroup')
             .append('g')
@@ -250,13 +362,6 @@ class drPlot{
             .append('g')
             .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
             .attr('id', 'geneContainer');
-
-        //Add Brush Holder
-        d3.select('#wrapperGroup')
-            .append('g')
-            .attr('transform',`translate(${this.margin.left},${this.margin.top})`)
-            .attr('id','brushContainer');
-        this.createBrush()
 
 
         //Start constructing the plot
@@ -285,7 +390,6 @@ class drPlot{
             .attr('x', this.margin.left - 60 )
             .attr('y', (this.height - this.margin.top)/2)
             .text('PC2')
-
 
         //PD2
         d3.select('#wrapperGroup')
@@ -322,9 +426,9 @@ class drPlot{
         this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
             .domain(this.cellsGroups);
 
-
     }
 
+    //This makes the brush
     createBrush(){
         var geneBrush = d3.brush()
             .extent([ [0, 0], [this.width-this.margin.left-this.margin.right,this.height-this.margin.top-this.margin.bottom] ])
@@ -334,6 +438,7 @@ class drPlot{
 
     }
 
+    //Function the brush uses to select cells and genes.
     updateGenes(){
         //Turn Off all Selected Genes
         d3.selectAll('.selected').classed('selected',false)
@@ -393,22 +498,6 @@ class drPlot{
 		//this.drawSummaryPlot(genesSel);
     }
 
-    drawSummaryPlot(currentData) {
-            /* create new summary */
-            let allGoTerms = [];
-            //let currentData = pD1sgenes.concat(pD2sgenes);
-            this.dataSet.filter(gene => {
-                if(currentData.includes(gene['Gene.name'])) {
-                    allGoTerms = allGoTerms.concat(gene['GO.term.name']);
-                }
-            })
-
-            //console.log("selectData:");
-            //console.log(allGoTerms);
-
-            let summaryPlot = new SummaryPlot(allGoTerms);
-    }
-
     drawPlot(){
 
         d3.select('#pc1Axis')
@@ -422,9 +511,13 @@ class drPlot{
         
         d3.select('#pd1Axis')
             .call(this.pd1Axis)
-
+        
+        ///////////////////////////////////////////////////////////////////
         //Plot the cells
+<<<<<<< HEAD
         //console.log(this.pComps)
+=======
+>>>>>>> c5a84a96f64841c1982cc0bea8074312440584bb
         var cellComp = d3.select('#cellContainer')
             .selectAll('circle')
             .data(this.pComps)
@@ -450,7 +543,7 @@ class drPlot{
             .attr('fill', d=>this.cellsColorScale(d.cell.slice(0,-2)))
             .on('end', () => d3.select(this).transition().duration(500));
 
-        
+        ///////////////////////////////////////////////////////////////////
         //Cell Labels
         var cellLabs = d3.select('#cellContainer')
             .selectAll('text')
@@ -478,12 +571,9 @@ class drPlot{
             .attr('text-decoration','underline')
             .text(d=>d.cell.slice(0,-2))
             .on('end', () => d3.select(this).transition().duration(500));
-
-
-
+        
+        ///////////////////////////////////////////////////////////////////
         //Plot the Genes
-        //console.log(this.pDims)
-
         var geneComp = d3.select('#geneContainer')
             .selectAll('text')
             .data(this.pDims)
@@ -498,7 +588,6 @@ class drPlot{
             .style('opacity',0)
             .remove()
 
-
         geneComp = geneCompEnter.merge(geneComp)
             .transition().duration(1000)
             .on('start', () => d3.select(this))
@@ -512,8 +601,75 @@ class drPlot{
             .text(d=>d.gene)
             .on('end', () => d3.select(this).transition().duration(500));
 
+        //Gene Directions
+        var geneDirs = d3.select('#geneContainer')
+            .selectAll('line')
+            .data(this.pDims)
+
+        var geneDirsEnter = geneDirs.enter()
+            .append('line')
+        
+        geneDirs.exit()
+            .style('opacity', 1)
+            .transition()
+            .duration(1000)
+            .style('opacity',0)
+            .remove()
+        
+        geneDirs = geneDirsEnter.merge(geneDirs)
+            .transition().duration(1000)
+            .on('start', () => d3.select(this))
+            .ease(d3.easeElastic)
+            .delay( 500 )
+            .attr('x1', this.pd1Scale(0))
+            .attr('y1', this.pd2Scale(0))
+            .attr('x2', d => this.pd1Scale(d.pd1))
+            .attr('y2', d => this.pd2Scale(d.pd2))
+            .attr('stroke-width', .5)
+            .attr('stroke', 'black')
+            .attr('opacity', .5)
+
+
 
 
     }
+
+    /*********************/
+    /* draw summary plot */
+    /*********************/
+    drawSummaryPlot(currentData) {
+            /* create new summary */
+            let allGoTerms = [];
+            //let currentData = pD1sgenes.concat(pD2sgenes);
+            this.dataSet.filter(gene => {
+                if(currentData.includes(gene['Gene.name'])) {
+                    allGoTerms = allGoTerms.concat(gene['GO.term.name']);
+                }
+            })
+
+            //console.log("selectData:");
+            //console.log(allGoTerms);
+
+            let summaryPlot = new SummaryPlot(allGoTerms);
+
+		this.dataSet.filter(gene => {
+			if(selectGene === gene['Gene.name']) {
+				//console.log(gene);
+				let geneDescription = new GeneDescription(gene);
+			}
+		})
+	}
+
+	clickListener(){
+		let that = this;
+
+		$(document).click(function(event) {
+			if(event.target.matches('.geneTextPlot')) {
+				//console.log(event.target.id);
+				//console.log(event.target.id.slice(8));
+				that.drawGeneDescription(event.target.id.slice(8));
+			}
+		});
+	}
 
 }

@@ -29,11 +29,16 @@
 
 		<!-- functions -->
 		<!-- <script src="https://cdn.jsdelivr.net/npm/pca-js@1.0.0/pca.min.js"></script> -->
-		<!-- ml.js -->
+		<!-- ml.js and math.js -->
 		<script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.2.2/math.min.js"></script>
+
+		<!-- Script JS -->
 		<script type="application/javascript" src="js/summary_plot.js"></script>
+		<script type="application/javascript" src="js/gene_description.js"></script>
 		<script type="application/javascript" src="js/dr_plot.js"></script>
 		<script type="application/javascript" src="js/heat_map.js"></script>
+		<script type="application/javascript" src="js/buttons_and_data.js"></script>
 		<script type="application/javascript" src="js/script_json.js"></script>
 	</head>
 
@@ -45,28 +50,38 @@
 			</header>
 		</div>
 
-		<!-- Search -->
-		<div id="search"></div>
+		<div id="appFunctions" class="row row text-center justify-content-md-center">
+			<!-- Search -->
+			<div id="search"></div>
 
-		<!-- Buttons -->
-		<div id="buttons">
-		<label class="switch">Hierarchical Clustering
-		<input type="checkbox">
-		<span class="slider round" id="switch"></span>
-		</label>
+			<!-- Buttons -->
+			<div id="buttons">
+			</div>
 		</div>
-		<!-- Dimensional Reduction Plot -->
-		<div id="drPlot"></div>
 
-		<!-- Dendrogram -->
-		<div id="dendrogram"></div>
+		<!-- Part 1 -->
+		<div class="row">
+			<!-- Dimensional Reduction Plot -->
+			<div id="drPlot" class="cal"></div>
 
-		<!-- Heatmap/Table -->
-		<div id="heatmap"></div>
+			<!-- Dendrogram -->
+			<div id="dendrogram"></div>
 
-		<!-- Summary Plot -->
-		<div id="summaryPlot"></div>
+			<div class="col-sm-2">
+			<!-- Summary Plot -->
+			<div id="summaryPlot"></div>
 
+			<!-- gene description -->
+			<div id="geneDescription"></div>
+			</div>
+		</div>
+
+		<!-- Part2 -->
+		<div class="row">
+
+			<!-- Heatmap/Table -->
+			<div id="heatmap"></div>
+		</div>
 
 	</body>
 

@@ -6,12 +6,18 @@ class Heatmap{
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapData = data.slice(0,100);
+			    this.heatmapData = data;
+
+					this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
 
 					console.log(this.heatmapData);
 
 			    this.cells = Object.keys(this.heatmapData[0].cell_values);
 					this.cells.sort();
+
+					this.selectedCells = Object.keys(this.heatmapData[0].cell_values);
+					this.selectedCells.sort();
+					this.init = false;
 
 			    this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
@@ -24,19 +30,51 @@ class Heatmap{
 
 					this.expanded = false;
 				}
-	  createHeatmap() {
-			// let button = this.renderSwitch(d3.select("#buttons"), "Hierarchical Clustering");
 
-			document.getElementById("switch").addEventListener("click", () => {
-				if (this.expanded === false){
-					this.hClustering();
-					this.expanded = true;
-				}else {
-					d3.select("#hCluster").remove().transition().duration(1500);
-					this.expanded = false;
+		stretchData(newdata) {
+			this.heatmapData = newdata;
+			this.stretched_data = [];
+			let rowMinMax = {};
+			for (let i = 0; i < this.cells.length; i++){
+				let rowvals = [];
+				rowvals = this.heatmapData.map(d => parseFloat(d.cell_values[this.cells[i]]));
+
+				rowMinMax[this.cells[i]] = [Math.min(...rowvals),Math.max(...rowvals)];
+			}
+
+			let allvals = [];
+			for (let i = 0; i < this.heatmapData.length; i++){
+				for (let j = 0; j < this.cells.length; j++){
+									allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
+								}
 				}
 
-      });
+			let totalmax = Math.max(...allvals);
+			let totalmin = Math.min(...allvals);
+
+			for (let i = 0; i < this.heatmapData.length; i++){
+							let colvals = []
+							for (let j = 0; j < this.cells.length; j++){
+												colvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
+												allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
+											}
+
+							var colmax = Math.max(...colvals);
+							var colmin = Math.min(...colvals);
+
+
+
+
+							for (let j = 0; j < this.cells.length; j++){
+												this.stretched_data.push({"gene": this.heatmapData[i]["Gene.name"], "cell": this.cells[j],
+																	"colvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
+																	"rowvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
+																	"totalvalue":((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
+																	"actualvalue": parseFloat(this.heatmapData[i].cell_values[this.cells[j]])})
+											}
+						}
+		}
+	  createHeatmap() {
 
 			let dropdownWrap = d3.select('#buttons').append('div').classed('dropdown-wrapper', true);
 
@@ -51,64 +89,28 @@ class Heatmap{
 
 			this.drawDropDown();
 
+			this.stretchData(this.heatmapData);
 
 					this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 			    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
-			    let cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
+			    this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
 			        .domain(this.cellsGroups);
-
-			    this.stretched_data = [];
-					let rowMinMax = {};
-					for (let i = 0; i < this.cells.length; i++){
-						let rowvals = [];
-						rowvals = this.heatmapData.map(d => parseFloat(d.cell_values[this.cells[i]]));
-
-						rowMinMax[this.cells[i]] = [Math.min(...rowvals),Math.max(...rowvals)];
-					}
-
-					let allvals = [];
-					for (let i = 0; i < this.heatmapData.length; i++){
-			      for (let j = 0; j < this.cells.length; j++){
-											allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
-							      }
-						}
-
-					let totalmax = Math.max(...allvals);
-					let totalmin = Math.min(...allvals);
-
-			    for (let i = 0; i < this.heatmapData.length; i++){
-						      let colvals = []
-						      for (let j = 0; j < this.cells.length; j++){
-										        colvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
-														allvals.push(parseFloat(this.heatmapData[i].cell_values[this.cells[j]]));
-										      }
-
-						      var colmax = Math.max(...colvals);
-						      var colmin = Math.min(...colvals);
-
-
-
-
-						      for (let j = 0; j < this.cells.length; j++){
-										        this.stretched_data.push({"gene": this.heatmapData[i]["Gene.name"], "cell": this.cells[j],
-															        "colvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - colmin)/(Math.max(1,(colmax - colmin)))),
-																			"rowvalue": ((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - rowMinMax[this.cells[j]][0])/(Math.max(1,(rowMinMax[this.cells[j]][1]-rowMinMax[this.cells[j]][0])))),
-																			"totalvalue":((parseFloat(this.heatmapData[i].cell_values[this.cells[j]]) - totalmin)/(Math.max(1,(totalmax-totalmin)))),
-																			"actualvalue": parseFloat(this.heatmapData[i].cell_values[this.cells[j]])})
-										      }
-						    }
 
 			    var svg = d3.select("#heatmap")
 			      .append("svg")
 			      .attr("width", this.width + this.margin.left + this.margin.right)
-			      .attr("height", this.height + this.margin.top + this.margin.bottom)
+			      .attr("height", this.height + 400 + this.margin.top + this.margin.bottom)
+						.attr("id","heatmapSVG")
 			      .append("g")
+						.attr("id","heatmapSVGgroup")
 			      .attr("transform",
 							            "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-			  let genes_trunc = this.genes.map(d => d.slice(-5));
+				svg.append('g')
+				.attr("id","lineGroup");
+
 
 			    var x = d3.scaleBand()
 			      .range([ 0, this.width ])
@@ -149,10 +151,32 @@ class Heatmap{
 			  .attr("y", -(y.bandwidth()/2))
 			  .attr("height", y.bandwidth())
 			  .attr("width", 150)
-			  .style("fill", d => cellsColorScale(d.slice(0,-2)))
+			  .style("fill", d => this.cellsColorScale(d.slice(0,-2)))
 			  .attr("opacity",0.2);
 
-			d3.select('#yAxis').selectAll('rect').on('click',d => this.sortCols(d));
+			d3.select('#yAxis')
+				.append('g')
+				.attr("id","cellsHeader")
+				.append('text')
+				.attr("x",-40)
+				.attr("y",-10)
+				.attr("font-size",12)
+				.attr("fill","black")
+				.text('Cell Types');
+
+			let that = this;
+
+			d3.select('#cellsHeader')
+				.selectAll('text').on('click',function(){
+					let inCells = that.cells.filter(d => that.selectedCells.indexOf(d) !== -1);
+					inCells.sort();
+					let outCells = that.cells.filter(d => that.selectedCells.indexOf(d) === -1);
+					outCells.sort();
+					that.cells = inCells.concat(outCells);
+					that.updateHeatmap();
+				})
+
+			d3.select('#yAxis').selectAll('rect').on('click',d => this.sortCols(d))
 
 			// Build color scale
 			this.myColor = d3.scaleLinear()
@@ -211,7 +235,6 @@ class Heatmap{
 									                              .style("top", (d3.event.pageY - 35) + "px"))
 					      .on("mouseout",d => div.style("opacity",0));
 							}
-
 			  }
 
 				drawDropDown() {
@@ -241,7 +264,7 @@ class Heatmap{
 
 						dropC.on('change', function(d, i) {
 							that.newNorm = this.options[this.selectedIndex].value;
-							that.updateHeatmap(that.newNorm);
+							that.updateHeatmap();
 						});
 					}
 
@@ -251,8 +274,16 @@ class Heatmap{
     //   return button;
     // }
 
-	  updateHeatmap(normOver) {
+	  updateHeatmap() {
+
 					this.genes = this.heatmapData.map(d => d["Gene.name"]);
+
+						let inCells = this.cells.filter(d => this.selectedCells.indexOf(d) !== -1);
+
+						let outCells = this.cells.filter(d => this.selectedCells.indexOf(d) === -1);
+						outCells.sort();
+						this.cells = inCells.concat(outCells);
+
 
 					var x = d3.scaleBand()
 						.range([ 0, this.width ])
@@ -273,7 +304,7 @@ class Heatmap{
 					.attr("x",9)
 					.attr("dy",".35em")
 					.attr("transform","translate(0,0) rotate(-90)")
-					.attr("text-anchor","start");;
+					.attr("text-anchor","start");
 
 					d3.select('#yAxis')
 					.transition()
@@ -282,22 +313,83 @@ class Heatmap{
 
 					let that = this;
 
-					d3.select('#rectGroup')
-					.selectAll('rect')
-					.join(this.stretched_data)
-					.transition()
-					.duration(1500)
-					.attr("x", d => x(d.gene))
-					.attr("y", d => y(d.cell))
-					.attr("width", x.bandwidth() )
-					.attr("height", y.bandwidth() )
-					.style("fill", function(d) {
-						if (that.brushed.indexOf(d.gene) === -1) {
-							return that.grayColor(d[that.newNorm])
-						} else {
-							return that.myColor(d[that.newNorm])
-						}
-					})
+					d3.select('#yAxis')
+						.selectAll('g')
+						.selectAll('rect')
+						.style("fill", function(d) {
+							if (that.selectedCells.indexOf(d) === -1){
+								return "gray";
+							}else{
+								return that.cellsColorScale(d.slice(0,-2));
+							}
+						});
+
+
+					if (that.brushed === null){
+						d3.select('#rectGroup')
+						.selectAll('rect')
+						.join(this.stretched_data)
+						.transition()
+						.duration(1500)
+						.attr("x", d => x(d.gene))
+						.attr("y", d => y(d.cell))
+						.attr("width", x.bandwidth() )
+						.attr("height", y.bandwidth() )
+						.style("fill", function(d) {
+							if (that.selectedCells.indexOf(d.cell) === -1) {
+								return that.grayColor(d[that.newNorm]);
+							}else {
+								return that.myColor(d[that.newNorm]);
+							}
+						})
+						.attr("opacity", function(d) {
+							if (that.selectedCells.indexOf(d.cell) === -1) {
+								return 0.3
+							}else{
+								return 1
+							}
+						})
+					}else {
+						d3.select('#rectGroup')
+						.selectAll('rect')
+						.join(this.stretched_data)
+						.transition()
+						.duration(1500)
+						.attr("x", d => x(d.gene))
+						.attr("y", d => y(d.cell))
+						.attr("width", x.bandwidth() )
+						.attr("height", y.bandwidth() )
+						.style("fill", function(d) {
+							if (that.brushed.indexOf(d.gene) === -1) {
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return that.grayColor(d[that.newNorm]);
+								}else {
+									return that.grayColor(d[that.newNorm])
+								}
+							} else {
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return that.grayColor(d[that.newNorm]);
+								}else {
+									return that.myColor(d[that.newNorm])
+								}
+							}
+						})
+						.attr("opacity", function(d) {
+							if (that.brushed.indexOf(d.gene) === -1) {
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return 0.3;
+								}else {
+									return 0.3;
+								}
+							} else {
+								if (that.selectedCells.indexOf(d.cell) === -1) {
+									return 0.3
+								}else {
+									return 1
+								}
+							}
+						})
+					}
 
 					d3.select('#rectGroup')
 					.selectAll('text')
@@ -308,6 +400,26 @@ class Heatmap{
 					.attr("y", d => y(d.cell) + (y.bandwidth()/2))
 					.text(d => d.actualvalue)
 
+				if (outCells.length !== 0){
+					let lineData = [y(outCells[0])];
+
+					let selection = d3.select('#lineGroup')
+					.selectAll('line')
+					.data(lineData)
+					.join('line')
+					.transition()
+					.duration(1500)
+					.style("stroke","black")
+					.style("stroke-width","3px")
+					.attr("x1",0)
+					.attr("x2",this.width)
+					.attr("y1",d => d)
+					.attr("y2",d => d);
+
+				}else{
+					d3.select('#lineGroup').selectAll('line').remove();
+				}
+
 			  }
 
 	sortCols(col){
@@ -315,16 +427,20 @@ class Heatmap{
 					this.oldcol = null;
 					this.heatmapData = this.heatmapData.sort((a, b) =>
 									parseFloat(a.cell_values[col]) < parseFloat(b.cell_values[col]) ? -1 : 1);
+					this.clusterData = this.clusterData.sort((a, b) =>
+									parseFloat(a.cell_values[col]) < parseFloat(b.cell_values[col]) ? -1 : 1);
 					}else {
 						this.oldcol = col;
 						this.heatmapData = this.heatmapData.sort((a, b) =>
+									parseFloat(a.cell_values[col]) > parseFloat(b.cell_values[col]) ? -1 : 1);
+						this.clusterData = this.clusterData.sort((a, b) =>
 									parseFloat(a.cell_values[col]) > parseFloat(b.cell_values[col]) ? -1 : 1);
 					}
 
 
 			this.sorted = !this.sorted;
 
-			this.updateHeatmap(this.newNorm);
+			this.updateHeatmap();
 	}
 
 	sortRows(row) {
@@ -351,7 +467,7 @@ class Heatmap{
 						this.cells.push(sortable[i][0]);
 					}
 
-			this.updateHeatmap(this.newNorm);
+			this.updateHeatmap();
 	}
 
 	tooltipRender(data) {
@@ -362,93 +478,131 @@ class Heatmap{
 
 
 	brushHeatmap(brushed) {
+		console.log(brushed);
 		this.brushed = brushed;
-		let that = this;
-		if (brushed === null){
-			d3.select("#rectGroup").selectAll('rect')
-			.style("fill", d => that.myColor(d[that.newNorm]))
-			.attr("opacity",1);
-		}else {
-			d3.select("#rectGroup").selectAll('rect')
-			.style("fill", function(d) {
-				if (brushed.indexOf(d.gene) === -1) {
-					return that.grayColor(d[that.newNorm])
-				} else {
-					return that.myColor(d[that.newNorm])
-				}
-			})
-			.attr("opacity", function(d) {
-				if (brushed.indexOf(d.gene) === -1) {
-					return 0.3
-				} else {
-					return 1
-				}
-			})
-		}
 
-
+		this.updateHeatmap();
 	}
+
 	hClustering(){
-		this.geneMatrix = this.heatmapData.map(d=>Object.values(d.cell_values))
+		if (this.expanded === true){
+			d3.select('#yAxis').selectAll('rect').on('click',d => this.sortCols(d))
 
-		var geneMat = new ML.Matrix(this.geneMatrix)
 
-		let distMat = ML.distanceMatrix(geneMat.data, ML.Distance.euclidean);
-
-		bob = ML.HClust.agnes(distMat, {isDistanceMatrix:true})
-
-		// append the svg object above the heatmap
-		var svg = d3.select("#dendrogram")
-			.append("g")
-			.append("svg")
-			.attr("id","hCluster")
+			d3.select("#hCluster")
 			.transition()
 			.duration(1500)
-			.attr("width", this.width + this.margin.left + this.margin.right)
-			.attr("height", 400 + this.margin.top)
-			.attr("transform",
-										"translate(" + this.margin.left + "," + this.margin.top + ")");
+			.attr("opacity",0)
+			.transition()
+			.duration(1)
+			.remove();
 
-		function separation(a, b) {
-		  return a.parent == b.parent ? 1 : 1;
+			d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform",
+										"translate(" + this.margin.left + "," + this.margin.top + ")");
+			this.expanded = false;
+		}else{
+			if (this.expanded === "yes"){
+				d3.select("#hCluster").remove().transition().duration(1500);
+			}
+			this.geneMatrix = this.clusterData.map(d=>Object.values(d.cell_values))
+
+			var geneMat = new ML.Matrix(this.geneMatrix)
+
+			let distMat = ML.distanceMatrix(geneMat.data, ML.Distance.euclidean);
+
+			let bob = ML.HClust.agnes(distMat, {isDistanceMatrix:true})
+
+			// append the svg object above the heatmap
+			var svg = d3.select("#heatmapSVG")
+				.append("g")
+				.attr("id","hCluster")
+				.attr("transform","translate(150,0)")
+				.attr("opacity",0)
+				.transition()
+				.duration(1500)
+				.attr("opacity",1);
+
+			function separation(a, b) {
+			  return a.parent == b.parent ? 1 : 1;
+			}
+
+			var cluster = d3.cluster()
+				.size([this.width, 400])
+				.separation(separation);
+
+
+			var root = d3.hierarchy(bob, function(d) {
+					return d.children;
+			});
+			cluster(root);
+
+			let nodes = root.descendants().slice(1);
+
+			let endNodes = nodes.filter(d => d.children === undefined);
+
+			endNodes = endNodes.sort((a, b) =>
+							parseFloat(a.x) < parseFloat(b.x) ? -1 : 1);
+
+			let indices = endNodes.map(d => d.data.index);
+
+			d3.select("#hCluster").selectAll('path')
+				.data( root.descendants().slice(1) )
+				.enter()
+				.append('path')
+				.attr("d", function(d) {
+						return "M" + d.x + "," + d.y
+										+ "L" + d.x + "," + d.parent.y
+										+ " " + d.parent.x + "," + d.parent.y;
+									})
+				.style("fill", 'none')
+				.attr("stroke", '#ccc')
+			if (this.heatmapData.length >= 150){
+				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,410)");
+			}else {
+				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,450)");
+			}
+
+			this.newData = [];
+
+			indices.forEach(d => this.newData.push(this.heatmapData[d]))
+
+			this.heatmapData = this.newData;
+
+			this.genes = this.heatmapData.map(d => d["Gene.name"]);
+
+			this.expanded = true;
+
+			d3.select('#yAxis').selectAll('rect').on('click',null);
+
+			this.updateHeatmap();
+		}
+	}
+
+	removeCell(cellType){
+		this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
+
+		if (this.cellsGroups.indexOf(cellType) !== -1){
+			this.cellsGroups = this.cellsGroups.filter(e => e !== cellType);
+		}else{
+			this.cellsGroups.push(cellType);
 		}
 
-		var cluster = d3.cluster()
-			.size([this.width, 400])
-			.separation(separation);
+		this.notSelectedCells = this.cells.filter(e => this.cellsGroups.indexOf(e.slice(0,-2)) === -1);
 
+		this.selectedCells = this.cells.filter(e => this.cellsGroups.indexOf(e.slice(0,-2)) !== -1);
 
-		var root = d3.hierarchy(bob, function(d) {
-				return d.children;
-		});
-		cluster(root);
+		this.init = true;
 
-		let nodes = root.descendants().slice(1);
+		for (var i = 0; i < this.clusterData.length; i++){
+			for (var j = 0; j < this.notSelectedCells.length; j++){
+				delete this.clusterData[i].cell_values[this.notSelectedCells[j]]
+			}
+		}
 
-		let endNodes = nodes.filter(d => d.children === undefined);
-
-		endNodes = endNodes.sort((a, b) =>
-						parseFloat(a.x) < parseFloat(b.x) ? -1 : 1);
-
-		let indices = endNodes.map(d => d.data.index);
-
-		d3.select("#hCluster").selectAll('path')
-			.data( root.descendants().slice(1) )
-			.enter()
-			.append('path')
-			.attr("d", function(d) {
-					return "M" + d.x + "," + d.y
-									+ "L" + d.x + "," + d.parent.y
-									+ " " + d.parent.x + "," + d.parent.y;
-								})
-			.style("fill", 'none')
-			.attr("stroke", '#ccc')
-
-		this.newData = [];
-
-		indices.forEach(d => this.newData.push(this.heatmapData[d]))
-
-		this.heatmapData = this.newData;
+		if(document.getElementById("hClustButton").classList.contains("active")){
+			this.expanded = "yes";
+			this.hClustering();
+		};
 
 		this.updateHeatmap();
 	}
