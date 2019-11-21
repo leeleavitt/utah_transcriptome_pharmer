@@ -20,10 +20,15 @@ div.tooltip {
     opacity: 0.8;
 }
 
-.selected {
+text.selected{
   fill: red;
   font-weight: bold; 
   opacity:1;
+}
+
+line.selected{
+  stroke:red;
+  stroke-width:2;
 }
 
 

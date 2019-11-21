@@ -488,7 +488,7 @@ class drPlot{
         for(var i=0; i<genesSel.length;i++){
             console.log(genesSel[i])
             console.log(d3.select(`genePlot${genesSel[i]}`))
-            d3.select(`.genePlot${genesSel[i]}`).classed('selected',true)
+            d3.selectAll(`.genePlot${genesSel[i]}`).classed('selected',true)
         }
 
         //This activates the HeatMap and the Summary Plot
@@ -544,6 +544,65 @@ class drPlot{
             .on('end', () => d3.select(this).transition().duration(500));
 
         ///////////////////////////////////////////////////////////////////
+        //Gene Directions
+        var geneDirs = d3.select('#geneContainer')
+            .selectAll('line')
+            .data(this.pDims)
+
+        var geneDirsEnter = geneDirs.enter()
+            .append('line')
+        
+        geneDirs.exit()
+            .style('opacity', 1)
+            .transition()
+            .duration(1000)
+            .style('opacity',0)
+            .remove()
+        
+        geneDirs = geneDirsEnter.merge(geneDirs)
+            .transition().duration(1000)
+            .on('start', () => d3.select(this))
+            .ease(d3.easeElastic)
+            .delay( 500 )
+            .attr('x1', this.pd1Scale(0))
+            .attr('y1', this.pd2Scale(0))
+            .attr('x2', d => this.pd1Scale(d.pd1))
+            .attr('y2', d => this.pd2Scale(d.pd2))
+            .attr('class', d=>`genePlot${d.gene}`)
+            .attr('stroke-width', .2)
+            .attr('stroke', 'black')
+            .attr('opacity', .5)
+
+    
+        //Genes
+        var geneComp = d3.select('#geneContainer')
+            .selectAll('text')
+            .data(this.pDims)
+
+        var geneCompEnter = geneComp.enter()
+            .append('text')
+
+        geneComp.exit()
+            .style('opacity', 1)
+            .transition()
+            .duration(1000)
+            .style('opacity',0)
+            .remove()
+
+        geneComp = geneCompEnter.merge(geneComp)
+            .transition().duration(1000)
+            .on('start', () => d3.select(this))
+            .ease(d3.easeElastic)
+            .delay( 500 )
+            .attr('font-size', 10)
+            .attr('opacity', .5)
+            .attr('x', d=> this.pd1Scale(d.pd1))
+            .attr('y', d=> this.pd2Scale(d.pd2))
+            .attr('class', d=>`genePlot${d.gene}`)
+            .text(d=>d.gene)
+            .on('end', () => d3.select(this).transition().duration(500));
+
+        ///////////////////////////////////////////////////////////////////
         //Cell Labels
         var cellLabs = d3.select('#cellContainer')
             .selectAll('text')
@@ -572,65 +631,6 @@ class drPlot{
             .text(d=>d.cell.slice(0,-2))
             .on('end', () => d3.select(this).transition().duration(500));
         
-        ///////////////////////////////////////////////////////////////////
-        //Plot the Genes
-        var geneComp = d3.select('#geneContainer')
-            .selectAll('text')
-            .data(this.pDims)
-
-        var geneCompEnter = geneComp.enter()
-            .append('text')
-
-        geneComp.exit()
-            .style('opacity', 1)
-            .transition()
-            .duration(1000)
-            .style('opacity',0)
-            .remove()
-
-        geneComp = geneCompEnter.merge(geneComp)
-            .transition().duration(1000)
-            .on('start', () => d3.select(this))
-            .ease(d3.easeElastic)
-            .delay( 500 )
-            .attr('font-size', 10)
-            .attr('opacity', .5)
-            .attr('x', d=> this.pd1Scale(d.pd1))
-            .attr('y', d=> this.pd2Scale(d.pd2))
-            .attr('class', d=>`genePlot${d.gene}`)
-            .text(d=>d.gene)
-            .on('end', () => d3.select(this).transition().duration(500));
-
-        //Gene Directions
-        var geneDirs = d3.select('#geneContainer')
-            .selectAll('line')
-            .data(this.pDims)
-
-        var geneDirsEnter = geneDirs.enter()
-            .append('line')
-        
-        geneDirs.exit()
-            .style('opacity', 1)
-            .transition()
-            .duration(1000)
-            .style('opacity',0)
-            .remove()
-        
-        geneDirs = geneDirsEnter.merge(geneDirs)
-            .transition().duration(1000)
-            .on('start', () => d3.select(this))
-            .ease(d3.easeElastic)
-            .delay( 500 )
-            .attr('x1', this.pd1Scale(0))
-            .attr('y1', this.pd2Scale(0))
-            .attr('x2', d => this.pd1Scale(d.pd1))
-            .attr('y2', d => this.pd2Scale(d.pd2))
-            .attr('stroke-width', .5)
-            .attr('stroke', 'black')
-            .attr('opacity', .5)
-
-
-
 
     }
 
