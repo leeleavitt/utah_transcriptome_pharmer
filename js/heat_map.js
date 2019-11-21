@@ -6,7 +6,7 @@ class Heatmap{
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapData = data;
+			    this.heatmapData = data.slice(0,50);
 
 					this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
 
