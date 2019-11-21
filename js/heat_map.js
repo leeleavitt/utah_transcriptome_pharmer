@@ -91,44 +91,44 @@ class Heatmap{
 
 			this.stretchData(this.heatmapData);
 
-					this.genes = this.heatmapData.map(d => d["Gene.name"]);
+			this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
-			    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
+	    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
-			    this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
-			        .domain(this.cellsGroups);
+	    this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
+	        .domain(this.cellsGroups);
 
-			    var svg = d3.select("#heatmap")
-			      .append("svg")
-			      .attr("width", this.width + this.margin.left + this.margin.right)
-			      .attr("height", this.height + 400 + this.margin.top + this.margin.bottom)
-						.attr("id","heatmapSVG")
-			      .append("g")
-						.attr("id","heatmapSVGgroup")
-			      .attr("transform",
-							            "translate(" + this.margin.left + "," + this.margin.top + ")");
+	    var svg = d3.select("#heatmap")
+	      .append("svg")
+	      .attr("width", this.width + this.margin.left + this.margin.right)
+	      .attr("height", this.height + 400 + this.margin.top + this.margin.bottom)
+				.attr("id","heatmapSVG")
+	      .append("g")
+				.attr("id","heatmapSVGgroup")
+	      .attr("transform",
+					            "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-				svg.append('g')
-				.attr("id","lineGroup");
+			svg.append('g')
+			.attr("id","lineGroup");
 
 
-			    var x = d3.scaleBand()
-			      .range([ 0, this.width ])
-			      .domain(this.genes)
-			      .padding(0.01);
+		    var x = d3.scaleBand()
+		      .range([ 0, this.width ])
+		      .domain(this.genes)
+		      .padding(0.01);
 
-				if (this.heatmapData.length < 150) {
-					svg.append("g")
-						.attr("id","xAxis")
-				    .call(d3.axisTop(x))
-				    .selectAll("text")
-						.attr("y",0)
-						.attr("x",9)
-						.attr("dy",".35em")
-				    .attr("transform","translate(0,0) rotate(-90)")
-						.attr("text-anchor","start");
+			if (this.heatmapData.length < 150) {
+				svg.append("g")
+					.attr("id","xAxis")
+			    .call(d3.axisTop(x))
+			    .selectAll("text")
+					.attr("y",0)
+					.attr("x",9)
+					.attr("dy",".35em")
+			    .attr("transform","translate(0,0) rotate(-90)")
+					.attr("text-anchor","start");
 
-					d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
+				d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
 
 				}
 
@@ -276,151 +276,151 @@ class Heatmap{
 
 	  updateHeatmap() {
 
-					this.genes = this.heatmapData.map(d => d["Gene.name"]);
+			this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
-						let inCells = this.cells.filter(d => this.selectedCells.indexOf(d) !== -1);
+			let inCells = this.cells.filter(d => this.selectedCells.indexOf(d) !== -1);
 
-						let outCells = this.cells.filter(d => this.selectedCells.indexOf(d) === -1);
-						outCells.sort();
-						this.cells = inCells.concat(outCells);
-
-
-					var x = d3.scaleBand()
-						.range([ 0, this.width ])
-						.domain(this.genes)
-						.padding(0.01);
-
-					var y = d3.scaleBand()
-					  .range([0, this.height])
-					  .domain(this.cells)
-					  .padding(0.01);
-
-					d3.select('#xAxis')
-					.transition()
-					.duration(1500)
-					.call(d3.axisTop(x))
-					.selectAll("text")
-					.attr("y",0)
-					.attr("x",9)
-					.attr("dy",".35em")
-					.attr("transform","translate(0,0) rotate(-90)")
-					.attr("text-anchor","start");
-
-					d3.select('#yAxis')
-					.transition()
-					.duration(1500)
-					.call(d3.axisLeft(y));
-
-					let that = this;
-
-					d3.select('#yAxis')
-						.selectAll('g')
-						.selectAll('rect')
-						.style("fill", function(d) {
-							if (that.selectedCells.indexOf(d) === -1){
-								return "gray";
-							}else{
-								return that.cellsColorScale(d.slice(0,-2));
-							}
-						});
+			let outCells = this.cells.filter(d => this.selectedCells.indexOf(d) === -1);
+			outCells.sort();
+			this.cells = inCells.concat(outCells);
 
 
-					if (that.brushed === null){
-						d3.select('#rectGroup')
-						.selectAll('rect')
-						.join(this.stretched_data)
-						.transition()
-						.duration(1500)
-						.attr("x", d => x(d.gene))
-						.attr("y", d => y(d.cell))
-						.attr("width", x.bandwidth() )
-						.attr("height", y.bandwidth() )
-						.style("fill", function(d) {
-							if (that.selectedCells.indexOf(d.cell) === -1) {
-								return that.grayColor(d[that.newNorm]);
-							}else {
-								return that.myColor(d[that.newNorm]);
-							}
-						})
-						.attr("opacity", function(d) {
-							if (that.selectedCells.indexOf(d.cell) === -1) {
-								return 0.3
-							}else{
-								return 1
-							}
-						})
-					}else {
-						d3.select('#rectGroup')
-						.selectAll('rect')
-						.join(this.stretched_data)
-						.transition()
-						.duration(1500)
-						.attr("x", d => x(d.gene))
-						.attr("y", d => y(d.cell))
-						.attr("width", x.bandwidth() )
-						.attr("height", y.bandwidth() )
-						.style("fill", function(d) {
-							if (that.brushed.indexOf(d.gene) === -1) {
-								if (that.selectedCells.indexOf(d.cell) === -1) {
-									return that.grayColor(d[that.newNorm]);
-								}else {
-									return that.grayColor(d[that.newNorm])
-								}
-							} else {
-								if (that.selectedCells.indexOf(d.cell) === -1) {
-									return that.grayColor(d[that.newNorm]);
-								}else {
-									return that.myColor(d[that.newNorm])
-								}
-							}
-						})
-						.attr("opacity", function(d) {
-							if (that.brushed.indexOf(d.gene) === -1) {
-								if (that.selectedCells.indexOf(d.cell) === -1) {
-									return 0.3;
-								}else {
-									return 0.3;
-								}
-							} else {
-								if (that.selectedCells.indexOf(d.cell) === -1) {
-									return 0.3
-								}else {
-									return 1
-								}
-							}
-						})
+			var x = d3.scaleBand()
+				.range([ 0, this.width ])
+				.domain(this.genes)
+				.padding(0.01);
+
+			var y = d3.scaleBand()
+			  .range([0, this.height])
+			  .domain(this.cells)
+			  .padding(0.01);
+
+			d3.select('#xAxis')
+			.transition()
+			.duration(1500)
+			.call(d3.axisTop(x))
+			.selectAll("text")
+			.attr("y",0)
+			.attr("x",9)
+			.attr("dy",".35em")
+			.attr("transform","translate(0,0) rotate(-90)")
+			.attr("text-anchor","start");
+
+			d3.select('#yAxis')
+			.transition()
+			.duration(1500)
+			.call(d3.axisLeft(y));
+
+			let that = this;
+
+			d3.select('#yAxis')
+				.selectAll('g')
+				.selectAll('rect')
+				.style("fill", function(d) {
+					if (that.selectedCells.indexOf(d) === -1){
+						return "gray";
+					}else{
+						return that.cellsColorScale(d.slice(0,-2));
 					}
+				});
 
-					d3.select('#rectGroup')
-					.selectAll('text')
-					.join(this.stretched_data)
-					.transition()
-					.duration(1500)
-					.attr("x", d => x(d.gene) + (x.bandwidth()/2))
-					.attr("y", d => y(d.cell) + (y.bandwidth()/2))
-					.text(d => d.actualvalue)
 
-				if (outCells.length !== 0){
-					let lineData = [y(outCells[0])];
+			if (that.brushed === null){
+				d3.select('#rectGroup')
+				.selectAll('rect')
+				.join(this.stretched_data)
+				.transition()
+				.duration(1500)
+				.attr("x", d => x(d.gene))
+				.attr("y", d => y(d.cell))
+				.attr("width", x.bandwidth() )
+				.attr("height", y.bandwidth() )
+				.style("fill", function(d) {
+					if (that.selectedCells.indexOf(d.cell) === -1) {
+						return that.grayColor(d[that.newNorm]);
+					}else {
+						return that.myColor(d[that.newNorm]);
+					}
+				})
+				.attr("opacity", function(d) {
+					if (that.selectedCells.indexOf(d.cell) === -1) {
+						return 0.3
+					}else{
+						return 1
+					}
+				})
+			}else {
+				d3.select('#rectGroup')
+				.selectAll('rect')
+				.join(this.stretched_data)
+				.transition()
+				.duration(1500)
+				.attr("x", d => x(d.gene))
+				.attr("y", d => y(d.cell))
+				.attr("width", x.bandwidth() )
+				.attr("height", y.bandwidth() )
+				.style("fill", function(d) {
+					if (that.brushed.indexOf(d.gene) === -1) {
+						if (that.selectedCells.indexOf(d.cell) === -1) {
+							return that.grayColor(d[that.newNorm]);
+						}else {
+							return that.grayColor(d[that.newNorm])
+						}
+					} else {
+						if (that.selectedCells.indexOf(d.cell) === -1) {
+							return that.grayColor(d[that.newNorm]);
+						}else {
+							return that.myColor(d[that.newNorm])
+						}
+					}
+				})
+				.attr("opacity", function(d) {
+					if (that.brushed.indexOf(d.gene) === -1) {
+						if (that.selectedCells.indexOf(d.cell) === -1) {
+							return 0.3;
+						}else {
+							return 0.3;
+						}
+					} else {
+						if (that.selectedCells.indexOf(d.cell) === -1) {
+							return 0.3
+						}else {
+							return 1
+						}
+					}
+				})
+			}
 
-					let selection = d3.select('#lineGroup')
-					.selectAll('line')
-					.data(lineData)
-					.join('line')
-					.transition()
-					.duration(1500)
-					.style("stroke","black")
-					.style("stroke-width","3px")
-					.attr("x1",0)
-					.attr("x2",this.width)
-					.attr("y1",d => d)
-					.attr("y2",d => d);
+			d3.select('#rectGroup')
+			.selectAll('text')
+			.join(this.stretched_data)
+			.transition()
+			.duration(1500)
+			.attr("x", d => x(d.gene) + (x.bandwidth()/2))
+			.attr("y", d => y(d.cell) + (y.bandwidth()/2))
+			.text(d => d.actualvalue)
 
-				}else{
-					d3.select('#lineGroup').selectAll('line').remove();
-				}
+		if (outCells.length !== 0){
+			let lineData = [y(outCells[0])];
 
-			  }
+			let selection = d3.select('#lineGroup')
+			.selectAll('line')
+			.data(lineData)
+			.join('line')
+			.transition()
+			.duration(1500)
+			.style("stroke","black")
+			.style("stroke-width","3px")
+			.attr("x1",0)
+			.attr("x2",this.width)
+			.attr("y1",d => d)
+			.attr("y2",d => d);
+
+		}else{
+			d3.select('#lineGroup').selectAll('line').remove();
+		}
+
+	}
 
 	sortCols(col){
 			if (this.oldcol === col){
@@ -602,6 +602,7 @@ class Heatmap{
 		if(document.getElementById("hClustButton").classList.contains("active")){
 			this.expanded = "yes";
 			this.hClustering();
+			return;
 		};
 
 		this.updateHeatmap();
