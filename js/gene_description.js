@@ -1,22 +1,23 @@
 class GeneDescription {
 
-	constructor(selectGene) {
-		this.selectGene = selectGene;
+	constructor() {
+		//console.log("selectGene");
+		//console.log(selectGene);
 
-		console.log("selectGene");
-		console.log(selectGene);
-
-		this.drawGeneDescription();
+		//this.drawGeneDescription();
 	}
 
-	drawGeneDescription() {
+	drawGeneDescription(selectGene) {
+		this.selectGene = selectGene;
+		this.cleanGeneDescription();
 		let that = this;
-		$("#geneDescription").empty();
 		$("#geneDescription")
 			.append("<p>" + that.selectGene.description + "</p>");
 
 	}
 
-
+	cleanGeneDescription() {
+		$("#geneDescription").empty();
+	}
 
 }

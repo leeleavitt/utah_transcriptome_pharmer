@@ -16,6 +16,8 @@ class drPlot{
 		this.margin = {top:60, bottom:60, left:60, right:60}
 		this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
 
+		/* add gene description class before click listener */
+		this.geneDescription = new GeneDescription();
 		this.clickListener();
 	}
 
@@ -451,6 +453,10 @@ class drPlot{
         //Find the Brushes Dimension
         var brushDims = d3.event.selection
 
+				if(brushDims === null) {
+					return;
+				}
+
         //Not sure what this is
         if (d3.event.selection === null){
           this.heatmapObject.brushHeatmap(null)
@@ -659,21 +665,30 @@ class drPlot{
 		})
 	}
 
+    /*************************/
+    /* draw gene description */
+    /*************************/
 	drawGeneDescription(selectGene) {
 		//console.log("[dr_plot.js] dataSet: ");
 		//console.log(this.dataSet);
 
+		let that = this;
 
 		this.dataSet.filter(gene => {
 			if(selectGene === gene['Gene.name']) {
 				//console.log(gene);
-				let geneDescription = new GeneDescription(gene);
+				that.geneDescription.drawGeneDescription(gene);
 			}
 		})
 	}
 
+	cleanGeneDescription() {
+		this.geneDescription.cleanGeneDescription();
+	}
+
 	clickListener(){
 		let that = this;
+		let selectedGenePlotText = "";
 
 		$(document).click(function(event) {
 			//console.log("click");
@@ -683,8 +698,30 @@ class drPlot{
 				//console.log(event.target.id);
 				//console.log(event.target.id.slice(8));
 				console.log(event.target.classList[1]);
-				console.log(event.target.classList[1].slice(8));
-				that.drawGeneDescription(event.target.classList[1].slice(8));
+				//console.log(event.target.classList[1].slice(8));
+				let getClassText = event.target.classList[1];
+
+				if (selectedGenePlotText === getClassText) { /* when select the same gene again */
+					that.cleanGeneDescription();
+					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+					selectedGenePlotText = ""; 
+				} else if(selectedGenePlotText != "") { /* when there is a selected gene */
+					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+					selectedGenePlotText = getClassText;
+					$('#geneContainer>text.' + selectedGenePlotText).addClass('selected');
+					that.drawGeneDescription(getClassText.slice(8));
+				} else { /* when there is no selected gene before */
+					selectedGenePlotText = getClassText;
+					//console.log(selectedGenePlotText);
+					$('#geneContainer>text.' + selectedGenePlotText).addClass('selected');
+					that.drawGeneDescription(getClassText.slice(8));
+				}
+			} else { /* when no gene has been clicked */
+				if(selectedGenePlotText != "") {
+					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+					selectedGenePlotText = "";
+				}
+				that.cleanGeneDescription();
 			}
 		});
 	}

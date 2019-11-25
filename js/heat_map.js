@@ -74,9 +74,10 @@ class Heatmap{
 											}
 						}
 		}
+
 	  createHeatmap() {
 
-			let dropdownWrap = d3.select('#buttons').append('div').classed('dropdown-wrapper', true);
+			let dropdownWrap = d3.select('#heatmapButtons');
 
 			let cWrap = dropdownWrap.append('div').classed('dropdown-panel', true);
 
@@ -84,8 +85,8 @@ class Heatmap{
 					.append('text')
 					.text('Normalize Data Over: ');
 
-			cWrap.append('div').attr('id', 'dropdown_c').classed('dropdown', true).append('div').classed('dropdown-content', true)
-					.append('select');
+			cWrap.append('div').attr('id', 'dropdown_c').classed('dropdown', true)
+					.append('select').attr('id', 'selectpicker_c').classed('selectpicker', true);
 
 			this.drawDropDown();
 
@@ -240,12 +241,12 @@ class Heatmap{
 				drawDropDown() {
 
 						let that = this;
-						let dropDownWrapper = d3.select('.dropdown-wrapper');
+						let dropDownWrapper = d3.select('#heatmapButtons').select('.dropdown-panel');
 						let dropData = [['Genes','colvalue'],['Cells','rowvalue'],['Whole Table','totalvalue']];
 
 
 						/* CIRCLE DROPDOWN */
-						let dropC = dropDownWrapper.select('#dropdown_c').select('.dropdown-content').select('select');
+						let dropC = dropDownWrapper.select('#dropdown_c').select('.selectpicker');
 
 						let optionsC = dropC.selectAll('option')
 								.data(dropData);
@@ -266,6 +267,9 @@ class Heatmap{
 							that.newNorm = this.options[this.selectedIndex].value;
 							that.updateHeatmap();
 						});
+
+						/* active dropdown menu */
+						$('#selectpicker_c').selectpicker();
 					}
 
 		// renderSwitch(div, labelText) {
