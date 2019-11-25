@@ -110,7 +110,6 @@ class Setup {
         that.dataButtonChecker(d)
       })
 
-
 		/* select all data by default */
     $('#cellButtons').selectpicker('selectAll');
 
@@ -321,13 +320,9 @@ class Setup {
     this.geneMat = geneMatScaled
   }
 
-
   pcaExecutor() {
     this.drPlot.pcaCompute2(this.geneMat, this.cells, this.geneSet)
     this.drPlot.drawPlot()
   }
-
-
-
 
 }
