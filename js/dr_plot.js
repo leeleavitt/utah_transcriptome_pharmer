@@ -1,10 +1,10 @@
 //TODOs:
-//1 genes on click need to have 
+//1 genes on click need to have
 //1a go terms list out
 //1b gene description
 
 //2 Subset the cells to go through
-//2a this would be a 
+//2a this would be a
 
 
 class drPlot{
@@ -84,7 +84,7 @@ class drPlot{
     //Successful PCA compute this function also takes in which cells hav
     //been selected
     pcaCompute(cellTypesSelected){
-        //passing in the cellTypesLogic allows us to 
+        //passing in the cellTypesLogic allows us to
         // Only compute the PCs on these still selected cells
 
 		//Extract the cell values out of the matrix
@@ -122,7 +122,7 @@ class drPlot{
             let index = cellsSelectedAll[i]
             geneMatNew.push(geneMat.data[index])
         }
-        
+
         geneMat = new ML.Matrix(geneMatNew)
         //console.log(geneMat)
 
@@ -136,8 +136,8 @@ class drPlot{
         this.cells = newCells
 
         //console.log(this.cells)
-    
-        
+
+
         //////////////////////////////////////////////////////////////////
 
 
@@ -457,24 +457,24 @@ class drPlot{
         }
 
         //Find genes that are outside of the margin
-        var pd1Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd1)))    
+        var pd1Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd1)))
         var pd1Margin = pd1Max*margin
         var pD1s = this.pDims.filter(d=>{
-            var selectedGenes = 
-                this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd1Margin) && 
-                this.pd1Scale(d.pd1) >= brushDims[0][0] && 
+            var selectedGenes =
+                this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd1Margin) &&
+                this.pd1Scale(d.pd1) >= brushDims[0][0] &&
                 this.pd1Scale(d.pd1) <= brushDims[1][0];
 
             return selectedGenes
             })
 
         //Find Genes within the margin
-        var pd2Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd2)))    
+        var pd2Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd2)))
         var pd2Margin = pd2Max*margin
         var pD2s = this.pDims.filter(d=>{
-            var selectedGenes = 
-                this.pd1Scale(Math.abs(d.pd2)) > this.pd1Scale(pd2Margin) && 
-                this.pd2Scale(d.pd2) >= brushDims[0][1] && 
+            var selectedGenes =
+                this.pd1Scale(Math.abs(d.pd2)) > this.pd1Scale(pd2Margin) &&
+                this.pd2Scale(d.pd2) >= brushDims[0][1] &&
                 this.pd2Scale(d.pd2) <= brushDims[1][1]
 
             return selectedGenes
@@ -505,16 +505,16 @@ class drPlot{
 
         d3.select('#pc1Axis')
             .call(this.pc1Axis)
-        
+
         d3.select('#pc2Axis')
             .call(this.pc2Axis)
-        
+
         d3.select('#pd2Axis')
             .call(this.pd2Axis)
-        
+
         d3.select('#pd1Axis')
             .call(this.pd1Axis)
-        
+
         ///////////////////////////////////////////////////////////////////
         //Plot the cells
         var cellComp = d3.select('#cellContainer')
@@ -530,7 +530,7 @@ class drPlot{
             .duration(1000)
             .style('opacity',0)
             .remove()
-        
+
         cellComp = cellCompEnter.merge(cellComp)
             .transition().duration(1000)
             .on('start', () => d3.select(this))
@@ -550,14 +550,14 @@ class drPlot{
 
         var geneDirsEnter = geneDirs.enter()
             .append('line')
-        
+
         geneDirs.exit()
             .style('opacity', 1)
             .transition()
             .duration(1000)
             .style('opacity',0)
             .remove()
-        
+
         geneDirs = geneDirsEnter.merge(geneDirs)
             .transition().duration(1000)
             .on('start', () => d3.select(this))
@@ -572,7 +572,7 @@ class drPlot{
             .attr('stroke', 'black')
             .attr('opacity', .5)
 
-    
+
         //Genes
         var geneComp = d3.select('#geneContainer')
             .selectAll('text')
@@ -601,15 +601,19 @@ class drPlot{
             .text(d=>d.gene)
             .on('end', () => d3.select(this).transition().duration(500));
 
+				d3.select('#geneContainer')
+						.selectAll('text')
+						.on('click',d => this.heatmapObject.highlightGene(d.gene));
+
         ///////////////////////////////////////////////////////////////////
         //Cell Labels
         var cellLabs = d3.select('#cellContainer')
             .selectAll('text')
             .data(this.pComps)
-        
+
         var cellLabelsEnter = cellLabs.enter()
             .append('text')
-        
+
         cellLabs.exit()
             .style('opacity', 1)
             .transition()
@@ -629,7 +633,7 @@ class drPlot{
             .attr('text-decoration','underline')
             .text(d=>d.cell.slice(0,-2))
             .on('end', () => d3.select(this).transition().duration(500));
-        
+
 
     }
 
