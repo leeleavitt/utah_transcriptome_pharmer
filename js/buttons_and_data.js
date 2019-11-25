@@ -113,7 +113,47 @@ class Setup {
 		/* select all data by default */
     $('#cellButtons').selectpicker('selectAll');
 
+    /////////////////////////////////////////////////////
+    //Search Bar with Autofill
+    /////////////////////////////////////////////////////
+    //Add the Search div to the autofill
+    //https://jqueryui.com/autocomplete/
+    var SearchHolder = d3.select('#buttons')
+      .append('div')
+      .attr('id', 'search')
+
+    //I need to Subset this matrix because this.matrixSubsetter() creates this.geneSet
+    this.cellOps()
+    this.matrixSubsetter()
+
+    //Now make a search bar. This is using jquery
+    SearchHolder
+      .append('div')
+      .attr('class','ui-widget')
+      .append('label')
+      .attr('for','tags')
+      .append('input')
+      .attr('id', 'genesSearch')
+      .on('keyup', d=>this.geneSearcher(d))
+
+      //This add autofill functionality
+      $('#genesSearch')
+        .autocomplete({source : this.geneSet})
+          
   }
+
+  //This is the function to return whatever has been typed into the searchbar on enter press
+  geneSearcher(){
+    if(event.key == 'Enter'){
+      var searchString = $('#genesSearch').focus()
+      console.log(searchString)
+      console.log(searchString.val())
+
+      searchString.val('')
+      $('#genesSearch').autocomplete('close')
+    }
+  }
+
 
   //This function update the button logic as well as the pca plot for now
   cellButtonChecker(index, selected) {
@@ -129,6 +169,7 @@ class Setup {
       this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = true
       console.log(this.cellsLogic.filter(d => d.cells === buttonPressed))
     } else {
+      console.log(buttonSel.innerText)
       let buttonPressed = buttonSel.innerText
       this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = false
     }
