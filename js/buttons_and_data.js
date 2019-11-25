@@ -118,6 +118,9 @@ class Setup{
       .append('div')
       .attr('id', 'search')
 
+    this.cellOps()
+    this.matrixSubsetter()
+
     SearchHolder
       .append('div')
       .attr('class','ui-widget')
@@ -126,24 +129,20 @@ class Setup{
       .append('input')
       .attr('id', 'genesSearch')
       .on('keyup', d=>this.geneSearcher(d))
-      .attr('autocomplete',{source : this.geneSet})
-      // .append('div')
-      // .attr('class','col-md-6')
-      // .append('input')
-      // .attr('id', 'genesSearch')
-      // .attr('class', 'form-control mdb-autocomplete')
-      // .attr('type','text')
-      // .attr('placeholder', 'Gene Search')
-      // .attr('aria-label', 'Search')
 
-      //Iniitialize the genset from the 
+      $('#genesSearch')
+        .autocomplete({source : this.geneSet})
+          
   }
 
   geneSearcher(){
     if(event.key == 'Enter'){
-      var searchString = $('#genesSearch')
+      var searchString = $('#genesSearch').focus()
       console.log(searchString)
       console.log(searchString.val())
+
+      searchString.val('')
+      $('#genesSearch').autocomplete('close')
     }
   }
 
