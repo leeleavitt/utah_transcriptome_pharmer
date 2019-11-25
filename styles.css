@@ -31,5 +31,7 @@ line.selected{
   stroke-width:2;
 }
 
-
+.genePlotText {
+	  cursor: pointer;
+}
 
