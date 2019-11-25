@@ -18,7 +18,8 @@ class drPlot{
 
 		/* add gene description class before click listener */
 		this.geneDescription = new GeneDescription();
-		this.clickListener();
+		this.utpAlert = new UTPAlert();
+			this.clickListener();
 	}
 
 	svdCompute(){
@@ -336,6 +337,7 @@ class drPlot{
 
     //This draws the plot adds the brus
     createPlot(){
+			let that = this;
         //SVG to add plot to
         d3.select('#drPlot')
             .append('svg')
@@ -445,22 +447,36 @@ class drPlot{
 
     //Function the brush uses to select cells and genes.
     updateGenes(){
-        //Turn Off all Selected Genes
-        d3.selectAll('.selected').classed('selected',false)
-        //Set up the margin
-        var margin = .05
+				let that = this;
 
         //Find the Brushes Dimension
         var brushDims = d3.event.selection
 
-				if(brushDims === null) {
-					return;
+        //Turn Off all Selected Genes
+        d3.selectAll('.selected').classed('selected',false)
+
+				d3.select('#brushContainer')
+						.on("click", that.updateGenesWhenClick());
+
+
+				if(brushDims != null) {
+					let selectedGenes = this.updateGenesWhenSelect(brushDims);
+					//return selectedGenes;
 				}
 
-        //Not sure what this is
-        if (d3.event.selection === null){
-          this.heatmapObject.brushHeatmap(null)
-        }
+				// No need to do this, the brushDims will only be null when user click the mouse
+        ////Not sure what this is
+        //if (d3.event.selection === null){
+        //  this.heatmapObject.brushHeatmap(null)
+        //}
+    }
+
+		updateGenesWhenSelect(brushDims) {
+				// Pass brushDims in 
+				var brushDims = brushDims;
+
+        //Set up the margin
+        var margin = .05
 
         //Find genes that are outside of the margin
         var pd1Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd1)))    
@@ -505,7 +521,12 @@ class drPlot{
 
 	    /* create new summary */
 		//this.drawSummaryPlot(genesSel);
-    }
+		}
+
+		updateGenesWhenClick() {
+			//console.log("u click");
+			this.cleanGeneDescription();
+		}
 
     drawPlot(){
 
@@ -690,6 +711,7 @@ class drPlot{
 		let that = this;
 		let selectedGenePlotText = "";
 
+		//$(document).click(function(event) {
 		$(document).click(function(event) {
 			//console.log("click");
 			//console.log(event.target.classList);
@@ -717,11 +739,11 @@ class drPlot{
 					that.drawGeneDescription(getClassText.slice(8));
 				}
 			} else { /* when no gene has been clicked */
-				if(selectedGenePlotText != "") {
-					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
-					selectedGenePlotText = "";
-				}
-				that.cleanGeneDescription();
+				//if(selectedGenePlotText != "") {
+				//	$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+				//	selectedGenePlotText = "";
+				//}
+				//that.cleanGeneDescription();
 			}
 		});
 	}
