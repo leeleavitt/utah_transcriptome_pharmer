@@ -8,9 +8,7 @@ class Setup{
   initial(){
     //////////////////////////////////////////////////////////
     //Hierarchical Clustering Buttons
-    let clustButtons = d3.select('#buttons')
-      .append('div')
-      .attr('id','clustButtons');
+    let clustButtons = d3.select('#clustButtons');
 
     clustButtons.append('button')
       .attr('class','btn btn-primary clustButton')
@@ -38,10 +36,6 @@ class Setup{
 
     //Button Time!
     //Append Cell buttons
-    d3.select('#buttons')
-      .append('div')
-      .attr('id','cellButtons')
-
     let cellButtonHolder = d3.select('#cellButtons')
 
     cellButtonHolder
@@ -86,10 +80,6 @@ class Setup{
     })
 
     //Make div for the data button
-    d3.select('#buttons')
-      .append('div')
-      .attr('id', 'dataButtons')
-
     let dataButtonHolder = d3.select('#dataButtons')
 
     dataButtonHolder
@@ -354,10 +344,3 @@ class Setup{
 
 
 }
-
-
-
-
-
-
-    

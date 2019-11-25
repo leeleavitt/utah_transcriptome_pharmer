@@ -13,6 +13,7 @@
 		<script src="https://d3js.org/d3-force.v2.min.js"></script>
 		<link href="https://fonts.googleapis.com/css?family=Work+Sans:400,700&display=swap" rel="stylesheet">
 
+		<!-- d3 plugins -->
 		<!-- d3 could -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js" integrity="sha384-bfFsMJ/X+j7+0PU5d5Qaiomm4ZQm+P++8ScVu7xWaeB3FpsIL6YBWfFfRlrNEBBX" crossorigin="anonymous"></script>
 
@@ -23,17 +24,25 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
+<<<<<<< HEAD
 		<!-- Jquery for search Box -->
 		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 		<!-- <link rel="stylesheet" href="/resources/demos/style.css"> -->
 		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+=======
+		<!-- bootstrap plugins -->
+		<!-- bootstrap-select -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.11/css/bootstrap-select.min.css" integrity="sha384-ZSKgyG7f8kFUO6JFSkEehXkQLG18PWWEEDcWLfHBDDszwRRyd/VJVjiBxjMd2I6f" crossorigin="anonymous">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.11/js/bootstrap-select.min.js" integrity="sha384-nQu0uOtvUAto18WugU6SfZ+mfZLvqncogj681f5tRMxOBXfFoIbe8YKhqbCIt31R" crossorigin="anonymous"></script>
+
+		<!-- math -->
+>>>>>>> e58e7736faaaf3158f2e062e0293d84420ca859f
 		<!-- Using openCPU to use R
 		<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 		<script src="//cdn.opencpu.org/opencpu-0.5.js"></script> -->
 
-		<!-- functions -->
 		<!-- <script src="https://cdn.jsdelivr.net/npm/pca-js@1.0.0/pca.min.js"></script> -->
 		<!-- ml.js and math.js -->
 		<script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script>
@@ -46,13 +55,14 @@
 		<script type="application/javascript" src="js/heat_map.js"></script>
 		<script type="application/javascript" src="js/buttons_and_data.js"></script>
 		<script type="application/javascript" src="js/script_json.js"></script>
+		<script type="application/javascript" src="js/alert.js"></script>
 	</head>
 
 	<body>
 		<div id="header-wrap" class="text-center">
 			<header>
 				<h1>Utah Transcriptome Pharmer</h1>
-				<div>Name: Lee Leavitt; E-Mail: lee.leavitt.u@gmail.com; UID: u0591788</div>
+				<div></div>
 			</header>
 		</div>
 
@@ -62,31 +72,45 @@
 
 			<!-- Buttons -->
 			<div id="buttons">
+				<div class="row">
+					<div id="heatmapButtons">
+					</div>
+					<div id="clustButtons">
+					</div>
+					<div id="cellButtons">
+					</div>
+					<div id="dataButtons">
+					</div>
+				</div>
 			</div>
 		</div>
 
 		<!-- Part 1 -->
 		<div class="row">
+
 			<!-- Dimensional Reduction Plot -->
 			<div id="drPlot" class="cal"></div>
-			<!-- Heatmap/Table -->
-			<div id="heatmap"></div>
-
-
-			<!-- Dendrogram -->
-			<div id="dendrogram"></div>
 
 			<div class="col-sm-2">
-			<!-- Summary Plot -->
-			<div id="summaryPlot"></div>
 
-			<!-- gene description -->
-			<div id="geneDescription"></div>
+				<!-- Summary Plot -->
+				<div id="summaryPlot"></div>
+
+				<!-- gene description -->
+				<div id="geneDescription"></div>
+
 			</div>
+
 		</div>
 
 		<!-- Part2 -->
 		<div class="row">
+
+			<!-- Heatmap/Table -->
+			<div id="heatmap"></div>
+
+			<!-- Dendrogram -->
+			<div id="dendrogram"></div>
 
 		</div>
 

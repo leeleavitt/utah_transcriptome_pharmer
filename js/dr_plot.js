@@ -1,10 +1,10 @@
 //TODOs:
-//1 genes on click need to have 
+//1 genes on click need to have
 //1a go terms list out
 //1b gene description
 
 //2 Subset the cells to go through
-//2a this would be a 
+//2a this would be a
 
 
 class drPlot{
@@ -16,7 +16,10 @@ class drPlot{
 		this.margin = {top:60, bottom:60, left:60, right:60}
 		this.svgDim = {width:this.width+this.margin.left+this.margin.right, height:this.height+this.margin.top+this.margin.bottom}
 
-		this.clickListener();
+		/* add gene description class before click listener */
+		this.geneDescription = new GeneDescription();
+		this.utpAlert = new UTPAlert();
+			this.clickListener();
 	}
 
 	svdCompute(){
@@ -84,7 +87,7 @@ class drPlot{
     //Successful PCA compute this function also takes in which cells hav
     //been selected
     pcaCompute(cellTypesSelected){
-        //passing in the cellTypesLogic allows us to 
+        //passing in the cellTypesLogic allows us to
         // Only compute the PCs on these still selected cells
 
 		//Extract the cell values out of the matrix
@@ -122,7 +125,7 @@ class drPlot{
             let index = cellsSelectedAll[i]
             geneMatNew.push(geneMat.data[index])
         }
-        
+
         geneMat = new ML.Matrix(geneMatNew)
         //console.log(geneMat)
 
@@ -136,8 +139,8 @@ class drPlot{
         this.cells = newCells
 
         //console.log(this.cells)
-    
-        
+
+
         //////////////////////////////////////////////////////////////////
 
 
@@ -334,6 +337,7 @@ class drPlot{
 
     //This draws the plot adds the brus
     createPlot(){
+			let that = this;
         //SVG to add plot to
         d3.select('#drPlot')
             .append('svg')
@@ -443,38 +447,56 @@ class drPlot{
 
     //Function the brush uses to select cells and genes.
     updateGenes(){
-        //Turn Off all Selected Genes
-        d3.selectAll('.selected').classed('selected',false)
-        //Set up the margin
-        var margin = .05
+				let that = this;
 
         //Find the Brushes Dimension
         var brushDims = d3.event.selection
 
-        //Not sure what this is
-        if (d3.event.selection === null){
-          this.heatmapObject.brushHeatmap(null)
-        }
+        //Turn Off all Selected Genes
+        d3.selectAll('.selected').classed('selected',false)
+
+				d3.select('#brushContainer')
+						.on("click", that.updateGenesWhenClick());
+
+
+				if(brushDims != null) {
+					let selectedGenes = this.updateGenesWhenSelect(brushDims);
+					//return selectedGenes;
+				}
+
+				// No need to do this, the brushDims will only be null when user click the mouse
+        ////Not sure what this is
+        //if (d3.event.selection === null){
+        //  this.heatmapObject.brushHeatmap(null)
+        //}
+    }
+
+		updateGenesWhenSelect(brushDims) {
+				// Pass brushDims in
+				var brushDims = brushDims;
+
+        //Set up the margin
+        var margin = .05
 
         //Find genes that are outside of the margin
-        var pd1Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd1)))    
+        var pd1Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd1)))
         var pd1Margin = pd1Max*margin
         var pD1s = this.pDims.filter(d=>{
-            var selectedGenes = 
-                this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd1Margin) && 
-                this.pd1Scale(d.pd1) >= brushDims[0][0] && 
+            var selectedGenes =
+                this.pd1Scale(Math.abs(d.pd1)) > this.pd1Scale(pd1Margin) &&
+                this.pd1Scale(d.pd1) >= brushDims[0][0] &&
                 this.pd1Scale(d.pd1) <= brushDims[1][0];
 
             return selectedGenes
             })
 
         //Find Genes within the margin
-        var pd2Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd2)))    
+        var pd2Max = Math.max(...this.pDims.map(d=>Math.abs(d.pd2)))
         var pd2Margin = pd2Max*margin
         var pD2s = this.pDims.filter(d=>{
-            var selectedGenes = 
-                this.pd1Scale(Math.abs(d.pd2)) > this.pd1Scale(pd2Margin) && 
-                this.pd2Scale(d.pd2) >= brushDims[0][1] && 
+            var selectedGenes =
+                this.pd1Scale(Math.abs(d.pd2)) > this.pd1Scale(pd2Margin) &&
+                this.pd2Scale(d.pd2) >= brushDims[0][1] &&
                 this.pd2Scale(d.pd2) <= brushDims[1][1]
 
             return selectedGenes
@@ -499,22 +521,28 @@ class drPlot{
 
 	    /* create new summary */
 		//this.drawSummaryPlot(genesSel);
-    }
+		}
+
+		updateGenesWhenClick() {
+			//console.log("u click");
+			this.cleanGeneDescription();
+			this.heatmapObject.highlightGene("clear");
+		}
 
     drawPlot(){
 
         d3.select('#pc1Axis')
             .call(this.pc1Axis)
-        
+
         d3.select('#pc2Axis')
             .call(this.pc2Axis)
-        
+
         d3.select('#pd2Axis')
             .call(this.pd2Axis)
-        
+
         d3.select('#pd1Axis')
             .call(this.pd1Axis)
-        
+
         ///////////////////////////////////////////////////////////////////
         //Plot the cells
         var cellComp = d3.select('#cellContainer')
@@ -530,7 +558,7 @@ class drPlot{
             .duration(1000)
             .style('opacity',0)
             .remove()
-        
+
         cellComp = cellCompEnter.merge(cellComp)
             .transition().duration(1000)
             .on('start', () => d3.select(this))
@@ -550,14 +578,14 @@ class drPlot{
 
         var geneDirsEnter = geneDirs.enter()
             .append('line')
-        
+
         geneDirs.exit()
             .style('opacity', 1)
             .transition()
             .duration(1000)
             .style('opacity',0)
             .remove()
-        
+
         geneDirs = geneDirsEnter.merge(geneDirs)
             .transition().duration(1000)
             .on('start', () => d3.select(this))
@@ -572,7 +600,7 @@ class drPlot{
             .attr('stroke', 'black')
             .attr('opacity', .5)
 
-    
+
         //Genes
         var geneComp = d3.select('#geneContainer')
             .selectAll('text')
@@ -597,19 +625,23 @@ class drPlot{
             .attr('opacity', .5)
             .attr('x', d=> this.pd1Scale(d.pd1))
             .attr('y', d=> this.pd2Scale(d.pd2))
-            .attr('class', d=>`genePlot${d.gene}`)
+            .attr('class', d=>'genePlotText ' + `genePlot${d.gene}`)
             .text(d=>d.gene)
             .on('end', () => d3.select(this).transition().duration(500));
+
+				d3.select('#geneContainer')
+						.selectAll('text')
+						.on('click',d => this.heatmapObject.highlightGene(d.gene));
 
         ///////////////////////////////////////////////////////////////////
         //Cell Labels
         var cellLabs = d3.select('#cellContainer')
             .selectAll('text')
             .data(this.pComps)
-        
+
         var cellLabelsEnter = cellLabs.enter()
             .append('text')
-        
+
         cellLabs.exit()
             .style('opacity', 1)
             .transition()
@@ -629,7 +661,7 @@ class drPlot{
             .attr('text-decoration','underline')
             .text(d=>d.cell.slice(0,-2))
             .on('end', () => d3.select(this).transition().duration(500));
-        
+
 
     }
 
@@ -659,14 +691,64 @@ class drPlot{
 		})
 	}
 
-	clickListener(){
+    /*************************/
+    /* draw gene description */
+    /*************************/
+	drawGeneDescription(selectGene) {
+		//console.log("[dr_plot.js] dataSet: ");
+		//console.log(this.dataSet);
+
 		let that = this;
 
+		this.dataSet.filter(gene => {
+			if(selectGene === gene['Gene.name']) {
+				//console.log(gene);
+				that.geneDescription.drawGeneDescription(gene);
+			}
+		})
+	}
+
+	cleanGeneDescription() {
+		this.geneDescription.cleanGeneDescription();
+	}
+
+	clickListener(){
+		let that = this;
+		let selectedGenePlotText = "";
+
+		//$(document).click(function(event) {
 		$(document).click(function(event) {
-			if(event.target.matches('.geneTextPlot')) {
+			//console.log("click");
+			//console.log(event.target.classList);
+			//console.log(event.target.classList[0]);
+			if(event.target.classList[0] === 'genePlotText') {
 				//console.log(event.target.id);
 				//console.log(event.target.id.slice(8));
-				that.drawGeneDescription(event.target.id.slice(8));
+				console.log(event.target.classList[1]);
+				//console.log(event.target.classList[1].slice(8));
+				let getClassText = event.target.classList[1];
+
+				if (selectedGenePlotText === getClassText) { /* when select the same gene again */
+					that.cleanGeneDescription();
+					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+					selectedGenePlotText = "";
+				} else if(selectedGenePlotText != "") { /* when there is a selected gene */
+					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+					selectedGenePlotText = getClassText;
+					$('#geneContainer>text.' + selectedGenePlotText).addClass('selected');
+					that.drawGeneDescription(getClassText.slice(8));
+				} else { /* when there is no selected gene before */
+					selectedGenePlotText = getClassText;
+					//console.log(selectedGenePlotText);
+					$('#geneContainer>text.' + selectedGenePlotText).addClass('selected');
+					that.drawGeneDescription(getClassText.slice(8));
+				}
+			} else { /* when no gene has been clicked */
+				//if(selectedGenePlotText != "") {
+				//	$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+				//	selectedGenePlotText = "";
+				//}
+				//that.cleanGeneDescription();
 			}
 		});
 	}
