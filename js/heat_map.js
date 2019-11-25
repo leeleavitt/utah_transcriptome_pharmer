@@ -334,7 +334,7 @@ class Heatmap{
 						return that.cellsColorScale(d.slice(0,-2));
 					}
 				});
-				
+
 			console.log(this.highlightedGenes);
 
 			d3.select('#highlightRectGroup')
@@ -630,18 +630,25 @@ class Heatmap{
 	}
 
 	highlightGene(geneName){
-		console.log(geneName);
-		if (this.highlightedGenes.indexOf(geneName) !== -1){
-			console.log("same");
-		}
-		this.highlightedGenes.push(geneName);
-		this.highlightedGenes = [...new Set(this.highlightedGenes)]
-		console.log(this.highlightedGenes);
-		if (geneName === null){
-			d3.select("#highlightRectGroup")
+
+		if (geneName === "clear"){
+			this.highlightedGenes = [];
+
+			d3.select('#highlightRectGroup')
+			.selectAll('rect')
 			.remove();
-		}else{
-			this.highlights = true;
+		}else if (this.lastclick === geneName){
+
+			d3.select(`#highlightRect${geneName}`)
+			.remove();
+
+			this.highlightedGenes.splice(this.highlightedGenes.indexOf(geneName),1);
+
+		}else if (this.highlightedGenes.indexOf(geneName) === -1){
+			this.highlightedGenes.push(geneName);
+			this.highlightedGenes = [...new Set(this.highlightedGenes)]
+
+
 			var x = d3.scaleBand()
 				.range([ 0, this.width ])
 				.domain(this.genes)
@@ -650,6 +657,7 @@ class Heatmap{
 
 			d3.select('#highlightRectGroup')
 			.append('rect')
+			.attr("id",`highlightRect${geneName}`)
 			.attr("x",x(geneName))
 			.attr("y",0)
 			.attr("width",x.bandwidth())
@@ -658,7 +666,7 @@ class Heatmap{
 			.attr("fill","none")
 			.attr("stroke-width","1px");
 		}
-
+		this.lastclick = geneName;
 	}
 }
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current

@@ -472,7 +472,7 @@ class drPlot{
     }
 
 		updateGenesWhenSelect(brushDims) {
-				// Pass brushDims in 
+				// Pass brushDims in
 				var brushDims = brushDims;
 
         //Set up the margin
@@ -526,6 +526,7 @@ class drPlot{
 		updateGenesWhenClick() {
 			//console.log("u click");
 			this.cleanGeneDescription();
+			this.heatmapObject.highlightGene("clear");
 		}
 
     drawPlot(){
@@ -730,7 +731,7 @@ class drPlot{
 				if (selectedGenePlotText === getClassText) { /* when select the same gene again */
 					that.cleanGeneDescription();
 					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
-					selectedGenePlotText = ""; 
+					selectedGenePlotText = "";
 				} else if(selectedGenePlotText != "") { /* when there is a selected gene */
 					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
 					selectedGenePlotText = getClassText;
