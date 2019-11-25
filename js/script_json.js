@@ -65,6 +65,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	/****************************************************************/
 	/*					  Button Setup and Data Manipulation  							*/
 	/****************************************************************/
+	bob=1
 	let setup = new Setup(genesNoZeroData, heatmap, drplot);
 	setup.initial();
 
@@ -115,7 +116,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	geneMatDistEuc = ML.distanceMatrix(geneMat.transpose().data, ML.Distance.euclidean)
 
 	//Now compute the agnes heirarchal clsutering
-	bob = ML.HClust.agnes(geneMatDistEuc, {isDistanceMatrix:true})
+	//bob = ML.HClust.agnes(geneMatDistEuc, {isDistanceMatrix:true})
 
 	buttonClasses = 0
 	buttonLogic = 0

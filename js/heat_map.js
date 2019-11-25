@@ -29,6 +29,9 @@ class Heatmap{
 					this.brushed = this.genes;
 
 					this.expanded = false;
+
+					this.highlightedGenes = [];
+
 				}
 
 		stretchData(newdata) {
@@ -111,7 +114,6 @@ class Heatmap{
 
 			svg.append('g')
 			.attr("id","lineGroup");
-
 
 		    var x = d3.scaleBand()
 		      .range([ 0, this.width ])
@@ -217,7 +219,8 @@ class Heatmap{
 							                              .style("left", (d3.event.pageX + 10) + "px")
 							                              .style("top", (d3.event.pageY - 35) + "px"))
 			      .on("mouseout",d => div.style("opacity",0))
-						.classed("notselected",false);
+						.classed("notselected",false)
+						.attr("opacity",1);
 
 						if (this.heatmapData.length < 50) {
 							rectGroup.selectAll()
@@ -234,8 +237,12 @@ class Heatmap{
 									                              .style("opacity",1)
 									                              .style("left", (d3.event.pageX + 10) + "px")
 									                              .style("top", (d3.event.pageY - 35) + "px"))
-					      .on("mouseout",d => div.style("opacity",0));
+					      .on("mouseout",d => div.style("opacity",0))
+								.attr("opacity",1);
 							}
+
+					svg.append('g')
+					.attr("id","highlightRectGroup");
 			  }
 
 				drawDropDown() {
@@ -328,6 +335,15 @@ class Heatmap{
 					}
 				});
 
+			console.log(this.highlightedGenes);
+
+			d3.select('#highlightRectGroup')
+			.selectAll('rect')
+			.data(this.highlightedGenes)
+			.join('rect')
+			.transition()
+			.duration(1500)
+			.attr('x',d => x(d));
 
 			if (that.brushed === null){
 				d3.select('#rectGroup')
@@ -443,6 +459,7 @@ class Heatmap{
 
 
 			this.sorted = !this.sorted;
+
 
 			this.updateHeatmap();
 	}
@@ -610,6 +627,46 @@ class Heatmap{
 		};
 
 		this.updateHeatmap();
+	}
+
+	highlightGene(geneName){
+
+		if (geneName === "clear"){
+			this.highlightedGenes = [];
+
+			d3.select('#highlightRectGroup')
+			.selectAll('rect')
+			.remove();
+		}else if (this.lastclick === geneName){
+
+			d3.select(`#highlightRect${geneName}`)
+			.remove();
+
+			this.highlightedGenes.splice(this.highlightedGenes.indexOf(geneName),1);
+
+		}else if (this.highlightedGenes.indexOf(geneName) === -1){
+			this.highlightedGenes.push(geneName);
+			this.highlightedGenes = [...new Set(this.highlightedGenes)]
+
+
+			var x = d3.scaleBand()
+				.range([ 0, this.width ])
+				.domain(this.genes)
+				.padding(0.01);
+
+
+			d3.select('#highlightRectGroup')
+			.append('rect')
+			.attr("id",`highlightRect${geneName}`)
+			.attr("x",x(geneName))
+			.attr("y",0)
+			.attr("width",x.bandwidth())
+			.attr("height",this.height)
+			.attr("stroke","black")
+			.attr("fill","none")
+			.attr("stroke-width","1px");
+		}
+		this.lastclick = geneName;
 	}
 }
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current

@@ -111,9 +111,42 @@ class Setup {
       })
 
 
+    /////////////////////////////////////////////////////
+    //Search Bar with Autofill
+    /////////////////////////////////////////////////////
+    var SearchHolder = d3.select('#buttons')
+      .append('div')
+      .attr('id', 'search')
+
+    this.cellOps()
+    this.matrixSubsetter()
+
+    SearchHolder
+      .append('div')
+      .attr('class','ui-widget')
+      .append('label')
+      .attr('for','tags')
+      .append('input')
+      .attr('id', 'genesSearch')
+      .on('keyup', d=>this.geneSearcher(d))
+
+      $('#genesSearch')
+        .autocomplete({source : this.geneSet})
+          
+  }
+
+  geneSearcher(){
+    if(event.key == 'Enter'){
+      var searchString = $('#genesSearch').focus()
+      console.log(searchString)
+      console.log(searchString.val())
+
+      searchString.val('')
+      $('#genesSearch').autocomplete('close')
+    }
+
 		/* select all data by default */
     $('#cellButtons').selectpicker('selectAll');
-
   }
 
   //This function update the button logic as well as the pca plot for now
@@ -279,7 +312,8 @@ class Setup {
 
     ////////////////////////////////////////////////////////////////////////////
     //Gene Ops
-    this.geneSet = this.data.map(d => d['Gene.name'])
+    this.geneSet = this.data.map(d=>d['Gene.name'])
+    this.geneArray = [...this.data.map(d=>d['Gene.name'])]
     ////////////////////////////////////////////////////////////////////////////
   }
 
@@ -321,13 +355,10 @@ class Setup {
     this.geneMat = geneMatScaled
   }
 
-
   pcaExecutor() {
     this.drPlot.pcaCompute2(this.geneMat, this.cells, this.geneSet)
     this.drPlot.drawPlot()
   }
-
-
 
 
 }
