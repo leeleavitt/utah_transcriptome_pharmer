@@ -111,6 +111,40 @@ class Setup{
         that.dataButtonChecker(d)
       })
 
+    /////////////////////////////////////////////////////
+    //Search Bar with Autofill
+    /////////////////////////////////////////////////////
+    var SearchHolder = d3.select('#buttons')
+      .append('div')
+      .attr('id', 'search')
+
+    SearchHolder
+      .append('div')
+      .attr('class','ui-widget')
+      .append('label')
+      .attr('for','tags')
+      .append('input')
+      .attr('id', 'genesSearch')
+      .on('keyup', d=>this.geneSearcher(d))
+      .attr('autocomplete',{source : this.geneSet})
+      // .append('div')
+      // .attr('class','col-md-6')
+      // .append('input')
+      // .attr('id', 'genesSearch')
+      // .attr('class', 'form-control mdb-autocomplete')
+      // .attr('type','text')
+      // .attr('placeholder', 'Gene Search')
+      // .attr('aria-label', 'Search')
+
+      //Iniitialize the genset from the 
+  }
+
+  geneSearcher(){
+    if(event.key == 'Enter'){
+      var searchString = $('#genesSearch')
+      console.log(searchString)
+      console.log(searchString.val())
+    }
   }
 
   //This function update the button logic as well as the pca plot for now
@@ -272,6 +306,7 @@ class Setup{
     ////////////////////////////////////////////////////////////////////////////
     //Gene Ops
     this.geneSet = this.data.map(d=>d['Gene.name'])
+    this.geneArray = [...this.data.map(d=>d['Gene.name'])]
     ////////////////////////////////////////////////////////////////////////////
   }
 
@@ -313,13 +348,10 @@ class Setup{
     this.geneMat = geneMatScaled
   }
 
-
   pcaExecutor(){
     this.drPlot.pcaCompute2(this.geneMat, this.cells, this.geneSet)
     this.drPlot.drawPlot()
   }
-
-
 
 
 }
