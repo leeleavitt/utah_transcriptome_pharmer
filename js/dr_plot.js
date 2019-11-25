@@ -597,7 +597,7 @@ class drPlot{
             .attr('opacity', .5)
             .attr('x', d=> this.pd1Scale(d.pd1))
             .attr('y', d=> this.pd2Scale(d.pd2))
-            .attr('class', d=>`genePlot${d.gene}`)
+            .attr('class', d=>'genePlotText ' + `genePlot${d.gene}`)
             .text(d=>d.gene)
             .on('end', () => d3.select(this).transition().duration(500));
 
@@ -659,14 +659,32 @@ class drPlot{
 		})
 	}
 
+	drawGeneDescription(selectGene) {
+		//console.log("[dr_plot.js] dataSet: ");
+		//console.log(this.dataSet);
+
+
+		this.dataSet.filter(gene => {
+			if(selectGene === gene['Gene.name']) {
+				//console.log(gene);
+				let geneDescription = new GeneDescription(gene);
+			}
+		})
+	}
+
 	clickListener(){
 		let that = this;
 
 		$(document).click(function(event) {
-			if(event.target.matches('.geneTextPlot')) {
+			//console.log("click");
+			//console.log(event.target.classList);
+			//console.log(event.target.classList[0]);
+			if(event.target.classList[0] === 'genePlotText') {
 				//console.log(event.target.id);
 				//console.log(event.target.id.slice(8));
-				that.drawGeneDescription(event.target.id.slice(8));
+				console.log(event.target.classList[1]);
+				console.log(event.target.classList[1].slice(8));
+				that.drawGeneDescription(event.target.classList[1].slice(8));
 			}
 		});
 	}
