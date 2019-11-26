@@ -218,7 +218,6 @@ class Setup {
   //Data Operations
   ////////////////////////////////////////////////////////////////////////
   dataButtonChecker(dataSel) {
-    console.log(dataSel);
     //Change the button logic
     this.dataLogic.map(d => {
       if (d.dataButtonName === dataSel) {
@@ -231,10 +230,9 @@ class Setup {
     })
 
     var selectedVals = this.dataLogic.filter(d => d.logic).map(d => d.dataButtonName)
-    console.log(selectedVals)
+
     bob = selectedVals
     //
-    console.log(selectedVals);
     if (selectedVals.includes('Center') && selectedVals.includes('Scale')) {
       //This updates the cells and cells index to work with
       this.cellOps()
@@ -396,8 +394,6 @@ class Setup {
   }
 
   dataNormalize() {
-    console.log(this.newNorm);
-    console.log(this.geneMat);
 
     if (this.newNorm === 'colvalue'){
       var geneMatTmp = this.geneMat.transpose();
@@ -431,7 +427,7 @@ class Setup {
       for (var i = 0; i < this.geneMat.data.length; i++){
         let rowmax = math.max([...this.geneMat.data[i]]);
         let rowmin = math.min([...this.geneMat.data[i]]);
-        console.log(rowmax, rowmin);
+
         if (rowmax > totmax){
           totmax = rowmax;
         }
@@ -440,8 +436,6 @@ class Setup {
         }
       }
 
-      console.log(totmax);
-      console.log(totmin);
       let geneMatNormed = this.geneMat.data.map((d, i) => {
         d = d.map(e => (e - totmin) / (Math.max(1,(totmax - totmin))))
         return (d)
