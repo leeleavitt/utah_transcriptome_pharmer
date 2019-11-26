@@ -464,11 +464,10 @@ class drPlot{
 					//return selectedGenes;
 				}
 
-				// No need to do this, the brushDims will only be null when user click the mouse
-        ////Not sure what this is
-        //if (d3.event.selection === null){
-        //  this.heatmapObject.brushHeatmap(null)
-        //}
+				// This returns the heatmap to full color when the brush is turned off
+        if (d3.event.selection === null){
+         this.heatmapObject.brushHeatmap(null)
+        }
     }
 
 		updateGenesWhenSelect(brushDims) {
