@@ -37,7 +37,25 @@ class Setup {
 
     //Button Time!
     //Append Cell buttons
-    let cellButtonHolder = d3.select('#cellButtons')
+    let cellAreaSelect = d3.select('#cellButtons');
+
+		cellAreaSelect
+			.append('div')
+			.attr('id', 'cellAreaSelectLabel')
+    	.classed('c-label', true)
+      .append('text')
+      .text('Select Cell Type/Row');
+
+		cellAreaSelect
+			.append('div')
+			.append('select')
+			.attr('id', 'cellAreaSelectDropdown')
+			.attr('class', 'selectpicker')
+			.attr('data-actions-box', 'true')
+			.attr('multiple', '');
+
+			
+    let cellButtonHolder = d3.select('#cellAreaSelectDropdown')
 
     /*cellButtonHolder
       .append('h6')
@@ -63,10 +81,10 @@ class Setup {
       })
       .text(d => d)
 
-    $('#cellButtons').selectpicker('refresh');
+    $('#cellAreaSelectDropdown').selectpicker('refresh');
 
 
-    $('#cellButtons').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+    $('#cellAreaSelectDropdown').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
 
       that.cellButtonChecker(clickedIndex, isSelected);
 
@@ -108,7 +126,7 @@ class Setup {
 
     dataButtonHolder
       .append('h6')
-      .text('Data Transformations')
+      .text('PCA Transformations')
 
     let dataButton = dataButtonHolder.selectAll('button')
       .data(dataButtonVals)
@@ -126,7 +144,7 @@ class Setup {
       })
 
 		/* select all data by default */
-    $('#cellButtons').selectpicker('selectAll');
+    $('#cellAreaSelectDropdown').selectpicker('selectAll');
 
     //run dataButtonChecker on initialization
     this.dataButtonChecker();
@@ -178,7 +196,7 @@ class Setup {
   //This function update the button logic as well as the pca plot for now
   cellButtonChecker(index, selected) {
     //Get the button clicked
-    let buttonSel = $("select#cellButtons>option")[index]
+    let buttonSel = $("select#cellAreaSelectDropdown>option")[index]
     //Is the button Clicked?
     let buttonLogic = selected
     //IF the button is clicked, then change the click logic to false
