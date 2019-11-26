@@ -243,7 +243,7 @@ class drPlot{
         var geneMat = mat
         this.cells = cells
         this.geneSet = genes
-
+				console.log(geneMat);
 
         //Perform PCA, this make the directions
         var genePCA = new ML.PCA(geneMat,{center:false, scale:false, ignoreZeroVariance:false})

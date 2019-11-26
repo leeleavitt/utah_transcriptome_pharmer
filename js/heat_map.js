@@ -80,19 +80,6 @@ class Heatmap{
 
 	  createHeatmap() {
 
-			let dropdownWrap = d3.select('#heatmapButtons');
-
-			let cWrap = dropdownWrap.append('div').classed('dropdown-panel', true);
-
-			cWrap.append('div').classed('c-label', true)
-					.append('text')
-					.text('Normalize Data Over: ');
-
-			cWrap.append('div').attr('id', 'dropdown_c').classed('dropdown', true)
-					.append('select').attr('id', 'selectpicker_c').classed('selectpicker', true);
-
-			this.drawDropDown();
-
 			this.stretchData(this.heatmapData);
 
 			this.genes = this.heatmapData.map(d => d["Gene.name"]);
@@ -244,40 +231,6 @@ class Heatmap{
 					svg.append('g')
 					.attr("id","highlightRectGroup");
 			  }
-
-				drawDropDown() {
-
-						let that = this;
-						let dropDownWrapper = d3.select('#heatmapButtons').select('.dropdown-panel');
-						let dropData = [['Genes','colvalue'],['Cells','rowvalue'],['Whole Table','totalvalue']];
-
-
-						/* CIRCLE DROPDOWN */
-						let dropC = dropDownWrapper.select('#dropdown_c').select('.selectpicker');
-
-						let optionsC = dropC.selectAll('option')
-								.data(dropData);
-
-
-						optionsC.exit().remove();
-
-						let optionsCEnter = optionsC.enter()
-								.append('option')
-								.attr('value', (d, i) => d[1]);
-
-						optionsCEnter.append('text')
-								.text((d, i) => d[0]);
-
-						optionsC = optionsCEnter.merge(optionsC);
-
-						dropC.on('change', function(d, i) {
-							that.newNorm = this.options[this.selectedIndex].value;
-							that.updateHeatmap();
-						});
-
-						/* active dropdown menu */
-						$('#selectpicker_c').selectpicker();
-					}
 
 		// renderSwitch(div, labelText) {
     //   let button = div.append("label").classed("switch").append("input").attr("type", "checkbox").append("span").classed("slider round", true);
@@ -667,6 +620,10 @@ class Heatmap{
 			.attr("stroke-width","1px");
 		}
 		this.lastclick = geneName;
+	}
+	setNorm(newNorm){
+		this.newNorm = newNorm;
+		this.updateHeatmap();
 	}
 }
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current

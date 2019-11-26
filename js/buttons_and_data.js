@@ -3,6 +3,7 @@ class Setup {
     this.data = data;
     this.heatmap = heatmapObj;
     this.drPlot = drPlotObj;
+    this.newNorm = 'colvalue';
   }
 
   initial() {
@@ -75,6 +76,20 @@ class Setup {
     // Center
     // Scale
     // Row normalize
+    let dropdownWrap = d3.select('#heatmapButtons');
+
+    let cWrap = dropdownWrap.append('div').classed('dropdown-panel', true);
+
+    cWrap.append('div').classed('c-label', true)
+        .append('text')
+        .text('Normalize Data Over: ');
+
+    cWrap.append('div').attr('id', 'dropdown_c').classed('dropdown', true)
+        .append('select').attr('id', 'selectpicker_c').classed('selectpicker', true);
+
+    this.drawDropDown();
+
+
     // Collumn normalize
     // Whole Table Normalize
     var dataButtonVals = ['Center', 'Scale', 'Ignore_Zero']
@@ -113,6 +128,9 @@ class Setup {
 		/* select all data by default */
     $('#cellButtons').selectpicker('selectAll');
 
+    //run dataButtonChecker on initialization
+    this.dataButtonChecker();
+
     /////////////////////////////////////////////////////
     //Search Bar with Autofill
     /////////////////////////////////////////////////////
@@ -139,7 +157,9 @@ class Setup {
       //This add autofill functionality
       $('#genesSearch')
         .autocomplete({source : this.geneSet})
-          
+
+
+
   }
 
   //This is the function to return whatever has been typed into the searchbar on enter press
@@ -198,6 +218,7 @@ class Setup {
   //Data Operations
   ////////////////////////////////////////////////////////////////////////
   dataButtonChecker(dataSel) {
+    console.log(dataSel);
     //Change the button logic
     this.dataLogic.map(d => {
       if (d.dataButtonName === dataSel) {
@@ -213,12 +234,16 @@ class Setup {
     console.log(selectedVals)
     bob = selectedVals
     //
+    console.log(selectedVals);
     if (selectedVals.includes('Center') && selectedVals.includes('Scale')) {
       //This updates the cells and cells index to work with
       this.cellOps()
 
       //This subsets the matrix based on cell types
       this.matrixSubsetter()
+
+      //this normalizes the data based on whatever has been chosen.
+      this.dataNormalize();
 
       //THis will take the newly updated this.geneMat and center the matrix
       this.dataCenter()
@@ -234,6 +259,9 @@ class Setup {
       //This subsets the matrix based on cell types
       this.matrixSubsetter()
 
+      //this normalizes the data based on whatever has been chosen.
+      this.dataNormalize();
+
       //THis will take the newly updated this.geneMat and center the matrix
       this.dataCenter()
 
@@ -245,6 +273,9 @@ class Setup {
 
       this.matrixSubsetter()
 
+      //this normalizes the data based on whatever has been chosen.
+      this.dataNormalize();
+
       this.dataScale()
 
       this.pcaExecutor()
@@ -252,6 +283,9 @@ class Setup {
       this.cellOps()
 
       this.matrixSubsetter()
+
+      //this normalizes the data based on whatever has been chosen.
+      this.dataNormalize();
 
       this.pcaExecutor()
 
@@ -361,9 +395,104 @@ class Setup {
     this.geneMat = geneMatScaled
   }
 
+  dataNormalize() {
+    console.log(this.newNorm);
+    console.log(this.geneMat);
+
+    if (this.newNorm === 'colvalue'){
+      var geneMatTmp = this.geneMat.transpose();
+      let geneMatNormed = geneMatTmp.data.map((d, i) => {
+        let colmax = math.max([...d])
+        let colmin = math.min([...d])
+        d = d.map(e => (e - colmin) / (Math.max(1,(colmax - colmin))))
+        return (d)
+      })
+      geneMatNormed = new ML.Matrix(geneMatNormed);
+
+      geneMatNormed = geneMatNormed.transpose()
+
+      this.geneMat = geneMatNormed;
+
+    }else if (this.newNorm === 'rowvalue'){
+      let geneMatNormed = this.geneMat.data.map((d, i) => {
+        let rowmax = math.max([...d])
+        let rowmin = math.min([...d])
+
+        d = d.map(e => (e - rowmin) / (Math.max(1,(rowmax - rowmin))))
+        return (d)
+      })
+      geneMatNormed = new ML.Matrix(geneMatNormed);
+
+      this.geneMat = geneMatNormed;
+
+    }else if (this.newNorm === 'totalvalue'){
+      var totmax = 0;
+      var totmin = 100;
+      for (var i = 0; i < this.geneMat.data.length; i++){
+        let rowmax = math.max([...this.geneMat.data[i]]);
+        let rowmin = math.min([...this.geneMat.data[i]]);
+        console.log(rowmax, rowmin);
+        if (rowmax > totmax){
+          totmax = rowmax;
+        }
+        if (rowmin < totmin){
+          totmin = rowmin;
+        }
+      }
+
+      console.log(totmax);
+      console.log(totmin);
+      let geneMatNormed = this.geneMat.data.map((d, i) => {
+        d = d.map(e => (e - totmin) / (Math.max(1,(totmax - totmin))))
+        return (d)
+      })
+      geneMatNormed = new ML.Matrix(geneMatNormed);
+
+      this.geneMat = geneMatNormed;
+
+    }
+
+  }
+
   pcaExecutor() {
+    console.log(this.geneMat);
     this.drPlot.pcaCompute2(this.geneMat, this.cells, this.geneSet)
     this.drPlot.drawPlot()
   }
 
+  drawDropDown() {
+
+      let that = this;
+      let dropDownWrapper = d3.select('#heatmapButtons').select('.dropdown-panel');
+      let dropData = [['Genes','colvalue'],['Cells','rowvalue'],['Whole Table','totalvalue']];
+
+
+      /* CIRCLE DROPDOWN */
+      let dropC = dropDownWrapper.select('#dropdown_c').select('.selectpicker');
+
+      let optionsC = dropC.selectAll('option')
+          .data(dropData);
+
+
+      optionsC.exit().remove();
+
+      let optionsCEnter = optionsC.enter()
+          .append('option')
+          .attr('value', (d, i) => d[1]);
+
+      optionsCEnter.append('text')
+          .text((d, i) => d[0]);
+
+      optionsC = optionsCEnter.merge(optionsC);
+
+      dropC.on('change', function(d, i) {
+        that.newNorm = this.options[this.selectedIndex].value;
+        that.heatmap.setNorm(that.newNorm);
+
+        that.dataButtonChecker()
+      });
+
+      /* active dropdown menu */
+      $('#selectpicker_c').selectpicker();
+    }
 }
