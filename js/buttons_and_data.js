@@ -16,7 +16,8 @@ class Setup {
       .attr('id', 'hClustButton')
       .attr('data-toggle', 'button')
       .attr('aria-pressed', 'true')
-      .on('click', d => this.heatmap.hClustering())
+      //.on('click', d => this.heatmap.hClustering())
+      .on('click', d=>this.hClusterChecker(d))
       .text('Hierarchical Clustering');
 
     ////////////////////////////////////////////////////////////////////
@@ -51,7 +52,7 @@ class Setup {
 			.append('select')
 			.attr('id', 'cellAreaSelectDropdown')
 			.attr('class', 'selectpicker')
-			.attr('data-actions-box', 'true')
+			//.attr('data-actions-box', 'true')
 			.attr('multiple', '');
 
 			
@@ -70,25 +71,22 @@ class Setup {
 
     cellButton = cellButtonEnter.merge(cellButton)
       .append('option')
-      //  .attr('class','btn btn-primary cellButton active')
       .attr('id', d => `${d}Button`)
-      //  .attr('background-color','red')
-      //  .attr('data-toggle','button')
-      //  .attr('aria-pressed','true')
       .on('click', function (d) {
         that.cellButtonChecker(d);
-
       })
       .text(d => d)
 
     $('#cellAreaSelectDropdown').selectpicker('refresh');
 
-
-    $('#cellAreaSelectDropdown').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
-
-      that.cellButtonChecker(clickedIndex, isSelected);
-
-    });
+    $('#cellAreaSelectDropdown')
+      .on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+        console.log(e)
+        console.log(clickedIndex)
+        console.log(isSelected)
+        console.log(previousValue)
+        that.cellButtonChecker(clickedIndex, isSelected, previousValue);
+      });
     /////////////////////////////////////////////////////
     //Data Operation Buttons. We need
     // Center
@@ -176,8 +174,6 @@ class Setup {
       $('#genesSearch')
         .autocomplete({source : this.geneSet})
 
-
-
   }
 
   //This is the function to return whatever has been typed into the searchbar on enter press
@@ -192,44 +188,47 @@ class Setup {
     }
   }
 
-
+  hClusterChecker(d){
+    console.log(d)
+  }
   //This function update the button logic as well as the pca plot for now
-  cellButtonChecker(index, selected) {
-    //Get the button clicked
-    let buttonSel = $("select#cellAreaSelectDropdown>option")[index]
-    //Is the button Clicked?
-    let buttonLogic = selected
-    //IF the button is clicked, then change the click logic to false
-    //Else change it to true
-    if (buttonLogic) {
+  cellButtonChecker(index, selected, allValues) {
+    if(index !== null){
+      //Get the button clicked
+      let buttonSel = $("select#cellAreaSelectDropdown>option")[index]
+      //Is the button Clicked?
+      let buttonLogic = selected
+      console.log(buttonLogic)
+      //IF the button is clicked, then change the click logic to false
+      //Else change it to true
+      if (buttonLogic) {
+        let buttonPressed = buttonSel.innerText
+        console.log(buttonPressed)
+        this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = true
+        console.log(this.cellsLogic.filter(d => d.cells === buttonPressed))
+      } else {
+        console.log(buttonSel.innerText)
+        let buttonPressed = buttonSel.innerText
+        this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = false
+      }
+
+      console.log(this.cellsLogic)
+      //Now that we have the button logic figured out, grab the cells that are within
+      //these groups
+      let cellsSelected = this.cellsLogic.map((d, i) => {
+        if (d.logic) { return d.cells }
+      }).filter(d => d !== undefined)
+
+      console.log(cellsSelected)
+
+      //Now that we have updated the logic we need to do the PCA calculation again
+      this.pcaExecutor()
+
+
+      // Refactored to here!
       let buttonPressed = buttonSel.innerText
-      console.log(buttonPressed)
-      this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = true
-      console.log(this.cellsLogic.filter(d => d.cells === buttonPressed))
-    } else {
-      console.log(buttonSel.innerText)
-      let buttonPressed = buttonSel.innerText
-      this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = false
+      this.heatmap.removeCell(buttonPressed);
     }
-
-    console.log(this.cellsLogic)
-    //Now that we have the button logic figured out, grab the cells that are within
-    //these groups
-    let cellsSelected = this.cellsLogic.map((d, i) => {
-      if (d.logic) { return d.cells }
-    }).filter(d => d !== undefined)
-
-    console.log(cellsSelected)
-
-    //Now that we have updated the logic we need to do the PCA calculation again
-    this.drPlot.pcaCompute(this.cellsLogic);
-    //drplot.createPlot();
-    this.drPlot.drawPlot();
-
-
-    // Refactored to here!
-    let buttonPressed = buttonSel.innerText
-    this.heatmap.removeCell(buttonPressed);
   }
 
   /////////////////////////////////////////////////////////////////////////
