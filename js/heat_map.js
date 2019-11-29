@@ -6,20 +6,20 @@ class Heatmap{
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapData = data;
+			    this.heatmapDataAll = data;
 
-					this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
+					this.clusterData = JSON.parse(JSON.stringify(this.heatmapDataAll));
 
-					console.log(this.heatmapData);
+					console.log(this.heatmapDataAll);
 
-			    this.cells = Object.keys(this.heatmapData[0].cell_values);
+			    this.cells = Object.keys(this.heatmapDataAll[0].cell_values);
 					this.cells.sort();
 
-					this.selectedCells = Object.keys(this.heatmapData[0].cell_values);
+					this.selectedCells = Object.keys(this.heatmapDataAll[0].cell_values);
 					this.selectedCells.sort();
 					this.init = false;
 
-			    this.genes = this.heatmapData.map(d => d["Gene.name"]);
+			    this.genes = this.heatmapDataAll.map(d => d["Gene.name"]);
 
 					this.newNorm = 'colvalue';
 
@@ -80,8 +80,8 @@ class Heatmap{
 
 	  createHeatmap() {
 
-			this.stretchData(this.heatmapData);
-
+			this.stretchData(this.heatmapDataAll);
+			console.log(this.stretched_data);
 			this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 	    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
@@ -245,6 +245,7 @@ class Heatmap{
 
 	  updateHeatmap() {
 
+
 			this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 			let inCells = this.cells.filter(d => this.selectedCells.indexOf(d) !== -1);
@@ -264,6 +265,22 @@ class Heatmap{
 			  .domain(this.cells)
 			  .padding(0.01);
 
+				if (this.heatmapData.length < 150 && d3.select('#xAxis')._groups[0][0] === null) {
+					d3.select('#heatmapSVGgroup').append("g")
+						.attr("id","xAxis")
+						.call(d3.axisTop(x))
+						.selectAll("text")
+						.attr("y",0)
+						.attr("x",9)
+						.attr("dy",".35em")
+						.attr("transform","translate(0,0) rotate(-90)")
+						.attr("text-anchor","start");
+
+					d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
+
+					}
+
+
 			d3.select('#xAxis')
 			.transition()
 			.duration(1500)
@@ -275,10 +292,14 @@ class Heatmap{
 			.attr("transform","translate(0,0) rotate(-90)")
 			.attr("text-anchor","start");
 
+			d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
+
 			d3.select('#yAxis')
 			.transition()
 			.duration(1500)
 			.call(d3.axisLeft(y));
+
+
 
 			let that = this;
 
@@ -298,7 +319,8 @@ class Heatmap{
 			if (that.brushed === null){
 				d3.select('#rectGroup')
 				.selectAll('rect')
-				.join(this.stretched_data)
+				.data(this.stretched_data)
+				.join('rect')
 				.transition()
 				.duration(1500)
 				.attr("x", d => x(d.gene))
@@ -323,10 +345,12 @@ class Heatmap{
 						return 1;
 					}
 				})
+
 			}else {
 				d3.select('#rectGroup')
 				.selectAll('rect')
-				.join(this.stretched_data)
+				.data(this.stretched_data)
+				.join('rect')
 				.transition()
 				.duration(1500)
 				.attr("x", d => x(d.gene))
@@ -373,14 +397,41 @@ class Heatmap{
 				})
 			}
 
-			d3.select('#rectGroup')
+			if (this.heatmapData.length < 50) {
+				d3.select('#rectGroup').selectAll('text')
+					.data(this.stretched_data)
+					.join("text")
+					.transition()
+					.duration(1500)
+					.attr("x", d => x(d.gene) + (x.bandwidth()/2))
+					.attr("y", d => y(d.cell) + (y.bandwidth()/2))
+					.text(d => d.actualvalue)
+					.attr("text-anchor","middle")
+					.attr("dominant-baseline","middle")
+					.attr("class","heatmapText")
+					.attr("opacity",1);
+				}
+
+				var div = d3.select("body").append("div")
+				.attr("class", "tooltip")
+				.style("opacity", 0);
+
+
+			d3.select("#rectGroup")
+			.selectAll('rect')
+			.on("mouseover", d => div.html(this.tooltipRender(d))
+																			.style("opacity",1)
+																			.style("left", (d3.event.pageX + 10) + "px")
+																			.style("top", (d3.event.pageY - 35) + "px"))
+			.on("mouseout",d => div.style("opacity",0));
+
+			d3.select("#rectGroup")
 			.selectAll('text')
-			.join(this.stretched_data)
-			.transition()
-			.duration(1500)
-			.attr("x", d => x(d.gene) + (x.bandwidth()/2))
-			.attr("y", d => y(d.cell) + (y.bandwidth()/2))
-			.text(d => d.actualvalue)
+			.on("mouseover", d => div.html(this.tooltipRender(d))
+																			.style("opacity",1)
+																			.style("left", (d3.event.pageX + 10) + "px")
+																			.style("top", (d3.event.pageY - 35) + "px"))
+			.on("mouseout",d => div.style("opacity",0));
 
 		if (outCells.length !== 0){
 			let lineData = [y(outCells[0])];
@@ -604,56 +655,26 @@ class Heatmap{
 			this.highlighted = geneName;
 			this.updateHeatmap();
 		}
-	// 	let that = this;
-	// 	console.log(geneName);
-	// 	console.log(this.highlighted);
-	// 	if (geneName === this.highlighted){
-	//
-	// 		d3.select('#rectGroup')
-	// 		.selectAll(`.heatmap${geneName}`)
-	// 		.transition()
-	// 		.duration(800)
-	// 		.style("fill",d => this.myColor(d[this.newNorm]));
-	//
-	//
-	// 		this.highlighted = '';
-	//
-	//
-	// 	}else if(this.highlighted !== ''){
-	// 		d3.select('#rectGroup')
-	// 		.selectAll(`.heatmap${geneName}`)
-	// 		.transition()
-	// 		.duration(800)
-	// 		.style("fill",d => this.redColor(d[this.newNorm]))
-	// 		.attr("opacity",1);
-	//
-	// 		d3.select('#rectGroup')
-	// 		.selectAll(`.heatmap${this.highlighted}`)
-	// 		.transition()
-	// 		.duration(800)
-	// 		.style("fill",function(d){
-	// 			if()
-	// 			return that.myColor(d[this.newNorm]));
-	// 		}
-	//
-	// 		this.highlighted = geneName;
-	//
-	// 	}else{
-	// 		d3.select('#rectGroup')
-	// 		.selectAll(`.heatmap${geneName}`)
-	// 		.transition()
-	// 		.duration(800)
-	// 		.style("fill",d => this.redColor(d[this.newNorm]))
-	// 		.attr("opacity",1);
-	//
-	// 		this.highlighted = geneName;
-	// 	}
 	}
 	setNorm(newNorm){
 		this.newNorm = newNorm;
 		this.updateHeatmap();
 	}
+	updateGenes(geneList){
+		console.log(geneList);
+		let temp = JSON.parse(JSON.stringify(this.heatmapDataAll));
+		console.log(temp);
+		this.stretchData(temp.filter(d => geneList.indexOf(d["Gene.name"]) !== -1));
+
+		console.log(this.heatmapData);
+
+		console.log(this.heatmapDataAll);
+
+		console.log(this.stretched_data);
+		this.updateHeatmap();
+	}
 }
+
 //Version of createHeatmap where you get the average for each cell type. Talk to Lee about possibly implementing this if the current
 //version seems too cumbersome.
 

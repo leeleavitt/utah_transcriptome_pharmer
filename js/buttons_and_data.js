@@ -5,6 +5,7 @@ class Setup {
     this.drPlot = drPlotObj;
     this.newNorm = 'colvalue';
 		this.displayedResult;
+    this.selectedGenes = [];
   }
 
   initial() {
@@ -212,6 +213,11 @@ class Setup {
 				console.log(tmpDRC.value);
 				$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
 			}
+
+      this.selectedGenes.push(searchString.val());
+
+      console.log(this.selectedGenes);
+      that.heatmap.updateGenes(this.selectedGenes);
 
 		//	for(let x in displayedResultContent) {
 		//		console.log(x);
