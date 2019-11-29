@@ -90,7 +90,7 @@ class Setup {
         console.log(previousValue)
         that.cellButtonChecker(clickedIndex, isSelected, previousValue);
       });
-    
+
     /////////////////////////////////////////////////////
     //Data Operation Buttons. We need
     // Center
@@ -184,14 +184,14 @@ class Setup {
     var sliderHolder = d3.select('#buttons')
       .append('div')
       .attr('id','sliderHolder')
-    
+
     var slider = sliderHolder
       .append('div')
       .attr('id', 'slider-range')
-      
+
       $('#slider-range').slider({
 
-        
+
       })
 
 
@@ -221,7 +221,7 @@ class Setup {
       let displayedResultContent = that.displayedResult["content"];
 
 			d3.selectAll('.selectedSearch').classed('selectedSearch',false);
-      
+
       //Now change all genes green on the pca plot
 			//console.log("list");
 			for(let i = 0; i < displayedResultContent.length; i++) {
@@ -231,20 +231,11 @@ class Setup {
 				$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
 			}
 
-<<<<<<< HEAD
+      console.log(displayedResultContent.map(d=>d.value))
       this.selectedGenes.push(searchString.val());
 
       console.log(this.selectedGenes);
       that.heatmap.updateGenes(this.selectedGenes);
-
-		//	for(let x in displayedResultContent) {
-		//		console.log(x);
-		//		//console.log(Object.values(x));
-		//	}
-=======
-      console.log(displayedResultContent.map(d=>d.value))
-      
->>>>>>> 94de7ed8186ace75f68c6b4c93a808f4c6a9e935
 
       searchString.val('')
       $('#genesSearch').autocomplete('close')
@@ -320,7 +311,7 @@ class Setup {
 
   dataOps(){
     var selectedVals = this.selectedVals
-    
+
     if (selectedVals.includes('Center') && selectedVals.includes('Scale')) {
       //This updates the cells and cells index to work with
       this.cellOps()
