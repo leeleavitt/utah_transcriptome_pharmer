@@ -4,6 +4,7 @@ class Setup {
     this.heatmap = heatmapObj;
     this.drPlot = drPlotObj;
     this.newNorm = 'colvalue';
+		this.displayedResult;
   }
 
   initial() {
@@ -16,8 +17,8 @@ class Setup {
       .attr('id', 'hClustButton')
       .attr('data-toggle', 'button')
       .attr('aria-pressed', 'true')
-      //.on('click', d => this.heatmap.hClustering())
-      .on('click', d=>this.hClusterChecker(d))
+      .on('click', d => this.heatmap.hClustering())
+      //.on('click', d=>this.hClusterChecker(d))
       .text('Hierarchical Clustering');
 
     ////////////////////////////////////////////////////////////////////
@@ -55,7 +56,7 @@ class Setup {
 			//.attr('data-actions-box', 'true')
 			.attr('multiple', '');
 
-			
+
     let cellButtonHolder = d3.select('#cellAreaSelectDropdown')
 
     /*cellButtonHolder
@@ -168,8 +169,12 @@ class Setup {
       .on('keyup', d=>this.geneSearcher(d))
 
       //This add autofill functionality
-      $('#genesSearch')
-        .autocomplete({source : this.geneSet})
+  //    $('#genesSearch')
+  //      .autocomplete({source : this.geneSet,
+	//			  response: function( event, ui ) {
+	//				console.log(ui)
+	//				}
+	//			})
 
     //////////////////////////////////////////////////////////
     //Data slider
@@ -191,11 +196,41 @@ class Setup {
   }
 
   //This is the function to return whatever has been typed into the searchbar on enter press
-  geneSearcher(){
+	geneSearcher(){
+		let that = this;
+		$('#genesSearch')
+			.autocomplete({source : this.geneSet,
+				response: function( event, ui ) {
+					that.displayedResult = ui;
+				}
+			})
+
     if(event.key == 'Enter'){
+      $('#genesSearch').autocomplete({
+				  response: function( event, ui ) {}
+			});
+
       var searchString = $('#genesSearch').focus()
       console.log(searchString)
       console.log(searchString.val())
+      console.log(that.displayedResult)
+      console.log(that.displayedResult["content"])
+      let displayedResultContent = that.displayedResult["content"];
+
+			d3.selectAll('.selectedSearch').classed('selectedSearch',false);
+
+			//console.log("list");
+			for(let i = 0; i < displayedResultContent.length; i++) {
+				let tmpDRC = displayedResultContent[i];
+				//console.log(tmpDRC);
+				console.log(tmpDRC.value);
+				$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
+			}
+
+		//	for(let x in displayedResultContent) {
+		//		console.log(x);
+		//		//console.log(Object.values(x));
+		//	}
 
       searchString.val('')
       $('#genesSearch').autocomplete('close')
@@ -249,6 +284,8 @@ class Setup {
   //Data Operations
   ////////////////////////////////////////////////////////////////////////
   dataButtonChecker(dataSel) {
+    //clear hierarchical Clustering
+    this.heatmap.clearHClust();
     //Change the button logic
     this.dataLogic.map(d => {
       if (d.dataButtonName === dataSel) {
