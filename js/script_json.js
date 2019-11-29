@@ -33,6 +33,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		return cellValsTot >= 50000
 	})
 
+	
 	// ///////////////////////////////////////////////////
 	// //Grab the first cell values, this contains cell types names
 	// cells = Object.getOwnPropertyNames(dataTotal[0].cell_values)
