@@ -736,11 +736,13 @@ class drPlot{
 					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
 					$('#geneContainer>text.' + selectedGenePlotText).addClass('selectedTrace');
 					selectedGenePlotText = getClassText;
+					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selectedTrace');
 					$('#geneContainer>text.' + selectedGenePlotText).addClass('selected');
 					that.drawGeneDescription(getClassText.slice(8));
 				} else { /* when there is no selected gene before */
 					selectedGenePlotText = getClassText;
 					//console.log(selectedGenePlotText);
+					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selectedTrace');
 					$('#geneContainer>text.' + selectedGenePlotText).addClass('selected');
 					that.drawGeneDescription(getClassText.slice(8));
 				}
