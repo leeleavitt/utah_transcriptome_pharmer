@@ -454,6 +454,7 @@ class drPlot{
 
         //Turn Off all Selected Genes
         d3.selectAll('.selected').classed('selected',false)
+        d3.selectAll('.selectedTrace').classed('selectedTrace',false)
 
 				d3.select('#brushContainer')
 						.on("click", that.updateGenesWhenClick());
@@ -733,6 +734,7 @@ class drPlot{
 					selectedGenePlotText = "";
 				} else if(selectedGenePlotText != "") { /* when there is a selected gene */
 					$('#geneContainer>text.' + selectedGenePlotText).removeClass('selected');
+					$('#geneContainer>text.' + selectedGenePlotText).addClass('selectedTrace');
 					selectedGenePlotText = getClassText;
 					$('#geneContainer>text.' + selectedGenePlotText).addClass('selected');
 					that.drawGeneDescription(getClassText.slice(8));
@@ -748,6 +750,7 @@ class drPlot{
 				//	selectedGenePlotText = "";
 				//}
 				//that.cleanGeneDescription();
+				selectedGenePlotText = "";
 			}
 		});
 	}
