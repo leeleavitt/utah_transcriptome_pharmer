@@ -232,7 +232,7 @@ class Setup {
 			}
 
       console.log(displayedResultContent.map(d=>d.value))
-      this.selectedGenes.push(searchString.val());
+      this.selectedGenes.push(displayedResultContent.map(d=>d.value));
 
       console.log(this.selectedGenes);
       that.heatmap.updateGenes(this.selectedGenes);
