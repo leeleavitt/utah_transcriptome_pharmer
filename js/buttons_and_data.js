@@ -528,7 +528,6 @@ class Setup {
   }
 
   pcaExecutor() {
-    console.log(this.geneMat);
     this.drPlot.pcaCompute2(this.geneMat, this.cells, this.geneSet)
     this.drPlot.drawPlot()
   }
