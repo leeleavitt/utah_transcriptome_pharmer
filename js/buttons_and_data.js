@@ -1,6 +1,7 @@
 class Setup {
   constructor(data, heatmapObj, drPlotObj) {
     this.data = data;
+    this.geneSet = this.data.map(d=>d['Gene.name'])
     this.heatmap = heatmapObj;
     this.drPlot = drPlotObj;
     this.newNorm = 'colvalue';
@@ -211,6 +212,7 @@ class Setup {
 			});
 
       var searchString = $('#genesSearch').focus()
+      //Needs to be added to a new div
       console.log(searchString)
       console.log(searchString.val())
       console.log(that.displayedResult)
@@ -218,7 +220,8 @@ class Setup {
       let displayedResultContent = that.displayedResult["content"];
 
 			d3.selectAll('.selectedSearch').classed('selectedSearch',false);
-
+      
+      //Now change all genes green on the pca plot
 			//console.log("list");
 			for(let i = 0; i < displayedResultContent.length; i++) {
 				let tmpDRC = displayedResultContent[i];
@@ -227,10 +230,8 @@ class Setup {
 				$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
 			}
 
-		//	for(let x in displayedResultContent) {
-		//		console.log(x);
-		//		//console.log(Object.values(x));
-		//	}
+      console.log(displayedResultContent.map(d=>d.value))
+      
 
       searchString.val('')
       $('#genesSearch').autocomplete('close')
@@ -240,6 +241,7 @@ class Setup {
   hClusterChecker(d){
     console.log(d)
   }
+
   //This function update the button logic as well as the pca plot for now
   cellButtonChecker(index, selected, allValues) {
     if(index !== null){
@@ -271,8 +273,10 @@ class Setup {
       console.log(cellsSelected)
 
       //Now that we have updated the logic we need to do the PCA calculation again
+      this.cellOps()
+      this.matrixSubsetter()
+      this.dataOps()
       this.pcaExecutor()
-
 
       // Refactored to here!
       let buttonPressed = buttonSel.innerText
@@ -297,10 +301,13 @@ class Setup {
       }
     })
 
-    var selectedVals = this.dataLogic.filter(d => d.logic).map(d => d.dataButtonName)
+    this.selectedVals = this.dataLogic.filter(d => d.logic).map(d => d.dataButtonName)
+    this.dataOps()
+  }
 
-    bob = selectedVals
-    //
+  dataOps(){
+    var selectedVals = this.selectedVals
+    
     if (selectedVals.includes('Center') && selectedVals.includes('Scale')) {
       //This updates the cells and cells index to work with
       this.cellOps()
@@ -359,6 +366,9 @@ class Setup {
 
   }
 
+  geneOps(){
+
+  }
   //Function to Subset the cells based on the buttons clicked
   //Should retrun rownames of the data
   cellOps() {
@@ -413,6 +423,7 @@ class Setup {
       geneMatNew.push(geneMat.data[index])
     }
 
+    console.log(geneMatNew)
     ////////////////////////////////////////////////////////////////////////////
     this.geneMat = new ML.Matrix(geneMatNew)
     ////////////////////////////////////////////////////////////////////////////
@@ -556,5 +567,5 @@ class Setup {
 
       /* active dropdown menu */
       $('#selectpicker_c').selectpicker();
-    }
+  }
 }
