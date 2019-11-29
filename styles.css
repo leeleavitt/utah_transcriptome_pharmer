@@ -43,3 +43,10 @@ line.selected{
 	  cursor: pointer;
 }
 
+
+/* buttons */
+text.selectedSearch{
+  fill: green;
+  font-weight: bold; 
+  opacity:1;
+}

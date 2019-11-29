@@ -4,6 +4,7 @@ class Setup {
     this.heatmap = heatmapObj;
     this.drPlot = drPlotObj;
     this.newNorm = 'colvalue';
+		this.displayedResult;
   }
 
   initial() {
@@ -171,17 +172,51 @@ class Setup {
       .on('keyup', d=>this.geneSearcher(d))
 
       //This add autofill functionality
-      $('#genesSearch')
-        .autocomplete({source : this.geneSet})
+  //    $('#genesSearch')
+  //      .autocomplete({source : this.geneSet,
+	//			  response: function( event, ui ) {
+	//				console.log(ui)
+	//				}
+	//			})
 
   }
 
   //This is the function to return whatever has been typed into the searchbar on enter press
-  geneSearcher(){
+	geneSearcher(){
+		let that = this;
+		$('#genesSearch')
+			.autocomplete({source : this.geneSet,
+				response: function( event, ui ) {
+					that.displayedResult = ui;
+				}
+			})
+
     if(event.key == 'Enter'){
+      $('#genesSearch').autocomplete({
+				  response: function( event, ui ) {}
+			});
+
       var searchString = $('#genesSearch').focus()
       console.log(searchString)
       console.log(searchString.val())
+      console.log(that.displayedResult)
+      console.log(that.displayedResult["content"])
+      let displayedResultContent = that.displayedResult["content"];
+
+			d3.selectAll('.selectedSearch').classed('selectedSearch',false);
+
+			//console.log("list");
+			for(let i = 0; i < displayedResultContent.length; i++) {
+				let tmpDRC = displayedResultContent[i];
+				//console.log(tmpDRC);
+				console.log(tmpDRC.value);
+				$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
+			}
+
+		//	for(let x in displayedResultContent) {
+		//		console.log(x);
+		//		//console.log(Object.values(x));
+		//	}
 
       searchString.val('')
       $('#genesSearch').autocomplete('close')
