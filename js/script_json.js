@@ -33,19 +33,20 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		return cellValsTot >= 50000
 	})
 
-	///////////////////////////////////////////////////
-	//Grab the first cell values, this contains cell types names
-	cells = Object.getOwnPropertyNames(dataTotal[0].cell_values)
-	//Remove the number identifier at the and and obtain a unique set
-	cellsUnique = [...new Set(cells.map(d=>d.slice(0,-2)))]
+	
+	// ///////////////////////////////////////////////////
+	// //Grab the first cell values, this contains cell types names
+	// cells = Object.getOwnPropertyNames(dataTotal[0].cell_values)
+	// //Remove the number identifier at the and and obtain a unique set
+	// cellsUnique = [...new Set(cells.map(d=>d.slice(0,-2)))]
 
-	cellsLogic = []
-	cellsUnique.map((d,i)=>{
-		cellsUniqueLogic = {}
-		cellsUniqueLogic['cells']= d
-		cellsUniqueLogic['logic'] = true
-		cellsLogic[i] = cellsUniqueLogic
-	})
+	// cellsLogic = []
+	// cellsUnique.map((d,i)=>{
+	// 	cellsUniqueLogic = {}
+	// 	cellsUniqueLogic['cells']= d
+	// 	cellsUniqueLogic['logic'] = true
+	// 	cellsLogic[i] = cellsUniqueLogic
+	// })
 
 	///////////////////////////////////////////////////
 
@@ -54,13 +55,12 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	/****************************************************************/
 	let heatmap = new Heatmap(genesNoZeroData);
 	heatmap.createHeatmap();
+
 	/****************************************************************/
 	/*									Dimensional Reduction Plot									*/
 	/****************************************************************/
 	let drplot = new drPlot(genesNoZeroData, heatmap);
-	drplot.pcaCompute(cellsLogic);
-	drplot.createPlot();
-	drplot.drawPlot();
+	// drplot.pcaCompute(cellsLogic);
 
 	/****************************************************************/
 	/*					  Button Setup and Data Manipulation  							*/
@@ -68,6 +68,16 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	bob=1
 	let setup = new Setup(genesNoZeroData, heatmap, drplot);
 	setup.initial();
+
+	setup.cellOps()
+	setup.matrixSubsetter()
+	setup.dataOps()
+
+	drplot.createPlot();
+	drplot.drawPlot();
+
+	setup.pcaExecutor()
+
 
 	/****************************************************************/
 	/*										  		Summary Plot	 											*/
