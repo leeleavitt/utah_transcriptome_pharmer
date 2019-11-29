@@ -17,8 +17,8 @@ class Setup {
       .attr('id', 'hClustButton')
       .attr('data-toggle', 'button')
       .attr('aria-pressed', 'true')
-      //.on('click', d => this.heatmap.hClustering())
-      .on('click', d=>this.hClusterChecker(d))
+      .on('click', d => this.heatmap.hClustering())
+      //.on('click', d=>this.hClusterChecker(d))
       .text('Hierarchical Clustering');
 
     ////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ class Setup {
 			//.attr('data-actions-box', 'true')
 			.attr('multiple', '');
 
-			
+
     let cellButtonHolder = d3.select('#cellAreaSelectDropdown')
 
     /*cellButtonHolder
@@ -270,6 +270,8 @@ class Setup {
   //Data Operations
   ////////////////////////////////////////////////////////////////////////
   dataButtonChecker(dataSel) {
+    //clear hierarchical Clustering
+    this.heatmap.clearHClust();
     //Change the button logic
     this.dataLogic.map(d => {
       if (d.dataButtonName === dataSel) {

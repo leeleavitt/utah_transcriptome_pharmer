@@ -526,7 +526,6 @@ class drPlot{
 		updateGenesWhenClick() {
 			//console.log("u click");
 			this.cleanGeneDescription();
-			this.heatmapObject.highlightGene("clear");
 		}
 
     drawPlot(){

@@ -177,6 +177,10 @@ class Heatmap{
 			  .range(["white", "#878787"])
 			  .domain([0,1]);
 
+			this.redColor = d3.scaleLinear()
+				.range(["white", "#fc5b61"])
+				.domain([0,1]);
+
 
 			  d3.select(".tooltip").remove();
 
@@ -196,6 +200,7 @@ class Heatmap{
 			      .data(this.stretched_data)
 			      .enter()
 			      .append("rect")
+						.attr("class",d => `heatmap${d.gene}`)
 			      .attr("x", d => x(d.gene))
 			      .attr("y", d => y(d.cell))
 			      .attr("width", x.bandwidth() )
@@ -288,15 +293,7 @@ class Heatmap{
 					}
 				});
 
-			console.log(this.highlightedGenes);
-
-			d3.select('#highlightRectGroup')
-			.selectAll('rect')
-			.data(this.highlightedGenes)
-			.join('rect')
-			.transition()
-			.duration(1500)
-			.attr('x',d => x(d));
+			console.log(that.brushed);
 
 			if (that.brushed === null){
 				d3.select('#rectGroup')
@@ -311,15 +308,19 @@ class Heatmap{
 				.style("fill", function(d) {
 					if (that.selectedCells.indexOf(d.cell) === -1) {
 						return that.grayColor(d[that.newNorm]);
+					}else if(that.highlighted === d.gene){
+						return that.redColor(d[that.newNorm]);
 					}else {
 						return that.myColor(d[that.newNorm]);
 					}
 				})
 				.attr("opacity", function(d) {
 					if (that.selectedCells.indexOf(d.cell) === -1) {
-						return 0.3
+						return 0.3;
+					}else if(that.highlighted === d.gene){
+						return 1;
 					}else{
-						return 1
+						return 1;
 					}
 				})
 			}else {
@@ -336,13 +337,17 @@ class Heatmap{
 					if (that.brushed.indexOf(d.gene) === -1) {
 						if (that.selectedCells.indexOf(d.cell) === -1) {
 							return that.grayColor(d[that.newNorm]);
-						}else {
-							return that.grayColor(d[that.newNorm])
+						}else if(that.highlighted === d.gene){
+							return that.redColor(d[that.newNorm]);
+						}else{
+							return that.grayColor(d[that.newNorm]);
 						}
-					} else {
+					}else {
 						if (that.selectedCells.indexOf(d.cell) === -1) {
 							return that.grayColor(d[that.newNorm]);
-						}else {
+						}else if(that.highlighted === d.gene){
+							return that.redColor(d[that.newNorm])
+						}else{
 							return that.myColor(d[that.newNorm])
 						}
 					}
@@ -351,14 +356,18 @@ class Heatmap{
 					if (that.brushed.indexOf(d.gene) === -1) {
 						if (that.selectedCells.indexOf(d.cell) === -1) {
 							return 0.3;
-						}else {
+						}else if(that.highlighted === d.gene){
+							return 1;
+						}else{
 							return 0.3;
 						}
 					} else {
 						if (that.selectedCells.indexOf(d.cell) === -1) {
-							return 0.3
-						}else {
-							return 1
+							return 0.3;
+						}else if(that.highlighted === d.gene){
+							return 1;
+						}else{
+							return 1;
 						}
 					}
 				})
@@ -454,7 +463,9 @@ class Heatmap{
 	brushHeatmap(brushed) {
 		console.log(brushed);
 		this.brushed = brushed;
-
+		if (brushed === null){
+			this.highlighted = '';
+		}
 		this.updateHeatmap();
 	}
 
@@ -552,7 +563,14 @@ class Heatmap{
 		}
 	}
 
+	clearHClust(){
+		this.expanded = true;
+		d3.select('#hClustButton').classed("active",false);
+		this.hClustering();
+	}
+
 	removeCell(cellType){
+		this.clearHClust();
 		this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
 
 		if (this.cellsGroups.indexOf(cellType) !== -1){
@@ -573,53 +591,63 @@ class Heatmap{
 			}
 		}
 
-		if(document.getElementById("hClustButton").classList.contains("active")){
-			this.expanded = "yes";
-			this.hClustering();
-			return;
-		};
-
 		this.updateHeatmap();
 	}
 
 	highlightGene(geneName){
-
-		if (geneName === "clear"){
-			this.highlightedGenes = [];
-
-			d3.select('#highlightRectGroup')
-			.selectAll('rect')
-			.remove();
-		}else if (this.lastclick === geneName){
-
-			d3.select(`#highlightRect${geneName}`)
-			.remove();
-
-			this.highlightedGenes.splice(this.highlightedGenes.indexOf(geneName),1);
-
-		}else if (this.highlightedGenes.indexOf(geneName) === -1){
-			this.highlightedGenes.push(geneName);
-			this.highlightedGenes = [...new Set(this.highlightedGenes)]
-
-
-			var x = d3.scaleBand()
-				.range([ 0, this.width ])
-				.domain(this.genes)
-				.padding(0.01);
-
-
-			d3.select('#highlightRectGroup')
-			.append('rect')
-			.attr("id",`highlightRect${geneName}`)
-			.attr("x",x(geneName))
-			.attr("y",0)
-			.attr("width",x.bandwidth())
-			.attr("height",this.height)
-			.attr("stroke","black")
-			.attr("fill","none")
-			.attr("stroke-width","1px");
+		console.log("old: " + this.highlighted);
+		console.log("new: " + geneName);
+		if (this.highlighted === geneName){
+			this.highlighted = '';
+			this.updateHeatmap();
+		}else{
+			this.highlighted = geneName;
+			this.updateHeatmap();
 		}
-		this.lastclick = geneName;
+	// 	let that = this;
+	// 	console.log(geneName);
+	// 	console.log(this.highlighted);
+	// 	if (geneName === this.highlighted){
+	//
+	// 		d3.select('#rectGroup')
+	// 		.selectAll(`.heatmap${geneName}`)
+	// 		.transition()
+	// 		.duration(800)
+	// 		.style("fill",d => this.myColor(d[this.newNorm]));
+	//
+	//
+	// 		this.highlighted = '';
+	//
+	//
+	// 	}else if(this.highlighted !== ''){
+	// 		d3.select('#rectGroup')
+	// 		.selectAll(`.heatmap${geneName}`)
+	// 		.transition()
+	// 		.duration(800)
+	// 		.style("fill",d => this.redColor(d[this.newNorm]))
+	// 		.attr("opacity",1);
+	//
+	// 		d3.select('#rectGroup')
+	// 		.selectAll(`.heatmap${this.highlighted}`)
+	// 		.transition()
+	// 		.duration(800)
+	// 		.style("fill",function(d){
+	// 			if()
+	// 			return that.myColor(d[this.newNorm]));
+	// 		}
+	//
+	// 		this.highlighted = geneName;
+	//
+	// 	}else{
+	// 		d3.select('#rectGroup')
+	// 		.selectAll(`.heatmap${geneName}`)
+	// 		.transition()
+	// 		.duration(800)
+	// 		.style("fill",d => this.redColor(d[this.newNorm]))
+	// 		.attr("opacity",1);
+	//
+	// 		this.highlighted = geneName;
+	// 	}
 	}
 	setNorm(newNorm){
 		this.newNorm = newNorm;
