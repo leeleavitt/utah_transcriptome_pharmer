@@ -36,7 +36,7 @@ class Setup {
       this.cellsLogic[i] = cellsUniqueLogic
     })
 
-    //Button Time!
+    ////////////////////////////////////////////////////////////
     //Append Cell buttons
     let cellAreaSelect = d3.select('#cellButtons');
 
@@ -87,6 +87,7 @@ class Setup {
         console.log(previousValue)
         that.cellButtonChecker(clickedIndex, isSelected, previousValue);
       });
+    
     /////////////////////////////////////////////////////
     //Data Operation Buttons. We need
     // Center
@@ -105,9 +106,6 @@ class Setup {
 
     this.drawDropDown();
 
-
-    // Collumn normalize
-    // Whole Table Normalize
     var dataButtonVals = ['Center', 'Scale', 'Ignore_Zero']
 
     //Use my logic object technique
@@ -149,7 +147,6 @@ class Setup {
 
     /////////////////////////////////////////////////////
     //Search Bar with Autofill
-    /////////////////////////////////////////////////////
     //Add the Search div to the autofill
     //https://jqueryui.com/autocomplete/
     var SearchHolder = d3.select('#buttons')
@@ -173,6 +170,23 @@ class Setup {
       //This add autofill functionality
       $('#genesSearch')
         .autocomplete({source : this.geneSet})
+
+    //////////////////////////////////////////////////////////
+    //Data slider
+    //to select genes on a slider range
+    var sliderHolder = d3.select('#buttons')
+      .append('div')
+      .attr('id','sliderHolder')
+    
+    var slider = sliderHolder
+      .append('div')
+      .attr('id', 'slider-range')
+      
+      $('#slider-range').slider({
+
+        
+      })
+
 
   }
 
