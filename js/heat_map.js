@@ -32,6 +32,7 @@ class Heatmap{
 
 					this.highlightedGenes = [];
 
+					this.geneList = [];
 				}
 
 		stretchData(newdata) {
@@ -660,11 +661,20 @@ class Heatmap{
 		this.newNorm = newNorm;
 		this.updateHeatmap();
 	}
-	updateGenes(geneList){
+	updateGenes(newGenes){
+		console.log(newGenes);
+		this.geneList = this.geneList.concat(newGenes);
+		console.log(this.geneList);
+
 		let temp = JSON.parse(JSON.stringify(this.heatmapDataAll));
-		this.stretchData(temp.filter(d => geneList[0].indexOf(d["Gene.name"]) !== -1));
+		console.log(temp);
+		this.stretchData(temp.filter(d => this.geneList.indexOf(d["Gene.name"]) !== -1));
+		console.log(temp.filter(d => this.geneList.indexOf(d["Gene.name"]) !== -1));
+		console.log(this.heatmapData);
 
+		console.log(this.heatmapDataAll);
 
+		console.log(this.stretched_data);
 		this.updateHeatmap();
 	}
 }
