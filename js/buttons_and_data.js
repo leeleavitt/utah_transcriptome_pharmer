@@ -592,4 +592,5 @@ class Setup {
       /* active dropdown menu */
       $('#selectpicker_c').selectpicker();
   }
+
 }
