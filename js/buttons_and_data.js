@@ -2,6 +2,7 @@ class Setup {
   constructor(data, heatmapObj, drPlotObj) {
     //Total Data Set
     this.data = data;
+    this.dataSubset = []
     this.geneSet = this.data.map(d=>d['Gene.name'])
     this.heatmap = heatmapObj;
     this.drPlot = drPlotObj;
@@ -185,29 +186,12 @@ class Setup {
       .append('label')
       .attr('for','tags')
       .append('input')
-      .attr('id', 'gotermSearch')
+      .attr('id', 'gotermsSearch')
       .on('keyup', d=>this.goTermSearcher(d))
 
-    this.dataSlider()
-  }
-
-  dataSlider(){
-    //////////////////////////////////////////////////////////
-    //Data slider
-    //to select genes on a slider range
-    //Find the most Genes
-    //Find the gene totals
-    var geneTotals = this.dataSubset.map(d=>{
-      let cellVals = Object.values(d.cell_values);
-      let cellValsTot = cellVals.reduce((a,b)=>a+b);
-      return cellValsTot
-    })
-
-    //Determine the range for the slider
-    var geneMax = Math.max(...geneTotals)
-    var geneMin = Math.min(...geneTotals)
-
-
+    
+    /////////////////////////////////////////////////////////////////
+    //SLIDER HOLDER
     var sliderHolder = d3.select('#buttons')
       .append('div')
       .attr('id','sliderHolder')
@@ -229,7 +213,26 @@ class Setup {
     sliderHolder
       .append('div')
       .attr('id', 'slider-range')
-      .on('mouseup', (d,e)=>this.dataValueSelector(e))
+      //.on('mouseup', (d,e)=>this.dataValueSelector(e))
+
+    this.dataSlider()
+  }
+
+  dataSlider(){
+    //////////////////////////////////////////////////////////
+    //Data slider
+    //to select genes on a slider range
+    //Find the most Genes
+    //Find the gene totals
+    var geneTotals = this.dataSubset.map(d=>{
+      let cellVals = Object.values(d.cell_values);
+      let cellValsTot = cellVals.reduce((a,b)=>a+b);
+      return cellValsTot
+    })
+
+    //Determine the range for the slider
+    var geneMax = Math.max(...geneTotals)
+    var geneMin = Math.min(...geneTotals)
 
     var that = this
     $('#slider-range').slider({
@@ -253,12 +256,14 @@ class Setup {
   //This is the function that the slider calls on to subset the data based on the slider values
   dataValueSelector(sliderValues){
     //This takes in my slider values and subsets the data
-    this.dataSubset = this.data.filter(d=>{
+    this.goTermGeneFinder()
+    var subsetData = this.dataSubset.filter(d=>{
       let cellVals = Object.values(d.cell_values)
       let cellValsTot = cellVals.reduce((a,b)=>a+b);
       return cellValsTot >= sliderValues[0] && cellValsTot <= sliderValues[1]
     })
-
+    this.dataSubset = subsetData
+    console.log(subsetData)
     //this.cellOps()
     this.matrixSubsetter()
     this.dataOps()
@@ -334,9 +339,9 @@ class Setup {
   }
 
   goTermSearcher(){
-    console.log(this.goTerms)
+
     let that = this;
-		$('#gotermSearch')
+		$('#gotermsSearch')
 			.autocomplete({source : this.goTerms,
 				response: function( event, ui ) {
 					that.displayedResult = ui;
@@ -344,23 +349,25 @@ class Setup {
 			})
 
     if(event.key == 'Enter'){
-      $('#gotermSearch').autocomplete({
+      $('#gotermsSearch').autocomplete({
 				  response: function( event, ui ) {}
 			});
 
       //What was searched?
-      var searchString = $('#gotermSearch').focus()
+      var searchString = $('#gotermsSearch').focus()
       //Add it to the Search Terms
       this.goTermsSearchTerms.push(searchString.val());
       console.log(this.goTermsSearchTerms)
 
       //Subset the data based on the newly added gotermSearchTerm
       this.goTermGeneFinder()
+      this.matrixSubsetter()
+      this.pcaExecutor()
 
-      that.heatmap.updateGenes(this.selectedGenes);
+      //that.heatmap.updateGenes(this.selectedGenes);
 
       searchString.val('')
-      $('#gotermSearch').autocomplete('close')
+      $('#gotermsSearch').autocomplete('close')
     }
 
   }
@@ -370,7 +377,7 @@ class Setup {
   //added to this class
   goTermGeneFinder(){
     //subset the data based on the search Terms
-    this.dataSubset = []
+    //this.dataSubset = []
 
     for(var i=0; i<this.goTermsSearchTerms.length; i++){
       // Turn this into array
@@ -582,7 +589,7 @@ class Setup {
 
     ////////////////////////////////////////////////////////////////////////////
     //Gene Ops
-    this.geneSet = this.data.map(d => d['Gene.name'])
+    this.geneSet = this.dataSubset.map(d => d['Gene.name'])
     ////////////////////////////////////////////////////////////////////////////
   }
 
