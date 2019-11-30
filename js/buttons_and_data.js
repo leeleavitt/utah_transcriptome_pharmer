@@ -271,7 +271,7 @@ class Setup {
     
     let that = this;
 		$('#genesSearch')
-			.autocomplete({source : this.goTerms,
+			.autocomplete({source : this.geneSet,
 				response: function( event, ui ) {
 					that.displayedResult = ui;
 				}
