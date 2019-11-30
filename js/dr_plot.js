@@ -455,6 +455,7 @@ class drPlot{
         //Turn Off all Selected Genes
         d3.selectAll('.selected').classed('selected',false)
         d3.selectAll('.selectedTrace').classed('selectedTrace',false)
+        d3.selectAll('.selectedSearch').classed('selectedSearch',false)
 
 				d3.select('#brushContainer')
 						.on("click", that.updateGenesWhenClick());

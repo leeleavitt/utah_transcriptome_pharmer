@@ -282,30 +282,51 @@ class Setup {
 				  response: function( event, ui ) {}
 			});
 
-      var searchString = $('#genesSearch').focus()
-      //Needs to be added to a new div
-      console.log(searchString)
-      console.log(searchString.val())
-      console.log(that.displayedResult)
-      console.log(that.displayedResult["content"])
+      let searchString = $('#genesSearch').focus()
+      let searchStringVal = searchString.val();
       let displayedResultContent = that.displayedResult["content"];
 
-			d3.selectAll('.selectedSearch').classed('selectedSearch',false);
+//      console.log(searchString)
+//      console.log(searchString.val())
+//			console.log("nofoucs");
+//      console.log(that.displayedResult)
+//      console.log(that.displayedResult["content"])
+//
+			
+			if(that.geneSet.includes(searchStringVal)) { /* check if user select one gene */
 
-      //Now change all genes green on the pca plot
-			//console.log("list");
-			for(let i = 0; i < displayedResultContent.length; i++) {
-				let tmpDRC = displayedResultContent[i];
-				//console.log(tmpDRC);
-				console.log(tmpDRC.value);
-				$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
+				$('#geneContainer>text.' + 'genePlot' + searchStringVal).addClass('selectedSearch');
+
+			} else if(displayedResultContent.length > 0) { /* if multiple selections */
+
+				//d3.selectAll('.selectedSearch').classed('selectedSearch',false);
+
+				//Now change all genes green on the pca plot
+				//console.log("list");
+				for(let i = 0; i < displayedResultContent.length; i++) {
+					let tmpDRC = displayedResultContent[i];
+					//console.log(tmpDRC);
+					//console.log(tmpDRC.value);
+					$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
+				}
+
+			} else { /* if no selection */
+
+				////Needs to be added to a new div
+				//console.log("foucs");
+				//console.log(that.geneSet);
+
 			}
 
-      console.log(displayedResultContent.map(d=>d.value))
-      this.selectedGenes.push(searchString.val());
+			/* heatmap */
+      //console.log(displayedResultContent.map(d=>d.value))
+      //this.selectedGenes.push(searchString.val());
 
-      console.log(this.selectedGenes);
-      that.heatmap.updateGenes(this.selectedGenes);
+      //console.log(this.selectedGenes);
+      //that.heatmap.updateGenes(this.selectedGenes);
+      console.log(displayedResultContent.map(d=>d.value))
+
+      that.heatmap.updateGenes(displayedResultContent.map(d=>d.value));
 
       searchString.val('')
       $('#genesSearch').autocomplete('close')
@@ -698,4 +719,5 @@ class Setup {
       /* active dropdown menu */
       $('#selectpicker_c').selectpicker();
   }
+
 }
