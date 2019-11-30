@@ -30,7 +30,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	genesNoZeroData = genes.filter(d=>{
 		let cellVals = Object.values(d.cell_values)
 		let cellValsTot = cellVals.reduce((a,b)=>a+b);
-		return cellValsTot >= 50000
+		return cellValsTot >= 20000
 	})
 
 	
@@ -67,15 +67,22 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	/****************************************************************/
 	bob=1
 	let setup = new Setup(genesNoZeroData, heatmap, drplot);
+
+	//First subset the data. There are 2 default search values
+	setup.goTermGeneFinder()
+	//Now initialize the buttons
 	setup.initial();
-
+	//Find which cells are ready and selected
+	setup.dataValueSelector([50000,3212092])
 	setup.cellOps()
+	//Subset the matrix
 	setup.matrixSubsetter()
+	//ensure the data operation are goin
 	setup.dataOps()
-
+	//Initialize the dimensional reduction plot
 	drplot.createPlot();
 	drplot.drawPlot();
-
+	//Execute and plot the pca
 	setup.pcaExecutor()
 
 

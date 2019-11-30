@@ -1,12 +1,17 @@
 class Setup {
   constructor(data, heatmapObj, drPlotObj) {
+    //Total Data Set
     this.data = data;
     this.geneSet = this.data.map(d=>d['Gene.name'])
     this.heatmap = heatmapObj;
     this.drPlot = drPlotObj;
     this.newNorm = 'colvalue';
 		this.displayedResult;
+    //To collecte serached genes into
     this.selectedGenes = [];
+    //Select cells based on go terms
+    this.goTermsSearchTerms = ['ion channel', 'G-protein']
+    this.goTerms = [...new Set( this.data.map(d=>d['GO.term.name']).flat() )]
   }
 
   initial() {
@@ -152,16 +157,16 @@ class Setup {
     //Search Bar with Autofill
     //Add the Search div to the autofill
     //https://jqueryui.com/autocomplete/
-    var SearchHolder = d3.select('#buttons')
+    var geneSearchHolder = d3.select('#buttons')
       .append('div')
-      .attr('id', 'search')
+      .attr('id', 'geneSearch')
 
     //I need to Subset this matrix because this.matrixSubsetter() creates this.geneSet
     this.cellOps()
     this.matrixSubsetter()
 
     //Now make a search bar. This is using jquery
-    SearchHolder
+    geneSearchHolder
       .append('div')
       .attr('class','ui-widget')
       .append('label')
@@ -170,38 +175,103 @@ class Setup {
       .attr('id', 'genesSearch')
       .on('keyup', d=>this.geneSearcher(d))
 
-      //This add autofill functionality
-  //    $('#genesSearch')
-  //      .autocomplete({source : this.geneSet,
-	//			  response: function( event, ui ) {
-	//				console.log(ui)
-	//				}
-	//			})
+    var gotermSearchHolder = d3.select('#buttons')
+      .append('div')
+      .attr('id', 'gotermSearch')
 
+    gotermSearchHolder
+      .append('div')
+      .attr('class','ui-widget')
+      .append('label')
+      .attr('for','tags')
+      .append('input')
+      .attr('id', 'gotermSearch')
+      .on('keyup', d=>this.goTermSearcher(d))
+
+    this.dataSlider()
+  }
+
+  dataSlider(){
     //////////////////////////////////////////////////////////
     //Data slider
     //to select genes on a slider range
+    //Find the most Genes
+    //Find the gene totals
+    var geneTotals = this.dataSubset.map(d=>{
+      let cellVals = Object.values(d.cell_values);
+      let cellValsTot = cellVals.reduce((a,b)=>a+b);
+      return cellValsTot
+    })
+
+    //Determine the range for the slider
+    var geneMax = Math.max(...geneTotals)
+    var geneMin = Math.min(...geneTotals)
+
+
     var sliderHolder = d3.select('#buttons')
       .append('div')
       .attr('id','sliderHolder')
+    
+    var sliderDesc = sliderHolder
+      .append('p')
+    
+    sliderDesc
+      .append('label')
+      .attr('for', 'ammount')
+      .text('Gene Totals:')
+    
+    sliderDesc
+      .append('input')
+      .attr('type', 'text')
+      .attr('id', 'amount')
+    //   .attr('readonly style', "border:0; color:#f6931f; font-weight:bold;")
 
-    var slider = sliderHolder
+    sliderHolder
       .append('div')
       .attr('id', 'slider-range')
+      .on('mouseup', (d,e)=>this.dataValueSelector(e))
 
-      $('#slider-range').slider({
+    var that = this
+    $('#slider-range').slider({
+      range: true,
+      min : geneMin,
+      max : geneMax,
+      values:[50000, geneMax],
+      slide : function(event, ui){
+        //this.dataValueSelector(ui);
+        $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+      },
+      stop: function(event, ui){
+        that.dataValueSelector(ui.values)
+      }
+    });
+    
+    $( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
+      " - $" + $( "#slider-range" ).slider( "values", 1 ) );
+  }
 
+  //This is the function that the slider calls on to subset the data based on the slider values
+  dataValueSelector(sliderValues){
+    //This takes in my slider values and subsets the data
+    this.dataSubset = this.data.filter(d=>{
+      let cellVals = Object.values(d.cell_values)
+      let cellValsTot = cellVals.reduce((a,b)=>a+b);
+      return cellValsTot >= sliderValues[0] && cellValsTot <= sliderValues[1]
+    })
 
-      })
-
+    //this.cellOps()
+    this.matrixSubsetter()
+    this.dataOps()
+    this.pcaExecutor()
 
   }
 
   //This is the function to return whatever has been typed into the searchbar on enter press
 	geneSearcher(){
-		let that = this;
+    
+    let that = this;
 		$('#genesSearch')
-			.autocomplete({source : this.geneSet,
+			.autocomplete({source : this.goTerms,
 				response: function( event, ui ) {
 					that.displayedResult = ui;
 				}
@@ -242,8 +312,66 @@ class Setup {
     }
   }
 
-  hClusterChecker(d){
-    console.log(d)
+  goTermSearcher(){
+    console.log(this.goTerms)
+    let that = this;
+		$('#gotermSearch')
+			.autocomplete({source : this.goTerms,
+				response: function( event, ui ) {
+					that.displayedResult = ui;
+				}
+			})
+
+    if(event.key == 'Enter'){
+      $('#gotermSearch').autocomplete({
+				  response: function( event, ui ) {}
+			});
+
+      //What was searched?
+      var searchString = $('#gotermSearch').focus()
+      //Add it to the Search Terms
+      this.goTermsSearchTerms.push(searchString.val());
+      console.log(this.goTermsSearchTerms)
+
+      //Subset the data based on the newly added gotermSearchTerm
+      this.goTermGeneFinder()
+
+      that.heatmap.updateGenes(this.selectedGenes);
+
+      searchString.val('')
+      $('#gotermSearch').autocomplete('close')
+    }
+
+  }
+
+  //Function which subsets genes based on go terms
+  //This creates dataSubset a subset of the larger dataset
+  //added to this class
+  goTermGeneFinder(){
+    //subset the data based on the search Terms
+    this.dataSubset = []
+
+    for(var i=0; i<this.goTermsSearchTerms.length; i++){
+      // Turn this into array
+      var dataTotalArray = Object.values(this.data)
+      
+      //Filter all genes
+      var dataSelect = dataTotalArray.filter(d=>{
+        //filter if the array of go terms have a match for the term
+        let goTermsVal = d['GO.term.name'].filter(d=>d.match(this.goTermsSearchTerms[i]))
+        return goTermsVal.length > 0
+      })
+      this.dataSubset = this.dataSubset.concat(dataSelect)
+    }
+  
+    //Remove duplicate genes.
+    this.dataSubset = [...new Set(this.dataSubset)]
+  
+    //Some Gene values are null so remove them
+    this.dataSubset = this.dataSubset.filter(d=>d.cell_values!=null)
+    
+    console.log(this.dataSubset)
+  
   }
 
   //This function update the button logic as well as the pca plot for now
@@ -377,7 +505,7 @@ class Setup {
   //Should retrun rownames of the data
   cellOps() {
     //Find all cells
-    var cells = Object.getOwnPropertyNames(this.data[0].cell_values)
+    var cells = Object.getOwnPropertyNames(this.dataSubset[0].cell_values)
 
     //Now we need find which match up with the cells in the dataframe
     var cellsGenericNames = cells.map(d => d.slice(0, -2))
@@ -413,7 +541,7 @@ class Setup {
     //Matrix Ops
     //////////////////////////////////////////////////
     //Extract the cell values out of the matrix
-    var geneMatrix = this.data.map(d => Object.values(d.cell_values))
+    var geneMatrix = this.dataSubset.map(d => Object.values(d.cell_values))
 
     //Make the array of arrays a matrix
     var geneMat = new ML.Matrix(geneMatrix)
@@ -427,7 +555,6 @@ class Setup {
       geneMatNew.push(geneMat.data[index])
     }
 
-    console.log(geneMatNew)
     ////////////////////////////////////////////////////////////////////////////
     this.geneMat = new ML.Matrix(geneMatNew)
     ////////////////////////////////////////////////////////////////////////////
