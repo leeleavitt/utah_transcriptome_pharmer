@@ -254,6 +254,9 @@ class Setup {
 
       //console.log(this.selectedGenes);
       //that.heatmap.updateGenes(this.selectedGenes);
+      console.log(displayedResultContent.map(d=>d.value))
+
+      that.heatmap.updateGenes(displayedResultContent.map(d=>d.value));
 
       searchString.val('')
       $('#genesSearch').autocomplete('close')
