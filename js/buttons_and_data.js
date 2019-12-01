@@ -342,10 +342,12 @@ class Setup {
 
     let that = this;
 		$('#gotermsSearch')
-			.autocomplete({source : this.goTerms,
+			.autocomplete({
+        source : this.goTerms,
 				response: function( event, ui ) {
 					that.displayedResult = ui;
-				}
+        },
+        minLength : 3
 			})
 
     if(event.key == 'Enter'){
