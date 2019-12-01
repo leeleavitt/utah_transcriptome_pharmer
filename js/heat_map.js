@@ -240,7 +240,7 @@ class Heatmap{
 			.style("font-weight","normal")
 			.style("font-size",12)
 			.attr("fill-opacity",function() {
-				if (that.heatmapData.length <= 120){
+				if (that.heatmapData.length <= 100){
 					return 1
 				}
 				return 0
@@ -514,7 +514,7 @@ class Heatmap{
 			var svg = d3.select("#heatmapSVG")
 				.append("g")
 				.attr("id","hCluster")
-				.attr("transform","translate(150,0)")
+				.attr("transform","translate(150,10)")
 				.attr("opacity",0)
 				.transition()
 				.duration(1500)
@@ -554,10 +554,10 @@ class Heatmap{
 									})
 				.style("fill", 'none')
 				.attr("stroke", '#ccc')
-			if (this.heatmapData.length >= 120){
-				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,410)");
+			if (this.heatmapData.length >= 100){
+				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,270)");
 			}else {
-				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,450)");
+				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,300)");
 			}
 
 			this.newData = [];
@@ -625,6 +625,7 @@ class Heatmap{
 		this.clearHClust();
 		this.geneList = this.geneList.concat(newGenes);
 		this.genes = this.geneList;
+		console.log(this.genes);
 
 		let temp = JSON.parse(JSON.stringify(this.heatmapDataAll));
 		let newData = temp.filter(d => this.geneList.indexOf(d["Gene.name"]) !== -1);
@@ -635,6 +636,24 @@ class Heatmap{
 				delete this.clusterData[i].cell_values[this.notSelectedCells[j]]
 			}
 		}
+		this.updateHeatmap();
+	}
+
+	updateGenesSlider(genes){
+		this.clearHClust();
+		this.genes = genes;
+		console.log(this.genes);
+
+		let temp = JSON.parse(JSON.stringify(this.heatmapDataAll));
+		let newData = temp.filter(d => this.genes.indexOf(d["Gene.name"]) !== -1);
+		this.stretchData(newData);
+		this.clusterData = JSON.parse(JSON.stringify(newData));
+		for (var i = 0; i < this.clusterData.length; i++){
+			for (var j = 0; j < this.notSelectedCells.length; j++){
+				delete this.clusterData[i].cell_values[this.notSelectedCells[j]]
+			}
+		}
+
 		this.updateHeatmap();
 	}
 }

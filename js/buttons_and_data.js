@@ -200,7 +200,7 @@ class Setup {
     gotermSearchHolder
       .append('div')
       .attr('id', "gotermBucket")
-  
+
     /////////////////////////////////////////////////////////////////
     //SLIDER HOLDER
     var sliderHolder = d3.select('#buttons')
@@ -234,7 +234,7 @@ class Setup {
 		sliderLabel
 			.append('span')
 			.text('-')
-		
+
 		sliderLabel
 			.append('input')
 			.attr('type', 'text')
@@ -359,7 +359,7 @@ class Setup {
   }
 
   geneFinder(){
-    
+
   }
   goTermSearcher(){
 
@@ -374,7 +374,7 @@ class Setup {
         },
         minLength : 3
 			})
-    
+
     console.log(event)
     if(event.key == 'Enter'){
       $('#gotermsSearch').autocomplete({
@@ -391,6 +391,7 @@ class Setup {
 
       //Subset the data based on the newly added gotermSearchTerm
       this.goTermGeneFinder()
+      this.dataSlider()
       this.dataValueSelector([100000, 500000000])
 
       //that.heatmap.updateGenes(this.selectedGenes);
@@ -409,7 +410,7 @@ class Setup {
 
     var gotermBucketEnter = gotermBucket.enter()
       .append('p')
-    
+
     gotermBucket.exit()
       .style('opacity', 1)
       .transition()
@@ -418,10 +419,10 @@ class Setup {
       .remove()
 
     gotermBucket = gotermBucketEnter.merge(gotermBucket)
-    
+
     gotermBucket
       .text(d=>d)
-    
+
     gotermBucket
       .on('click', d=>this.bucketCleaner(d) )
 
@@ -445,7 +446,7 @@ class Setup {
   //added to this class
   goTermGeneFinder(){
     //subset the data based on the search Terms
-    //this.dataSubset = []
+    this.dataSubset = []
     console.log(this.goTermsSearchTerms)
 
     for(var i=0; i<this.goTermsSearchTerms.length; i++){
@@ -655,6 +656,9 @@ class Setup {
     //Gene Ops
     this.geneSet = this.dataSubset.map(d => d['Gene.name'])
     ////////////////////////////////////////////////////////////////////////////
+
+
+    this.heatmap.updateGenesSlider(this.geneSet);
   }
 
   dataCenter() {
