@@ -189,21 +189,21 @@ class Setup {
       .attr('id', 'gotermsSearch')
       .on('keyup', d=>this.goTermSearcher(d))
 
-    
+
     /////////////////////////////////////////////////////////////////
     //SLIDER HOLDER
     var sliderHolder = d3.select('#buttons')
       .append('div')
       .attr('id','sliderHolder')
-    
+
     var sliderDesc = sliderHolder
       .append('p')
-    
+
     sliderDesc
       .append('label')
       .attr('for', 'ammount')
       .text('Gene Totals:')
-    
+
     sliderDesc
       .append('input')
       .attr('type', 'text')
@@ -248,7 +248,7 @@ class Setup {
         that.dataValueSelector(ui.values)
       }
     });
-    
+
     $( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
       " - $" + $( "#slider-range" ).slider( "values", 1 ) );
   }
@@ -273,7 +273,7 @@ class Setup {
 
   //This is the function to return whatever has been typed into the searchbar on enter press
 	geneSearcher(){
-    
+
     let that = this;
 		$('#genesSearch')
 			.autocomplete({source : this.geneSet,
@@ -297,7 +297,7 @@ class Setup {
 //      console.log(that.displayedResult)
 //      console.log(that.displayedResult["content"])
 //
-			
+
 			if(that.geneSet.includes(searchStringVal)) { /* check if user select one gene */
 
 				$('#geneContainer>text.' + 'genePlot' + searchStringVal).addClass('selectedSearch');
@@ -382,7 +382,7 @@ class Setup {
     for(var i=0; i<this.goTermsSearchTerms.length; i++){
       // Turn this into array
       var dataTotalArray = Object.values(this.data)
-      
+
       //Filter all genes
       var dataSelect = dataTotalArray.filter(d=>{
         //filter if the array of go terms have a match for the term
@@ -391,15 +391,15 @@ class Setup {
       })
       this.dataSubset = this.dataSubset.concat(dataSelect)
     }
-  
+
     //Remove duplicate genes.
     this.dataSubset = [...new Set(this.dataSubset)]
-  
+
     //Some Gene values are null so remove them
     this.dataSubset = this.dataSubset.filter(d=>d.cell_values!=null)
-    
+
     console.log(this.dataSubset)
-  
+
   }
 
   //This function update the button logic as well as the pca plot for now
@@ -449,7 +449,9 @@ class Setup {
   ////////////////////////////////////////////////////////////////////////
   dataButtonChecker(dataSel) {
     //clear hierarchical Clustering
-    this.heatmap.clearHClust();
+    if (dataSel !== 'dontclear'){
+      this.heatmap.clearHClust();
+    }
     //Change the button logic
     this.dataLogic.map(d => {
       if (d.dataButtonName === dataSel) {
@@ -720,7 +722,7 @@ class Setup {
         that.newNorm = this.options[this.selectedIndex].value;
         that.heatmap.setNorm(that.newNorm);
 
-        that.dataButtonChecker()
+        that.dataButtonChecker('dontclear');
       });
 
       /* active dropdown menu */

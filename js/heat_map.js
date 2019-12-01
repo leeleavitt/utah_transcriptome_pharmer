@@ -1,8 +1,8 @@
 class Heatmap{
 	  constructor(data){
-			    this.margin = {top: 50, right: 30, bottom: 30, left: 150};
+			    this.margin = {top: 100, right: 30, bottom: 30, left: 150};
 
-			    this.width = 1500 - this.margin.left - this.margin.right;
+			    this.width = 1000 - this.margin.left - this.margin.right;
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
@@ -17,6 +17,7 @@ class Heatmap{
 
 					this.selectedCells = Object.keys(this.heatmapDataAll[0].cell_values);
 					this.selectedCells.sort();
+					this.notSelectedCells = [];
 					this.init = false;
 
 			    this.genes = this.heatmapDataAll.map(d => d["Gene.name"]);
@@ -33,10 +34,13 @@ class Heatmap{
 					this.highlightedGenes = [];
 
 					this.geneList = [];
+
+
 				}
 
 		stretchData(newdata) {
 			this.heatmapData = newdata;
+
 			this.stretched_data = [];
 			let rowMinMax = {};
 			for (let i = 0; i < this.cells.length; i++){
@@ -82,7 +86,7 @@ class Heatmap{
 	  createHeatmap() {
 
 			this.stretchData(this.heatmapDataAll);
-			console.log(this.stretched_data);
+
 			this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 	    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
@@ -108,7 +112,6 @@ class Heatmap{
 		      .domain(this.genes)
 		      .padding(0.01);
 
-			if (this.heatmapData.length < 150) {
 				svg.append("g")
 					.attr("id","xAxis")
 			    .call(d3.axisTop(x))
@@ -117,11 +120,11 @@ class Heatmap{
 					.attr("x",9)
 					.attr("dy",".35em")
 			    .attr("transform","translate(0,0) rotate(-90)")
-					.attr("text-anchor","start");
+					.attr("text-anchor","start")
+					.attr("fill-opacity",1);
 
 				d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
 
-				}
 
 
 			// Build X scales and axis:
@@ -183,60 +186,13 @@ class Heatmap{
 				.domain([0,1]);
 
 
-			  d3.select(".tooltip").remove();
-
-			  var div = d3.select("body").append("div")
-			  .attr("class", "tooltip")
-			  .style("opacity", 0);
-
-
 			//Read the data
 			  let rectGroup = svg
 						.append('g')
 						.attr('id','rectGroup');
 
-
-
-				rectGroup.selectAll()
-			      .data(this.stretched_data)
-			      .enter()
-			      .append("rect")
-						.attr("class",d => `heatmap${d.gene}`)
-			      .attr("x", d => x(d.gene))
-			      .attr("y", d => y(d.cell))
-			      .attr("width", x.bandwidth() )
-			      .attr("height", y.bandwidth() )
-			      .style("fill", d => this.myColor(d.colvalue))
-			      .on("mouseover", d => div.html(this.tooltipRender(d))
-							                              .style("opacity",1)
-							                              .style("left", (d3.event.pageX + 10) + "px")
-							                              .style("top", (d3.event.pageY - 35) + "px"))
-			      .on("mouseout",d => div.style("opacity",0))
-						.classed("notselected",false)
-						.attr("opacity",1);
-
-						if (this.heatmapData.length < 50) {
-							rectGroup.selectAll()
-								.data(this.stretched_data)
-								.enter()
-								.append("text")
-								.attr("x", d => x(d.gene) + (x.bandwidth()/2))
-								.attr("y", d => y(d.cell) + (y.bandwidth()/2))
-								.text(d => d.actualvalue)
-								.attr("text-anchor","middle")
-								.attr("dominant-baseline","middle")
-								.attr("class","heatmapText")
-								.on("mouseover", d => div.html(this.tooltipRender(d))
-									                              .style("opacity",1)
-									                              .style("left", (d3.event.pageX + 10) + "px")
-									                              .style("top", (d3.event.pageY - 35) + "px"))
-					      .on("mouseout",d => div.style("opacity",0))
-								.attr("opacity",1);
-							}
-
-					svg.append('g')
-					.attr("id","highlightRectGroup");
-			  }
+				this.updateHeatmap();
+		}
 
 		// renderSwitch(div, labelText) {
     //   let button = div.append("label").classed("switch").append("input").attr("type", "checkbox").append("span").classed("slider round", true);
@@ -245,9 +201,7 @@ class Heatmap{
     // }
 
 	  updateHeatmap() {
-
-
-			this.genes = this.heatmapData.map(d => d["Gene.name"]);
+			let that = this;
 
 			let inCells = this.cells.filter(d => this.selectedCells.indexOf(d) !== -1);
 
@@ -266,43 +220,41 @@ class Heatmap{
 			  .domain(this.cells)
 			  .padding(0.01);
 
-				if (this.heatmapData.length < 150 && d3.select('#xAxis')._groups[0][0] === null) {
-					d3.select('#heatmapSVGgroup').append("g")
-						.attr("id","xAxis")
-						.call(d3.axisTop(x))
-						.selectAll("text")
-						.attr("y",0)
-						.attr("x",9)
-						.attr("dy",".35em")
-						.attr("transform","translate(0,0) rotate(-90)")
-						.attr("text-anchor","start");
-
-					d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
-
-					}
-
-
 			d3.select('#xAxis')
 			.transition()
 			.duration(1500)
 			.call(d3.axisTop(x))
 			.selectAll("text")
+			.attr("id",d => `xAxisText${d}`)
 			.attr("y",0)
 			.attr("x",9)
 			.attr("dy",".35em")
 			.attr("transform","translate(0,0) rotate(-90)")
 			.attr("text-anchor","start");
 
+
 			d3.select('#xAxis').selectAll('text').on('click',d => this.sortRows(d));
+
+			d3.select('#xAxis')
+			.selectAll('text')
+			.style("font-weight","normal")
+			.style("font-size",12)
+			.attr("fill-opacity",function() {
+				if (that.heatmapData.length <= 120){
+					return 1
+				}
+				return 0
+			});
+
+			d3.select(`#xAxisText${this.highlighted}`)
+			.attr("fill-opacity",1)
+			.style("font-weight","bold")
+			.style("font-size",18);
 
 			d3.select('#yAxis')
 			.transition()
 			.duration(1500)
 			.call(d3.axisLeft(y));
-
-
-
-			let that = this;
 
 			d3.select('#yAxis')
 				.selectAll('g')
@@ -314,8 +266,6 @@ class Heatmap{
 						return that.cellsColorScale(d.slice(0,-2));
 					}
 				});
-
-			console.log(that.brushed);
 
 			if (that.brushed === null){
 				d3.select('#rectGroup')
@@ -398,7 +348,7 @@ class Heatmap{
 				})
 			}
 
-			if (this.heatmapData.length < 50) {
+			if (this.heatmapData.length <= 25) {
 				d3.select('#rectGroup').selectAll('text')
 					.data(this.stretched_data)
 					.join("text")
@@ -412,6 +362,13 @@ class Heatmap{
 					.attr("class","heatmapText")
 					.attr("opacity",1);
 				}
+
+			if (this.heatmapData.length > 25) {
+				d3.select('#rectGroup').selectAll('text')
+					.remove();
+			}
+
+
 
 				var div = d3.select("body").append("div")
 				.attr("class", "tooltip")
@@ -474,12 +431,15 @@ class Heatmap{
 
 			this.sorted = !this.sorted;
 
+			this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 			this.updateHeatmap();
 	}
 
 	sortRows(row) {
-			let gene = JSON.parse(JSON.stringify(this.heatmapData[this.genes.indexOf(row)]));
+			let genes = this.heatmapData.map(d => d["Gene.name"]);
+
+			let gene = JSON.parse(JSON.stringify(this.heatmapData[genes.indexOf(row)]));
 			gene = gene.cell_values;
 
 			var sortable = [];
@@ -513,7 +473,7 @@ class Heatmap{
 
 
 	brushHeatmap(brushed) {
-		console.log(brushed);
+
 		this.brushed = brushed;
 		if (brushed === null){
 			this.highlighted = '';
@@ -522,6 +482,7 @@ class Heatmap{
 	}
 
 	hClustering(){
+
 		if (this.expanded === true){
 			d3.select('#yAxis').selectAll('rect').on('click',d => this.sortCols(d))
 
@@ -564,7 +525,7 @@ class Heatmap{
 			}
 
 			var cluster = d3.cluster()
-				.size([this.width, 400])
+				.size([this.width, 250])
 				.separation(separation);
 
 
@@ -593,7 +554,7 @@ class Heatmap{
 									})
 				.style("fill", 'none')
 				.attr("stroke", '#ccc')
-			if (this.heatmapData.length >= 150){
+			if (this.heatmapData.length >= 120){
 				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,410)");
 			}else {
 				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,450)");
@@ -603,9 +564,7 @@ class Heatmap{
 
 			indices.forEach(d => this.newData.push(this.heatmapData[d]))
 
-			this.heatmapData = this.newData;
-
-			this.genes = this.heatmapData.map(d => d["Gene.name"]);
+			this.genes = this.newData.map(d => d["Gene.name"]);
 
 			this.expanded = true;
 
@@ -616,6 +575,7 @@ class Heatmap{
 	}
 
 	clearHClust(){
+		console.log("here");
 		this.expanded = true;
 		d3.select('#hClustButton').classed("active",false);
 		this.hClustering();
@@ -647,8 +607,6 @@ class Heatmap{
 	}
 
 	highlightGene(geneName){
-		console.log("old: " + this.highlighted);
-		console.log("new: " + geneName);
 		if (this.highlighted === geneName){
 			this.highlighted = '';
 			this.updateHeatmap();
@@ -657,24 +615,26 @@ class Heatmap{
 			this.updateHeatmap();
 		}
 	}
+
 	setNorm(newNorm){
 		this.newNorm = newNorm;
 		this.updateHeatmap();
 	}
+
 	updateGenes(newGenes){
-		console.log(newGenes);
+		this.clearHClust();
 		this.geneList = this.geneList.concat(newGenes);
-		console.log(this.geneList);
+		this.genes = this.geneList;
 
 		let temp = JSON.parse(JSON.stringify(this.heatmapDataAll));
-		console.log(temp);
-		this.stretchData(temp.filter(d => this.geneList.indexOf(d["Gene.name"]) !== -1));
-		console.log(temp.filter(d => this.geneList.indexOf(d["Gene.name"]) !== -1));
-		console.log(this.heatmapData);
-
-		console.log(this.heatmapDataAll);
-
-		console.log(this.stretched_data);
+		let newData = temp.filter(d => this.geneList.indexOf(d["Gene.name"]) !== -1);
+		this.stretchData(newData);
+		this.clusterData = JSON.parse(JSON.stringify(newData));
+		for (var i = 0; i < this.clusterData.length; i++){
+			for (var j = 0; j < this.notSelectedCells.length; j++){
+				delete this.clusterData[i].cell_values[this.notSelectedCells[j]]
+			}
+		}
 		this.updateHeatmap();
 	}
 }
