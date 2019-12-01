@@ -386,6 +386,7 @@ class Setup {
 
       //Subset the data based on the newly added gotermSearchTerm
       this.goTermGeneFinder()
+      this.dataSlider()
       this.dataValueSelector([100000, 500000000])
 
       //that.heatmap.updateGenes(this.selectedGenes);
@@ -440,7 +441,7 @@ class Setup {
   //added to this class
   goTermGeneFinder(){
     //subset the data based on the search Terms
-    //this.dataSubset = []
+    this.dataSubset = []
     console.log(this.goTermsSearchTerms)
 
     for(var i=0; i<this.goTermsSearchTerms.length; i++){
