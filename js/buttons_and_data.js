@@ -90,10 +90,6 @@ class Setup {
 
     $('#cellAreaSelectDropdown')
       .on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
-        console.log(e)
-        console.log(clickedIndex)
-        console.log(isSelected)
-        console.log(previousValue)
         that.cellButtonChecker(clickedIndex, isSelected, previousValue);
       });
 
@@ -170,6 +166,7 @@ class Setup {
       .append('div')
       .attr('id', 'geneSearch')
 
+
     //I need to Subset this matrix because this.matrixSubsetter() creates this.geneSet
     this.cellOps()
     this.matrixSubsetter()
@@ -180,6 +177,7 @@ class Setup {
       .attr('class','ui-widget')
       .append('label')
       .attr('for','tags')
+      .text('Gene Search: ')
       .append('input')
       .attr('id', 'genesSearch')
       .on('keyup', d=>this.geneSearcher(d))
@@ -193,11 +191,16 @@ class Setup {
       .attr('class','ui-widget')
       .append('label')
       .attr('for','tags')
+      .text('Go Term Search: ')
       .append('input')
       .attr('id', 'gotermsSearch')
       .on('keyup', d=>this.goTermSearcher(d))
 
-
+    //Make a box to contain all searches
+    gotermSearchHolder
+      .append('div')
+      .attr('id', "gotermBucket")
+  
     /////////////////////////////////////////////////////////////////
     //SLIDER HOLDER
     var sliderHolder = d3.select('#buttons')
@@ -242,9 +245,11 @@ class Setup {
       //.on('mouseup', (d,e)=>this.dataValueSelector(e))
 
     this.dataSlider()
+    this.goTermBucketMaker()
   }
 
   dataSlider(){
+    console.log('hello')
     //////////////////////////////////////////////////////////
     //Data slider
     //to select genes on a slider range
@@ -283,6 +288,7 @@ class Setup {
 
   //This is the function that the slider calls on to subset the data based on the slider values
   dataValueSelector(sliderValues){
+    console.log(sliderValues)
     //This takes in my slider values and subsets the data
     this.goTermGeneFinder()
     var subsetData = this.dataSubset.filter(d=>{
@@ -291,7 +297,7 @@ class Setup {
       return cellValsTot >= sliderValues[0] && cellValsTot <= sliderValues[1]
     })
     this.dataSubset = subsetData
-    console.log(subsetData)
+    console.log(this.dataSubset)
     //this.cellOps()
     this.matrixSubsetter()
     this.dataOps()
@@ -319,14 +325,7 @@ class Setup {
       let searchStringVal = searchString.val();
       let displayedResultContent = that.displayedResult["content"];
 
-//      console.log(searchString)
-//      console.log(searchString.val())
-//			console.log("nofoucs");
-//      console.log(that.displayedResult)
-//      console.log(that.displayedResult["content"])
-//
-
-			if(that.geneSet.includes(searchStringVal)) { /* check if user select one gene */
+      if(that.geneSet.includes(searchStringVal)) { /* check if user select one gene */
 
 				$('#geneContainer>text.' + 'genePlot' + searchStringVal).addClass('selectedSearch');
 
@@ -335,29 +334,17 @@ class Setup {
 				//d3.selectAll('.selectedSearch').classed('selectedSearch',false);
 
 				//Now change all genes green on the pca plot
-				//console.log("list");
 				for(let i = 0; i < displayedResultContent.length; i++) {
 					let tmpDRC = displayedResultContent[i];
-					//console.log(tmpDRC);
-					//console.log(tmpDRC.value);
 					$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
 				}
 
 			} else { /* if no selection */
 
-				////Needs to be added to a new div
-				//console.log("foucs");
-				//console.log(that.geneSet);
-
 			}
 
 			/* heatmap */
       //console.log(displayedResultContent.map(d=>d.value))
-      //this.selectedGenes.push(searchString.val());
-
-      //console.log(this.selectedGenes);
-      //that.heatmap.updateGenes(this.selectedGenes);
-      console.log(displayedResultContent.map(d=>d.value))
 
       that.heatmap.updateGenes(displayedResultContent.map(d=>d.value));
 
@@ -366,16 +353,24 @@ class Setup {
     }
   }
 
+  geneFinder(){
+    
+  }
   goTermSearcher(){
+
+    console.log(event)
 
     let that = this;
 		$('#gotermsSearch')
-			.autocomplete({source : this.goTerms,
+			.autocomplete({
+        source : this.goTerms,
 				response: function( event, ui ) {
 					that.displayedResult = ui;
-				}
+        },
+        minLength : 3
 			})
-
+    
+    console.log(event)
     if(event.key == 'Enter'){
       $('#gotermsSearch').autocomplete({
 				  response: function( event, ui ) {}
@@ -387,10 +382,11 @@ class Setup {
       this.goTermsSearchTerms.push(searchString.val());
       console.log(this.goTermsSearchTerms)
 
+      this.goTermBucketMaker()
+
       //Subset the data based on the newly added gotermSearchTerm
       this.goTermGeneFinder()
-      this.matrixSubsetter()
-      this.pcaExecutor()
+      this.dataValueSelector([100000, 500000000])
 
       //that.heatmap.updateGenes(this.selectedGenes);
 
@@ -400,12 +396,52 @@ class Setup {
 
   }
 
+  goTermBucketMaker(){
+    console.log(this.goTermsSearchTerms)
+    var gotermBucket = d3.select('#gotermBucket')
+      .selectAll('p')
+      .data(this.goTermsSearchTerms)
+
+    var gotermBucketEnter = gotermBucket.enter()
+      .append('p')
+    
+    gotermBucket.exit()
+      .style('opacity', 1)
+      .transition()
+      .duration(1000)
+      .style('opacity',0)
+      .remove()
+
+    gotermBucket = gotermBucketEnter.merge(gotermBucket)
+    
+    gotermBucket
+      .text(d=>d)
+    
+    gotermBucket
+      .on('click', d=>this.bucketCleaner(d) )
+
+  }
+
+  bucketCleaner(bucketTermRemove){
+    //Remove this term
+    this.goTermsSearchTerms = this.goTermsSearchTerms.filter(d=> d !== bucketTermRemove)
+    //Remake the bucket
+    this.goTermBucketMaker()
+    //Now find Genes
+    this.goTermGeneFinder()
+    //Now do the Slider()
+    this.dataSlider()
+    //Now make new values
+    this.dataValueSelector([100000, 500000000])
+  }
+
   //Function which subsets genes based on go terms
   //This creates dataSubset a subset of the larger dataset
   //added to this class
   goTermGeneFinder(){
     //subset the data based on the search Terms
     //this.dataSubset = []
+    console.log(this.goTermsSearchTerms)
 
     for(var i=0; i<this.goTermsSearchTerms.length; i++){
       // Turn this into array
@@ -437,28 +473,21 @@ class Setup {
       let buttonSel = $("select#cellAreaSelectDropdown>option")[index]
       //Is the button Clicked?
       let buttonLogic = selected
-      console.log(buttonLogic)
       //IF the button is clicked, then change the click logic to false
       //Else change it to true
       if (buttonLogic) {
         let buttonPressed = buttonSel.innerText
-        console.log(buttonPressed)
         this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = true
-        console.log(this.cellsLogic.filter(d => d.cells === buttonPressed))
       } else {
-        console.log(buttonSel.innerText)
         let buttonPressed = buttonSel.innerText
         this.cellsLogic.filter(d => d.cells === buttonPressed)[0].logic = false
       }
 
-      console.log(this.cellsLogic)
       //Now that we have the button logic figured out, grab the cells that are within
       //these groups
       let cellsSelected = this.cellsLogic.map((d, i) => {
         if (d.logic) { return d.cells }
       }).filter(d => d !== undefined)
-
-      console.log(cellsSelected)
 
       //Now that we have updated the logic we need to do the PCA calculation again
       this.cellOps()
