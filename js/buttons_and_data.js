@@ -208,10 +208,12 @@ class Setup {
       .attr('id','sliderHolder')
 
     var sliderDesc = sliderHolder
-      .append('p')
+      .append('div')
+			.attr('class', 'row align-items-center')
 
 		let sliderLabel = sliderDesc.append('div')
 												.attr('id', 'sliderLabel')
+												.attr('class', 'col-xm-2 mx-3')
 												.append('form')
 												.attr('class', 'form-inline justify-content-center')
 												.append('div')
@@ -226,6 +228,7 @@ class Setup {
 			.append('input')
 			.attr('type', 'text')
 			.attr('class', 'form-control-sm mx-sm-1 text-center')
+			.attr('style', 'width:6em')
 			.attr('id', 'sliderAmountMin');
 
 		sliderLabel
@@ -236,12 +239,14 @@ class Setup {
 			.append('input')
 			.attr('type', 'text')
 			.attr('class', 'form-control-sm mx-sm-1 text-center')
+			.attr('style', 'width:6em')
 			.attr('id', 'sliderAmountMax');
     //   .attr('readonly style', "border:0; color:#f6931f; font-weight:bold;")
 
-    sliderHolder
+    sliderDesc
       .append('div')
       .attr('id', 'slider-range')
+			.attr('class', 'col mx-3')
       //.on('mouseup', (d,e)=>this.dataValueSelector(e))
 
     this.dataSlider()
