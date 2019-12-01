@@ -521,7 +521,7 @@ class drPlot{
 		this.heatmapObject.brushHeatmap(genesSel);
 
 	    /* create new summary */
-		//this.drawSummaryPlot(genesSel);
+		this.drawSummaryPlot(genesSel);
 		}
 
 		updateGenesWhenClick() {

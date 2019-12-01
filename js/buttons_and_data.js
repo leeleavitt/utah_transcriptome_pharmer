@@ -127,11 +127,19 @@ class Setup {
     })
 
     //Make div for the data button
-    let dataButtonHolder = d3.select('#dataButtons')
+    let dataAreaSelect = d3.select('#dataButtons')
 
-    dataButtonHolder
-      .append('h6')
+		dataAreaSelect.append('div')
+			.attr('id', 'dataAreaSelectLabel')
+			.classed('c-label', true)
+      .append('text')
       .text('PCA Transformations')
+
+		dataAreaSelect.append('div')
+			.attr('id', 'dataAreaSelectDropdown');
+			//.attr('class', 'selectpicker');
+
+    let dataButtonHolder = d3.select('#dataAreaSelectDropdown');
 
     let dataButton = dataButtonHolder.selectAll('button')
       .data(dataButtonVals)
@@ -199,15 +207,33 @@ class Setup {
     var sliderDesc = sliderHolder
       .append('p')
 
-    sliderDesc
+		let sliderLabel = sliderDesc.append('div')
+												.attr('id', 'sliderLabel')
+												.append('form')
+												.attr('class', 'form-inline justify-content-center')
+												.append('div')
+												.attr('class', 'form-group');
+
+		sliderLabel
       .append('label')
-      .attr('for', 'ammount')
+      .attr('for', 'sliderAmountMin')
       .text('Gene Totals:')
 
-    sliderDesc
-      .append('input')
-      .attr('type', 'text')
-      .attr('id', 'amount')
+		sliderLabel
+			.append('input')
+			.attr('type', 'text')
+			.attr('class', 'form-control-sm mx-sm-1 text-center')
+			.attr('id', 'sliderAmountMin');
+
+		sliderLabel
+			.append('span')
+			.text('-')
+		
+		sliderLabel
+			.append('input')
+			.attr('type', 'text')
+			.attr('class', 'form-control-sm mx-sm-1 text-center')
+			.attr('id', 'sliderAmountMax');
     //   .attr('readonly style', "border:0; color:#f6931f; font-weight:bold;")
 
     sliderHolder
@@ -242,15 +268,17 @@ class Setup {
       values:[50000, geneMax],
       slide : function(event, ui){
         //this.dataValueSelector(ui);
-        $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+        $( "#sliderAmountMin" ).val(ui.values[ 0 ]);
+        $( "#sliderAmountMax" ).val(ui.values[ 1 ]);
       },
       stop: function(event, ui){
         that.dataValueSelector(ui.values)
       }
     });
 
-    $( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
-      " - $" + $( "#slider-range" ).slider( "values", 1 ) );
+    $( "#sliderAmountMin" ).val($( "#slider-range" ).slider( "values", 0 ));
+    $( "#sliderAmountMax" ).val($( "#slider-range" ).slider( "values", 1 ));
+
   }
 
   //This is the function that the slider calls on to subset the data based on the slider values
