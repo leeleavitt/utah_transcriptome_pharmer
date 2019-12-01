@@ -75,7 +75,7 @@ class drPlot{
 			this.pComps[i]=cell
 		}
 
-		console.log(this.pComps)
+		//console.log(this.pComps)
 
 		//Compute the directional components. This is how the genes direct the data
 		//Need to determine if i am using the correct region, collumns or row.
@@ -227,24 +227,15 @@ class drPlot{
 
         this.pd2Axis = d3.axisRight(this.pd2Scale)
 
-
-
-        //console.log(this.pDims)
-        console.log(this.pComps)
-
-
     }
 
     //Successful PCA compute this function also takes in which cells hav
     //been selected
     pcaCompute2(mat, cells, genes){
-        console.log('hello')
         //////////////////////////////////////////////////////////////////
         var geneMat = mat
         this.cells = cells
         this.geneSet = genes
-				console.log(geneMat);
-
         //Perform PCA, this make the directions
         var genePCA = new ML.PCA(geneMat,{center:false, scale:false, ignoreZeroVariance:false})
         //Calculate the components from the PCA space
@@ -327,10 +318,6 @@ class drPlot{
             .range([0, (this.width - this.margin.left - this.margin.right)])
 
         this.pd2Axis = d3.axisRight(this.pd2Scale)
-
-        //console.log(this.pDims)
-        console.log(this.pComps)
-
 
     }
 
@@ -427,7 +414,6 @@ class drPlot{
         ///////////////////////////////////////////////////////////////
         //Color scale for the cells
         ///////////////////////////////////////////////////////////////
-        console.log(this.cells)
         this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
         this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
@@ -512,8 +498,8 @@ class drPlot{
 
         //This Turns the Selected genes Red
         for(var i=0; i<genesSel.length;i++){
-            console.log(genesSel[i])
-            console.log(d3.select(`genePlot${genesSel[i]}`))
+            // console.log(genesSel[i])
+            // console.log(d3.select(`genePlot${genesSel[i]}`))
             d3.selectAll(`.genePlot${genesSel[i]}`).classed('selected',true)
         }
 
@@ -525,7 +511,6 @@ class drPlot{
 		}
 
 		updateGenesWhenClick() {
-			//console.log("u click");
 			this.cleanGeneDescription();
 		}
 
@@ -677,15 +662,10 @@ class drPlot{
                     allGoTerms = allGoTerms.concat(gene['GO.term.name']);
                 }
             })
-
-            //console.log("selectData:");
-            //console.log(allGoTerms);
-
             let summaryPlot = new SummaryPlot(allGoTerms);
 
 		this.dataSet.filter(gene => {
 			if(selectGene === gene['Gene.name']) {
-				//console.log(gene);
 				let geneDescription = new GeneDescription(gene);
 			}
 		})
@@ -695,14 +675,10 @@ class drPlot{
     /* draw gene description */
     /*************************/
 	drawGeneDescription(selectGene) {
-		//console.log("[dr_plot.js] dataSet: ");
-		//console.log(this.dataSet);
-
 		let that = this;
 
 		this.dataSet.filter(gene => {
 			if(selectGene === gene['Gene.name']) {
-				//console.log(gene);
 				that.geneDescription.drawGeneDescription(gene);
 			}
 		})
