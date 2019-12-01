@@ -200,7 +200,7 @@ class Setup {
     gotermSearchHolder
       .append('div')
       .attr('id', "gotermBucket")
-  
+
     /////////////////////////////////////////////////////////////////
     //SLIDER HOLDER
     var sliderHolder = d3.select('#buttons')
@@ -231,7 +231,7 @@ class Setup {
 		sliderLabel
 			.append('span')
 			.text('-')
-		
+
 		sliderLabel
 			.append('input')
 			.attr('type', 'text')
@@ -354,7 +354,7 @@ class Setup {
   }
 
   geneFinder(){
-    
+
   }
   goTermSearcher(){
 
@@ -369,7 +369,7 @@ class Setup {
         },
         minLength : 3
 			})
-    
+
     console.log(event)
     if(event.key == 'Enter'){
       $('#gotermsSearch').autocomplete({
@@ -404,7 +404,7 @@ class Setup {
 
     var gotermBucketEnter = gotermBucket.enter()
       .append('p')
-    
+
     gotermBucket.exit()
       .style('opacity', 1)
       .transition()
@@ -413,10 +413,10 @@ class Setup {
       .remove()
 
     gotermBucket = gotermBucketEnter.merge(gotermBucket)
-    
+
     gotermBucket
       .text(d=>d)
-    
+
     gotermBucket
       .on('click', d=>this.bucketCleaner(d) )
 
@@ -650,6 +650,9 @@ class Setup {
     //Gene Ops
     this.geneSet = this.dataSubset.map(d => d['Gene.name'])
     ////////////////////////////////////////////////////////////////////////////
+
+
+    this.heatmap.updateGenesSlider(this.geneSet);
   }
 
   dataCenter() {
