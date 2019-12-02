@@ -1,6 +1,12 @@
 # Utah Transcriptome Pharmer
 
-[DEMO](https://printfer.github.io/utah_transcriptome_pharmer/)
+*[DEMO](https://printfer.github.io/utah_transcriptome_pharmer/)*
+
+## Intro
+
+[Process Book](doc/process book.pdf)
+[DEMO Video](https://youtu.be/Et4tN2wOwj8)
+
 
 ## run
 
