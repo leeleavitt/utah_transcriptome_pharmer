@@ -22,7 +22,8 @@ class GeneDescription {
 		let source = content.match(re);
 
 		let tmpGDL = d3.select("#geneDescriptionLayout")
-			.attr("class", "alert alert-info");
+			.attr("class", "alert alert-info mx-2")
+			.attr("style", "height:363px; margin-bottom:0px");
 
 		tmpGDL
 			.append("h5")
