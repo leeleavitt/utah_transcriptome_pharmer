@@ -27,7 +27,7 @@ class Heatmap{
 					this.oldrow = null;
 					this.oldcol = null;
 
-					this.brushed = this.genes;
+					this.brushed = null;
 
 					this.expanded = false;
 
@@ -264,7 +264,7 @@ class Heatmap{
 						return that.cellsColorScale(d.slice(0,-2));
 					}
 				});
-
+			console.log(that.brushed);
 			if (that.brushed === null){
 				d3.select('#rectGroup')
 				.selectAll('rect')
