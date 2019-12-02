@@ -48,6 +48,10 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.11/css/bootstrap-select.min.css" integrity="sha384-ZSKgyG7f8kFUO6JFSkEehXkQLG18PWWEEDcWLfHBDDszwRRyd/VJVjiBxjMd2I6f" crossorigin="anonymous">
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.11/js/bootstrap-select.min.js" integrity="sha384-nQu0uOtvUAto18WugU6SfZ+mfZLvqncogj681f5tRMxOBXfFoIbe8YKhqbCIt31R" crossorigin="anonymous"></script>
 
+		<!-- pace.js -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js" integrity="sha384-5DyzDgtTHw1bbnR1u2aQPxi5+e1KVPsygV5Pioo5W+5ua3sN5AHF05kzM0QfXXqm" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/green/pace-theme-minimal.min.css" integrity="sha384-4cumayJM6zn3tqKnVp3cQIfYApRXXWXmZjYfLwKUSM6JocCTUSnqU3T8UeRC9msg" crossorigin="anonymous">
+
 
 		<!-- math -->
 		<!-- ml.js and math.js -->
@@ -91,7 +95,7 @@
 								<a class="nav-link" href="doc/process book.pdf" target="_blank">Process Book</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="#">About</a>
+								<a class="nav-link" href="https://github.com/printfer/utah_transcriptome_pharmer" target="_blank">About</a>
 							</li>
 						</ul>
 					</div>
@@ -111,30 +115,38 @@
 		<div class="mb-4">
 		</div>
 
-		<div id="appFunctions" class="row row text-center justify-content-md-center">
-			<!-- Search -->
-			<div id="search"></div>
-
-			<!-- Buttons -->
-			<div id="buttons">
-				<div class="row">
-					<div id="heatmapButtons">
-					</div>
-					<div id="clustButtons">
-					</div>
-					<div id="cellButtons">
-					</div>
-					<div id="dataButtons">
+		<div class="row mx-5">
+			<div class="col-sm-5 text-center">
+				<!-- gene description -->
+				<div id="geneDescription"></div>
+				<!-- Summary Plot -->
+				<div id="summaryPlot"></div>
+			</div>
+			<div class="col">
+				<div id="appFunctions" class="row text-center justify-content-md-center">
+					<!-- Buttons -->
+					<div id="buttons">
+						<div id="primaryButtons" class="row align-items-center">
+							<div id="heatmapButtons" class="col">
+							</div>
+							<div id="cellButtons" class="col">
+							</div>
+							<div id="dataButtons" class="col">
+							</div>
+							<div id="clustButtons" class="col">
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
+
 		<!-- Part 1 -->
 		<div class="row">
 
 			<!-- Dimensional Reduction Plot -->
-			<div id="drPlot" class="cal"></div>
+			<div id="drPlot" class="col"></div>
 
 			<!-- Heatmap/Table -->
 			<div id="heatmap"></div>
@@ -142,18 +154,6 @@
 			<!-- Dendrogram -->
 			<div id="dendrogram"></div>
 			
-			
-
-			<div class="col-sm-2">
-
-				<!-- Summary Plot -->
-				<div id="summaryPlot"></div>
-
-				<!-- gene description -->
-				<div id="geneDescription"></div>
-
-			</div>
-
 		</div>
 
 		<!-- Part2 -->

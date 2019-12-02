@@ -10,8 +10,8 @@ class SummaryPlot {
 
 		/* set size */
 		this.margin = {top: 30, right: 30, bottom: 30, left: 30};
-		this.height = 700;
-		this.width = 700;
+		this.height = 270;
+		this.width = 270;
 
 		/* scale */
 		this.colorScale = d3.scaleOrdinal()
@@ -78,7 +78,7 @@ class SummaryPlot {
 			/* set summary plot */
 			d3.select("#summaryPlot")
 				.append("svg")
-				.attr("viewBox", '0 0 2000 2000')
+				//.attr("viewBox", '0 0 2000 2000')
 				.attr("preserveAspectRatio","xMidYMid meet")
 				.attr("width", that.width + that.margin.left + that.margin.right)
 				.attr("height", that.height + that.margin.top + that.margin.bottom)
