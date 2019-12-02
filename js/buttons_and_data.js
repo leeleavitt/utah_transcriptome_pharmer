@@ -9,7 +9,7 @@ class Setup {
     this.newNorm = 'colvalue';
 		this.displayedResult;
     //To collecte serached genes into
-    this.selectedGenes = [];
+    this.genesSearchTerms = [];
     //Select cells based on go terms
     this.goTermsSearchTerms = ['ion channel', 'G-protein']
     this.goTerms = [...new Set( this.data.map(d=>d['GO.term.name']).flat() )]
@@ -159,17 +159,16 @@ class Setup {
     this.dataButtonChecker();
 
     /////////////////////////////////////////////////////
-    //Search Bar with Autofill
+    //Gene Search Bar with Autofill
     //Add the Search div to the autofill
     //https://jqueryui.com/autocomplete/
     var geneSearchHolder = d3.select('#buttons')
       .append('div')
       .attr('id', 'geneSearch')
 
-
     //I need to Subset this matrix because this.matrixSubsetter() creates this.geneSet
-    this.cellOps()
-    this.matrixSubsetter()
+    // this.cellOps()
+    // this.matrixSubsetter()
 
     //Now make a search bar. This is using jquery
     geneSearchHolder
@@ -182,6 +181,13 @@ class Setup {
       .attr('id', 'genesSearch')
       .on('keyup', d=>this.geneSearcher(d))
 
+    //Make a box to contain all searches
+    geneSearchHolder
+      .append('div')
+      .attr('id', "geneBucket")
+  
+    //////////////////////////////////////////////////////////////////////////
+    //Go term search
     var gotermSearchHolder = d3.select('#buttons')
       .append('div')
       .attr('id', 'gotermSearch')
@@ -244,11 +250,11 @@ class Setup {
       .attr('id', 'slider-range')
       //.on('mouseup', (d,e)=>this.dataValueSelector(e))
 
-    this.dataSlider()
+    this.gotermdataSlider()
     this.goTermBucketMaker()
   }
 
-  dataSlider(){
+  genedataSlider(){
     console.log('hello')
     //////////////////////////////////////////////////////////
     //Data slider
@@ -277,7 +283,45 @@ class Setup {
         $( "#sliderAmountMax" ).val(ui.values[ 1 ]);
       },
       stop: function(event, ui){
-        that.dataValueSelector(ui.values)
+        that.geneDataValueSelector(ui.values)
+      }
+    });
+
+    $( "#sliderAmountMin" ).val($( "#slider-range" ).slider( "values", 0 ));
+    $( "#sliderAmountMax" ).val($( "#slider-range" ).slider( "values", 1 ));
+
+  }
+  
+  gotermdataSlider(){
+    console.log('hello')
+    //////////////////////////////////////////////////////////
+    //Data slider
+    //to select genes on a slider range
+    //Find the most Genes
+    //Find the gene totals
+    var geneTotals = this.dataSubset.map(d=>{
+      let cellVals = Object.values(d.cell_values);
+      let cellValsTot = cellVals.reduce((a,b)=>a+b);
+      return cellValsTot
+    })
+
+    //Determine the range for the slider
+    var geneMax = Math.max(...geneTotals)
+    var geneMin = Math.min(...geneTotals)
+
+    var that = this
+    $('#slider-range').slider({
+      range: true,
+      min : geneMin,
+      max : geneMax,
+      values:[50000, geneMax],
+      slide : function(event, ui){
+        //this.dataValueSelector(ui);
+        $( "#sliderAmountMin" ).val(ui.values[ 0 ]);
+        $( "#sliderAmountMax" ).val(ui.values[ 1 ]);
+      },
+      stop: function(event, ui){
+        that.gotermDataValueSelector(ui.values)
       }
     });
 
@@ -286,8 +330,9 @@ class Setup {
 
   }
 
+
   //This is the function that the slider calls on to subset the data based on the slider values
-  dataValueSelector(sliderValues){
+  gotermDataValueSelector(sliderValues){
     console.log(sliderValues)
     //This takes in my slider values and subsets the data
     this.goTermGeneFinder()
@@ -305,57 +350,181 @@ class Setup {
 
   }
 
-  //This is the function to return whatever has been typed into the searchbar on enter press
-	geneSearcher(){
-
-    let that = this;
-		$('#genesSearch')
-			.autocomplete({source : this.geneSet,
-				response: function( event, ui ) {
-					that.displayedResult = ui;
-				}
-			})
-
-    if(event.key == 'Enter'){
-      $('#genesSearch').autocomplete({
-				  response: function( event, ui ) {}
-			});
-
-      let searchString = $('#genesSearch').focus()
-      let searchStringVal = searchString.val();
-      let displayedResultContent = that.displayedResult["content"];
-
-      if(that.geneSet.includes(searchStringVal)) { /* check if user select one gene */
-
-				$('#geneContainer>text.' + 'genePlot' + searchStringVal).addClass('selectedSearch');
-
-			} else if(displayedResultContent.length > 0) { /* if multiple selections */
-
-				//d3.selectAll('.selectedSearch').classed('selectedSearch',false);
-
-				//Now change all genes green on the pca plot
-				for(let i = 0; i < displayedResultContent.length; i++) {
-					let tmpDRC = displayedResultContent[i];
-					$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
-				}
-
-			} else { /* if no selection */
-
-			}
-
-			/* heatmap */
-      //console.log(displayedResultContent.map(d=>d.value))
-
-      that.heatmap.updateGenes(displayedResultContent.map(d=>d.value));
-
-      searchString.val('')
-      $('#genesSearch').autocomplete('close')
-    }
-  }
-
-  geneFinder(){
+  //This is the function that the slider calls on to subset the data based on the slider values
+  geneDataValueSelector(sliderValues){
+    console.log(sliderValues)
+    //This takes in my slider values and subsets the data
+    this.geneGeneFinder()
+    var subsetData = this.dataSubset.filter(d=>{
+      let cellVals = Object.values(d.cell_values)
+      let cellValsTot = cellVals.reduce((a,b)=>a+b);
+      return cellValsTot >= sliderValues[0] && cellValsTot <= sliderValues[1]
+    })
+    this.dataSubset = subsetData
+    console.log(this.dataSubset)
+    //this.cellOps()
+    this.matrixSubsetter()
+    this.dataOps()
+    this.pcaExecutor()
 
   }
+  
+  
+
+  // //This is the function to return whatever has been typed into the searchbar on enter press
+	// geneSearcher(){
+
+  //   let that = this;
+	// 	$('#genesSearch')
+	// 		.autocomplete({source : this.geneSet,
+	// 			response: function( event, ui ) {
+	// 				that.displayedResult = ui;
+	// 			}
+	// 		})
+
+  //   if(event.key == 'Enter'){
+  //     $('#genesSearch').autocomplete({
+	// 			  response: function( event, ui ) {}
+	// 		});
+
+  //     let searchString = $('#genesSearch').focus()
+  //     let searchStringVal = searchString.val();
+  //     let displayedResultContent = that.displayedResult["content"];
+
+  //     if(that.geneSet.includes(searchStringVal)) { /* check if user select one gene */
+
+	// 			$('#geneContainer>text.' + 'genePlot' + searchStringVal).addClass('selectedSearch');
+
+	// 		} else if(displayedResultContent.length > 0) { /* if multiple selections */
+
+	// 			//d3.selectAll('.selectedSearch').classed('selectedSearch',false);
+
+	// 			//Now change all genes green on the pca plot
+	// 			for(let i = 0; i < displayedResultContent.length; i++) {
+	// 				let tmpDRC = displayedResultContent[i];
+	// 				$('#geneContainer>text.' + 'genePlot' + tmpDRC.value).addClass('selectedSearch');
+	// 			}
+
+	// 		} else { /* if no selection */
+
+	// 		}
+
+	// 		/* heatmap */
+  //     //console.log(displayedResultContent.map(d=>d.value))
+
+  //     that.heatmap.updateGenes(displayedResultContent.map(d=>d.value));
+
+  //     searchString.val('')
+  //     $('#genesSearch').autocomplete('close')
+  //   }
+  // }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+geneSearcher(){
+  let that = this;
+  $('#genesSearch')
+    .autocomplete({
+      source : this.geneSet,
+      response: function( event, ui ) {
+        that.displayedResult = ui;
+      },
+      minLength : 2
+    })
+
+  if(event.key == 'Enter'){
+    $('#genesSearch').autocomplete({
+        response: function( event, ui ) {}
+    });
+
+    //What was searched?
+    var searchString = $('#genesSearch').focus()
+    //Add it to the Search Terms
+    this.genesSearchTerms.push(searchString.val());
+    console.log(this.genesSearchTerms)
+
+    this.geneBucketMaker()
+
+    //Subset the data based on the newly added gotermSearchTerm
+    this.geneGeneFinder()
+    this.genedataSlider()
+    this.geneDataValueSelector([100000, 500000000])
+
+    //that.heatmap.updateGenes(this.selectedGenes);
+
+    searchString.val('')
+    $('#genesSearch').autocomplete('close')
+  }
+
+}
+
+geneBucketMaker(){
+  console.log(this.genesSearchTerms)
+  var geneBucket = d3.select('#geneBucket')
+    .selectAll('p')
+    .data(this.genesSearchTerms)
+
+  var geneBucketEnter = geneBucket.enter()
+    .append('p')
+
+  geneBucket.exit()
+    .style('opacity', 1)
+    .transition()
+    .duration(1000)
+    .style('opacity',0)
+    .remove()
+
+  geneBucket = geneBucketEnter.merge(geneBucket)
+
+  geneBucket
+    .text(d=>d)
+
+  geneBucket
+    .on('click', d=>this.geneBucketCleaner(d) )
+
+}
+
+geneBucketCleaner(bucketTermRemove){
+  //Remove this term
+  this.genesSearchTerms = this.genesSearchTerms.filter(d=> d !== bucketTermRemove)
+  //Remake the bucket
+  this.geneBucketMaker()
+  //Now find Genes
+  this.geneGeneFinder()
+  //Now do the Slider()
+  this.genedataSlider()
+  //Now make new values
+  this.geneDataValueSelector([100000, 500000000],this.geneGeneFinder())
+}
+//Function which subsets genes based on go terms
+//This creates dataSubset a subset of the larger dataset
+//added to this class
+geneGeneFinder(){
+  //subset the data based on the search Terms
+  this.dataSubset = []
+  console.log(this.genesSearchTerms)
+
+  for(var i=0; i<this.genesSearchTerms.length; i++){
+    // Turn this into array
+    var dataTotalArray = Object.values(this.data)
+
+    //Filter all genes
+    //filter if the array of go terms have a match for the term
+    var dataSelect = dataTotalArray.filter(d=> d['Gene.name'].toLowerCase().includes(this.genesSearchTerms[i]) )
+    this.dataSubset = this.dataSubset.concat(dataSelect)
+  }
+
+  //Remove duplicate genes.
+  this.dataSubset = [...new Set(this.dataSubset)]
+
+  //Some Gene values are null so remove them
+  this.dataSubset = this.dataSubset.filter(d=>d.cell_values!=null)
+
+  console.log(this.dataSubset)
+
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
   goTermSearcher(){
 
     console.log(event)
@@ -386,8 +555,8 @@ class Setup {
 
       //Subset the data based on the newly added gotermSearchTerm
       this.goTermGeneFinder()
-      this.dataSlider()
-      this.dataValueSelector([100000, 500000000])
+      this.gotermdataSlider()
+      this.gotermDataValueSelector([100000, 500000000])
 
       //that.heatmap.updateGenes(this.selectedGenes);
 
@@ -419,11 +588,11 @@ class Setup {
       .text(d=>d)
 
     gotermBucket
-      .on('click', d=>this.bucketCleaner(d) )
+      .on('click', d=>this.gotermBucketCleaner(d) )
 
   }
 
-  bucketCleaner(bucketTermRemove){
+  gotermBucketCleaner(bucketTermRemove){
     //Remove this term
     this.goTermsSearchTerms = this.goTermsSearchTerms.filter(d=> d !== bucketTermRemove)
     //Remake the bucket
@@ -431,9 +600,9 @@ class Setup {
     //Now find Genes
     this.goTermGeneFinder()
     //Now do the Slider()
-    this.dataSlider()
+    this.gotermdataSlider()
     //Now make new values
-    this.dataValueSelector([100000, 500000000])
+    this.gotermDataValueSelector([100000, 500000000])
   }
 
   //Function which subsets genes based on go terms
@@ -466,6 +635,7 @@ class Setup {
     console.log(this.dataSubset)
 
   }
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   //This function update the button logic as well as the pca plot for now
   cellButtonChecker(index, selected, allValues) {
@@ -586,9 +756,6 @@ class Setup {
 
   }
 
-  geneOps(){
-
-  }
   //Function to Subset the cells based on the buttons clicked
   //Should retrun rownames of the data
   cellOps() {
@@ -622,7 +789,7 @@ class Setup {
     ////////////////////////////////////////////////////////////////////////////
   }
 
-  //THis subsets the matrix based on what is goin on in cellops
+  //This subsets the matrix based on what is goin on in cellops
   //Also outputs the genes
   matrixSubsetter() {
     //////////////////////////////////////////////

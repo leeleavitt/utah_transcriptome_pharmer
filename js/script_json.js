@@ -74,7 +74,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	//Now initialize the buttons
 	setup.initial();
 	//Find which cells are ready and selected
-	setup.dataValueSelector([50000,3212092])
+	setup.gotermDataValueSelector([50000,3212092])
 	setup.cellOps()
 	//Subset the matrix
 	setup.matrixSubsetter()
