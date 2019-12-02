@@ -78,7 +78,7 @@ class SummaryPlot {
 			/* set summary plot */
 			d3.select("#summaryPlot")
 				.append("svg")
-				.attr("viewBox", '0 0 2000 2000')
+				//.attr("viewBox", '0 0 2000 2000')
 				.attr("preserveAspectRatio","xMidYMid meet")
 				.attr("width", that.width + that.margin.left + that.margin.right)
 				.attr("height", that.height + that.margin.top + that.margin.bottom)

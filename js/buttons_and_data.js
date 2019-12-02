@@ -158,6 +158,10 @@ class Setup {
     //run dataButtonChecker on initialization
     this.dataButtonChecker();
 
+
+		/* config buttons */
+    $('#primaryButtons').addClass('alert alert-success');
+
     /////////////////////////////////////////////////////
     //Gene Search Bar with Autofill
     //Add the Search div to the autofill
@@ -185,6 +189,7 @@ class Setup {
     geneSearchHolder
       .append('div')
       .attr('id', "geneBucket")
+			.attr('style', 'height: 5em')
   
     //////////////////////////////////////////////////////////////////////////
     //Go term search
@@ -206,6 +211,7 @@ class Setup {
     gotermSearchHolder
       .append('div')
       .attr('id', "gotermBucket")
+			.attr('style', 'height: 5em')
 
     /////////////////////////////////////////////////////////////////
     //SLIDER HOLDER
