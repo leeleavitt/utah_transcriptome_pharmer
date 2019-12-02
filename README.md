@@ -4,7 +4,7 @@
 
 ## Intro
 
-* [Process Book](https://github.com/printfer/utah_transcriptome_pharmer/blob/master/doc/process%20book.pdf)
+* [Process Book](https://printfer.github.io/utah_transcriptome_pharmer/doc/process%20book.pdf)
 * [DEMO Video](https://youtu.be/Et4tN2wOwj8)
 
 
