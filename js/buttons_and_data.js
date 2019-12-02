@@ -420,7 +420,7 @@ class Setup {
       //Subset the data based on the newly added gotermSearchTerm
       this.geneGeneFinder()
       this.genedataSlider()
-      this.geneDataValueSelector([100000, 500000000])
+      this.geneDataValueSelector([10000, 500000000])
 
       //that.heatmap.updateGenes(this.selectedGenes);
 
@@ -467,7 +467,7 @@ class Setup {
     //Now do the Slider()
     this.genedataSlider()
     //Now make new values
-    this.geneDataValueSelector([1000000, 500000000],this.geneGeneFinder())
+    this.geneDataValueSelector([100000, 500000000],this.geneGeneFinder())
   }
   //Function which subsets genes based on go terms
   //This creates dataSubset a subset of the larger dataset
