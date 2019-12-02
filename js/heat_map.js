@@ -12,8 +12,6 @@ class Heatmap{
 
 					this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
 
-					console.log(this.heatmapDataAll);
-
 			    this.cells = Object.keys(this.heatmapDataAll[0].cell_values);
 					this.cells.sort();
 
@@ -88,7 +86,7 @@ class Heatmap{
 	  createHeatmap() {
 
 			this.stretchData(this.heatmapData);
-			
+
 	    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
 	    this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
@@ -557,7 +555,7 @@ class Heatmap{
 			if (this.heatmapData.length >= 100){
 				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,270)");
 			}else {
-				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,300)");
+				d3.select("#heatmapSVGgroup").transition().duration(1500).attr("transform","translate(150,310)");
 			}
 
 			this.newData = [];
@@ -575,7 +573,6 @@ class Heatmap{
 	}
 
 	clearHClust(){
-		console.log("here");
 		this.expanded = true;
 		d3.select('#hClustButton').classed("active",false);
 		this.hClustering();
@@ -625,7 +622,6 @@ class Heatmap{
 		this.clearHClust();
 		this.geneList = this.geneList.concat(newGenes);
 		this.genes = this.geneList;
-		console.log(this.genes);
 
 		let temp = JSON.parse(JSON.stringify(this.heatmapDataAll));
 		let newData = temp.filter(d => this.geneList.indexOf(d["Gene.name"]) !== -1);
@@ -642,7 +638,6 @@ class Heatmap{
 	updateGenesSlider(genes){
 		this.clearHClust();
 		this.genes = genes;
-		console.log(this.genes);
 
 		let temp = JSON.parse(JSON.stringify(this.heatmapDataAll));
 		let newData = temp.filter(d => this.genes.indexOf(d["Gene.name"]) !== -1);
