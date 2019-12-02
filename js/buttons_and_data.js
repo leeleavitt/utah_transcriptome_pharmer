@@ -21,7 +21,7 @@ class Setup {
     let clustButtons = d3.select('#clustButtons');
 
     clustButtons.append('button')
-      .attr('class', 'btn btn-primary clustButton')
+      .attr('class', 'btn btn-primary btn-sm clustButton')
       .attr('id', 'hClustButton')
       .attr('data-toggle', 'button')
       .attr('aria-pressed', 'true')
@@ -144,7 +144,7 @@ class Setup {
 
     dataButton = dataButtonEnter.merge(dataButton)
       .append('button')
-      .attr('class', 'btn btn-secondary dataButton')
+      .attr('class', 'btn btn-secondary btn-sm dataButton')
       .attr('id', d => `${d}Button`)
       .attr('data-toggle', 'button')
       .text(d => d.replace('_', ' '))

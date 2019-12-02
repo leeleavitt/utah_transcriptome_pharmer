@@ -5,19 +5,25 @@ class GeneDescription {
 		//console.log(selectGene);
 
 		//this.drawGeneDescription();
+		d3.select("#geneDescription")
+			.append("div")
+			.attr("id", "geneDescriptionLayout")
 	}
 
 	drawGeneDescription(selectGene) {
 		this.selectGene = selectGene;
 		this.cleanGeneDescription();
 		let that = this;
-		$("#geneDescription")
-			.append("<p>" + that.selectGene.description + "</p>");
+		d3.select("#geneDescriptionLayout")
+			.attr("class", "alert alert-info")
+			.append("div")
+			.text(that.selectGene.description);
 
 	}
 
 	cleanGeneDescription() {
-		$("#geneDescription").empty();
+		$("#geneDescriptionLayout").empty();
+		$("#geneDescriptionLayout").removeClass("alert alert-info");
 	}
 
 }

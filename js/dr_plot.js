@@ -663,12 +663,6 @@ class drPlot{
                 }
             })
             let summaryPlot = new SummaryPlot(allGoTerms);
-
-		this.dataSet.filter(gene => {
-			if(selectGene === gene['Gene.name']) {
-				let geneDescription = new GeneDescription(gene);
-			}
-		})
 	}
 
     /*************************/

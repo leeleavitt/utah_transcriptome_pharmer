@@ -10,8 +10,8 @@ class SummaryPlot {
 
 		/* set size */
 		this.margin = {top: 30, right: 30, bottom: 30, left: 30};
-		this.height = 700;
-		this.width = 700;
+		this.height = 270;
+		this.width = 270;
 
 		/* scale */
 		this.colorScale = d3.scaleOrdinal()
