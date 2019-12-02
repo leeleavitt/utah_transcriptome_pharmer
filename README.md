@@ -4,8 +4,8 @@
 
 ## Intro
 
-[Process Book](doc/process book.pdf)
-[DEMO Video](https://youtu.be/Et4tN2wOwj8)
+* [Process Book](https://github.com/printfer/utah_transcriptome_pharmer/blob/master/doc/process%20book.pdf)
+* [DEMO Video](https://youtu.be/Et4tN2wOwj8)
 
 
 ## run
