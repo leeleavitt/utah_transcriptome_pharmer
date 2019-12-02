@@ -34,7 +34,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 		return cellValsTot >= 20000
 	})
 
-	
+
 	// ///////////////////////////////////////////////////
 	// //Grab the first cell values, this contains cell types names
 	// cells = Object.getOwnPropertyNames(dataTotal[0].cell_values)
@@ -54,7 +54,7 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	/****************************************************************/
 	/*										  		Heat Map		  											*/
 	/****************************************************************/
-	let heatmap = new Heatmap(genesNoZeroData);
+	let heatmap = new Heatmap(dataTotal, genesNoZeroData);
 	heatmap.createHeatmap();
 
 	/****************************************************************/
