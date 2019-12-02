@@ -14,10 +14,34 @@ class GeneDescription {
 		this.selectGene = selectGene;
 		this.cleanGeneDescription();
 		let that = this;
-		d3.select("#geneDescriptionLayout")
-			.attr("class", "alert alert-info")
+		let re = /\[(.*?)\]/;
+
+		let content = that.selectGene.description;
+
+		let details = content.replace(re, '');
+		let source = content.match(re);
+
+		let tmpGDL = d3.select("#geneDescriptionLayout")
+			.attr("class", "alert alert-info");
+
+		tmpGDL
+			.append("h5")
+			.attr("class", "alert-heading")
+			.text("Gene Description");
+
+		//tmpGDL
+		//	.append("div")
+		//	.text(content);
+
+		tmpGDL
 			.append("div")
-			.text(that.selectGene.description);
+			.text(details);
+
+		tmpGDL
+			.append("div")
+			.attr("class", "font-italic font-weight-light")
+			.attr("style", "font-size: smaller")
+			.text(source[0]);
 
 	}
 

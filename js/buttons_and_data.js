@@ -574,11 +574,11 @@ geneGeneFinder(){
   goTermBucketMaker(){
     console.log(this.goTermsSearchTerms)
     var gotermBucket = d3.select('#gotermBucket')
-      .selectAll('p')
+      .selectAll('span')
       .data(this.goTermsSearchTerms)
 
     var gotermBucketEnter = gotermBucket.enter()
-      .append('p')
+      .append('span')
 
     gotermBucket.exit()
       .style('opacity', 1)
