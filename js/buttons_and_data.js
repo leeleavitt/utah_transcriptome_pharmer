@@ -390,9 +390,6 @@ class Setup {
 
   }
 
-
-
-
   geneSearcher(){
     let that = this;
     $('#genesSearch')
@@ -637,7 +634,7 @@ class Setup {
     //Now do the Slider()
     this.gotermdataSlider()
     //Now make new values
-    this.gotermDataValueSelector([1000000, 500000000])
+    this.gotermDataValueSelector([100000, 500000000])
   }
 
   //Function which subsets genes based on go terms
