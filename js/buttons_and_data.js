@@ -465,11 +465,12 @@ geneSearcher(){
 geneBucketMaker(){
   console.log(this.genesSearchTerms)
   var geneBucket = d3.select('#geneBucket')
-    .selectAll('p')
+    .selectAll('span')
     .data(this.genesSearchTerms)
 
   var geneBucketEnter = geneBucket.enter()
-    .append('p')
+    .append('span')
+		.attr('class', 'badge badge-primary')
 
   geneBucket.exit()
     .style('opacity', 1)
@@ -579,6 +580,7 @@ geneGeneFinder(){
 
     var gotermBucketEnter = gotermBucket.enter()
       .append('span')
+			.attr('class', 'badge badge-primary')
 
     gotermBucket.exit()
       .style('opacity', 1)
