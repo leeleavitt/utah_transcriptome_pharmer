@@ -22,7 +22,7 @@ class Setup {
     let clustButtons = d3.select('#clustButtons');
 
     clustButtons.append('button')
-      .attr('class', 'btn btn-primary btn-sm clustButton')
+      .attr('class', 'btn btn-primary clustButton')
       .attr('id', 'hClustButton')
       .attr('data-toggle', 'button')
       .attr('aria-pressed', 'true')
@@ -145,7 +145,7 @@ class Setup {
 
     dataButton = dataButtonEnter.merge(dataButton)
       .append('button')
-      .attr('class', 'btn btn-secondary btn-sm dataButton')
+      .attr('class', 'btn btn-secondary dataButton')
       .attr('id', d => `${d}Button`)
       .attr('data-toggle', 'button')
       .text(d => d.replace('_', ' '))
@@ -158,10 +158,6 @@ class Setup {
 
     //run dataButtonChecker on initialization
     this.dataButtonChecker();
-
-
-		/* config buttons */
-    $('#primaryButtons').addClass('alert alert-success');
 
     /////////////////////////////////////////////////////
     //Gene Search Bar with Autofill
@@ -190,7 +186,6 @@ class Setup {
     geneSearchHolder
       .append('div')
       .attr('id', "geneBucket")
-			.attr('style', 'height: 5em')
   
     //////////////////////////////////////////////////////////////////////////
     //Go term search
@@ -212,7 +207,6 @@ class Setup {
     gotermSearchHolder
       .append('div')
       .attr('id', "gotermBucket")
-			.attr('style', 'height: 5em')
 
     /////////////////////////////////////////////////////////////////
     //SLIDER HOLDER
@@ -407,31 +401,10 @@ class Setup {
     this.dataSubset = []
     console.log(this.genesSearchTerms)
 
-<<<<<<< HEAD
     if(this.genesSearchTerms.length > 0){
       for(var i=0; i<this.genesSearchTerms.length; i++){
         // Turn this into array
         var dataTotalArray = Object.values(this.data)
-=======
-}
-
-geneBucketMaker(){
-  console.log(this.genesSearchTerms)
-  var geneBucket = d3.select('#geneBucket')
-    .selectAll('span')
-    .data(this.genesSearchTerms)
-
-  var geneBucketEnter = geneBucket.enter()
-    .append('span')
-		.attr('class', 'badge badge-primary bucketStyle mx-1')
-
-  geneBucket.exit()
-    .style('opacity', 1)
-    .transition()
-    .duration(1000)
-    .style('opacity',0)
-    .remove()
->>>>>>> a6daf6d7e1905d24bf5892bf1393c920f527e796
 
         //Filter all genes
         //filter if the array of go terms have a match for the term
@@ -553,12 +526,11 @@ geneBucketMaker(){
   goTermBucketMaker(){
     console.log(this.goTermsSearchTerms)
     var gotermBucket = d3.select('#gotermBucket')
-      .selectAll('span')
+      .selectAll('p')
       .data(this.goTermsSearchTerms)
 
     var gotermBucketEnter = gotermBucket.enter()
-      .append('span')
-			.attr('class', 'badge badge-primary bucketStyle mx-1')
+      .append('p')
 
     gotermBucket.exit()
       .style('opacity', 1)
