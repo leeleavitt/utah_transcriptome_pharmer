@@ -1,26 +1,28 @@
 class Heatmap{
-	  constructor(data){
+	  constructor(allData,initialData){
 			    this.margin = {top: 100, right: 30, bottom: 30, left: 150};
 
 			    this.width = 1000 - this.margin.left - this.margin.right;
 
 			    this.height = 900 - this.margin.top - this.margin.bottom;
 
-			    this.heatmapDataAll = data;
+			    this.heatmapDataAll = allData;
 
-					this.clusterData = JSON.parse(JSON.stringify(this.heatmapDataAll));
+					this.heatmapData = initialData;
+
+					this.clusterData = JSON.parse(JSON.stringify(this.heatmapData));
 
 					console.log(this.heatmapDataAll);
 
 			    this.cells = Object.keys(this.heatmapDataAll[0].cell_values);
 					this.cells.sort();
 
-					this.selectedCells = Object.keys(this.heatmapDataAll[0].cell_values);
+					this.selectedCells = Object.keys(this.heatmapData[0].cell_values);
 					this.selectedCells.sort();
 					this.notSelectedCells = [];
 					this.init = false;
 
-			    this.genes = this.heatmapDataAll.map(d => d["Gene.name"]);
+			    this.genes = this.heatmapData.map(d => d["Gene.name"]);
 
 					this.newNorm = 'colvalue';
 
@@ -85,10 +87,8 @@ class Heatmap{
 
 	  createHeatmap() {
 
-			this.stretchData(this.heatmapDataAll);
-
-			this.genes = this.heatmapData.map(d => d["Gene.name"]);
-
+			this.stretchData(this.heatmapData);
+			
 	    this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
 
 	    this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
