@@ -3,6 +3,7 @@ class SummaryPlot {
 	constructor(data) {
 
 		let that = this;
+		this.summaryPlotLoc = d3.select("#summaryPlot");
 
 		/* pre process */
 		this.clear();
@@ -76,7 +77,7 @@ class SummaryPlot {
 
 		function draw(words) {
 			/* set summary plot */
-			d3.select("#summaryPlot")
+			that.summaryPlotLoc
 				.append("svg")
 				//.attr("viewBox", '0 0 2000 2000')
 				.attr("preserveAspectRatio","xMidYMid meet")
@@ -101,7 +102,7 @@ class SummaryPlot {
 	}
 
 	clear() {
-		d3.select("#summaryPlot").selectAll("*").remove();
+		this.summaryPlotLoc.selectAll("*").remove();
 	}
 
 
@@ -115,7 +116,7 @@ class SummaryPlot {
 			let width = document.getElementById('summaryPlot').offsetWidth;
 			let height = document.getElementById('summaryPlot').offsetHeight;
 
-			d3.select("#summaryPlot").select('svg')
+			that.summaryPlotLoc.select('svg')
 				.attr("width", width + that.margin.left + that.margin.right)
 				.attr("height", height + that.margin.top + that.margin.bottom)
 			d3.select("#wordcloud")
