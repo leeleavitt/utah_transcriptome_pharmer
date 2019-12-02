@@ -76,8 +76,15 @@ class SummaryPlot {
 		layout.start();
 
 		function draw(words) {
+			let summaryPlotWrap = that.summaryPlotLoc.append("div").attr("class", "alert alert-info");
+
+			summaryPlotWrap
+				.append("h4")
+				.attr("class", "alert-heading")
+				.text("Go Term Summary");
+
 			/* set summary plot */
-			that.summaryPlotLoc
+			summaryPlotWrap
 				.append("svg")
 				//.attr("viewBox", '0 0 2000 2000')
 				.attr("preserveAspectRatio","xMidYMid meet")

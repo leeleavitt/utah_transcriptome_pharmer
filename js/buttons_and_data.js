@@ -131,19 +131,20 @@ class Setup {
       .append('text')
       .text('PCA Transformations')
 
-		dataAreaSelect.append('div')
-			.attr('id', 'dataAreaSelectDropdown');
+		dataAreaSelect.append('select')
+			.attr('id', 'dataAreaSelectDropdown')
+      .attr('multiple', 'true');
 			//.attr('class', 'selectpicker');
 
     let dataButtonHolder = d3.select('#dataAreaSelectDropdown');
 
-    let dataButton = dataButtonHolder.selectAll('button')
+    let dataButton = dataButtonHolder.selectAll('option')
       .data(dataButtonVals)
 
     let dataButtonEnter = dataButton.enter()
 
     dataButton = dataButtonEnter.merge(dataButton)
-      .append('button')
+      .append('option')
       .attr('class', 'btn btn-secondary btn-sm dataButton')
       .attr('id', d => `${d}Button`)
       .attr('data-toggle', 'button')
@@ -151,6 +152,15 @@ class Setup {
       .on('click', d => {
         that.dataButtonChecker(d)
       })
+
+      $('#dataAreaSelectDropdown').selectpicker('refresh');
+
+      $('#dataAreaSelectDropdown')
+        .on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+          that.dataButtonCheckerX(clickedIndex, isSelected, previousValue);
+        });
+
+
 
 		/* select all data by default */
     $('#cellAreaSelectDropdown').selectpicker('selectAll');
@@ -190,7 +200,7 @@ class Setup {
       .append('div')
       .attr('id', "geneBucket")
 			.attr('style', 'height: 5em')
-  
+
     //////////////////////////////////////////////////////////////////////////
     //Go term search
     var gotermSearchHolder = d3.select('#buttons')
@@ -302,7 +312,7 @@ class Setup {
     $( "#sliderAmountMax" ).val($( "#slider-range" ).slider( "values", 1 ));
 
   }
-  
+
   gotermdataSlider(){
     console.log('hello')
     //////////////////////////////////////////////////////////
@@ -379,8 +389,8 @@ class Setup {
     this.pcaExecutor()
 
   }
-  
-  
+
+
 
   // //This is the function to return whatever has been typed into the searchbar on enter press
 	// geneSearcher(){
@@ -688,6 +698,17 @@ geneGeneFinder(){
   /////////////////////////////////////////////////////////////////////////
   //Data Operations
   ////////////////////////////////////////////////////////////////////////
+  dataButtonCheckerX(index, selected, allValues) {
+
+    let buttonSel = $("select#dataAreaSelectDropdown>option")[index]
+
+    let dataSel =  buttonSel.innerText;
+
+    this.dataButtonChecker(dataSel);
+
+
+  }
+
   dataButtonChecker(dataSel) {
     //clear hierarchical Clustering
     if (dataSel !== 'dontclear'){
