@@ -470,7 +470,7 @@ geneBucketMaker(){
 
   var geneBucketEnter = geneBucket.enter()
     .append('span')
-		.attr('class', 'badge badge-primary')
+		.attr('class', 'badge badge-primary bucketStyle mx-1')
 
   geneBucket.exit()
     .style('opacity', 1)
@@ -580,7 +580,7 @@ geneGeneFinder(){
 
     var gotermBucketEnter = gotermBucket.enter()
       .append('span')
-			.attr('class', 'badge badge-primary')
+			.attr('class', 'badge badge-primary bucketStyle mx-1')
 
     gotermBucket.exit()
       .style('opacity', 1)

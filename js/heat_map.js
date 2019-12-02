@@ -4,7 +4,7 @@ class Heatmap{
 
 			    this.width = 1000 - this.margin.left - this.margin.right;
 
-			    this.height = 900 - this.margin.top - this.margin.bottom;
+			    this.height = 820 - this.margin.top - this.margin.bottom;
 
 			    this.heatmapDataAll = allData;
 
@@ -97,7 +97,7 @@ class Heatmap{
 	    var svg = d3.select("#heatmap")
 	      .append("svg")
 	      .attr("width", this.width + this.margin.left + this.margin.right)
-	      .attr("height", this.height + 400 + this.margin.top + this.margin.bottom)
+	      .attr("height", this.height + 200 + this.margin.top + this.margin.bottom)
 				.attr("id","heatmapSVG")
 	      .append("g")
 				.attr("id","heatmapSVGgroup")

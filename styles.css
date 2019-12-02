@@ -50,3 +50,7 @@ text.selectedSearch{
   font-weight: bold; 
   opacity:1;
 }
+
+.bucketStyle {
+	  cursor: pointer;
+}
