@@ -414,7 +414,7 @@ class drPlot{
         ///////////////////////////////////////////////////////////////
         //Color scale for the cells
         ///////////////////////////////////////////////////////////////
-        this.cellsGroups = [...new Set(this.cells.map(d => d.slice(0,-2)))];
+        this.cellsGroups = [...new Set(this.cells.sort().map(d => d.slice(0,-2)))];
 
         this.cellsColorScale = d3.scaleOrdinal(d3.schemeSet2)
             .domain(this.cellsGroups);
