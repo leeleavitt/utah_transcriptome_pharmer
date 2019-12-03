@@ -276,15 +276,14 @@ class Setup {
 		$("input#sliderAmountMax").change(function (e){
 			let max = $("#sliderAmountMax").val();
 			$( "#slider-range" ).slider( "values", 1 , max );
-
-			that.gotermDataValueSelector($( "#slider-range" ).slider( "values"));
+			that.geneDataValueSelector($( "#slider-range" ).slider( "values"));
 		});
 
 		$("input#sliderAmountMin").change(function (e){
 			console.log("test")
 			let min = $("#sliderAmountMin").val();
 			$( "#slider-range" ).slider( "values", 0 , min );
-			that.gotermDataValueSelector($( "#slider-range" ).slider( "values"));
+			that.geneDataValueSelector($( "#slider-range" ).slider( "values"));
 		});
   }
   

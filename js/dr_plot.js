@@ -139,12 +139,8 @@ class drPlot{
         this.cells = newCells
 
         //console.log(this.cells)
-<<<<<<< HEAD
-    
-=======
 
 
->>>>>>> 75bc2461536456ddde02695c61af884731da0b26
         //////////////////////////////////////////////////////////////////
         //Perform PCA, this make the directions
         var genePCA = new ML.PCA(geneMat,{center:false, scale:false, ignoreZeroVariance:false})
@@ -532,10 +528,6 @@ class drPlot{
 
         ///////////////////////////////////////////////////////////////////
         //Plot the cells
-<<<<<<< HEAD
-        //console.log(this.pComps)
-=======
->>>>>>> c5a84a96f64841c1982cc0bea8074312440584bb
         var cellComp = d3.select('#cellContainer')
             .selectAll('circle')
             .data(this.pComps)

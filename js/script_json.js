@@ -108,44 +108,8 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	///////////////////////////////////////////////////
 	//Add Buttons for cell selection
 	///////////////////////////////////////////////////
-<<<<<<< HEAD
-	
-	//This function update the button logic as well as the pca plot for now
-	buttonChecker = function(cells){
-		//Get the button clicked
-		buttonSel = document.getElementById(`${cells}Button`)
-		//Is the button Clicked?
-		buttonLogic = buttonSel.classList.contains('active')
-		//IF the button is clicked, then change the click logic to false
-		//Else change it to true
-		if(buttonLogic){
-			buttonPressed = buttonSel.innerText
-			console.log(buttonPressed)
-			cellsLogic.filter(d=>d.cells === buttonPressed)[0].logic = false
-			console.log(cellsLogic.filter(d=>d.cells === buttonPressed))
-		}else{
-			buttonPressed = buttonSel.innerText
-			cellsLogic.filter(d=>d.cells === buttonPressed)[0].logic = true
-		}
-
-		console.log(cellsLogic)
-		//Now that we have the button logic figured out, grab the cells that are within
-		//these groups 
-		cellsSelected = cellsLogic.map((d,i)=>{
-            if(d.logic){return d.cells}
-		}).filter(d=>d !== undefined)
-		
-		console.log(cellsSelected)
-
-		//Now that we have updated the logic we need to do the PCA calculation again
-		drplot.pcaCompute(cellsLogic);
-		//drplot.createPlot();
-		drplot.drawPlot();
-		}
-=======
 
 
->>>>>>> c5a84a96f64841c1982cc0bea8074312440584bb
 
 
 
@@ -176,9 +140,4 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	// buttonLogic = 0
 	// //////////////////////////////////////////////////////
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> c5a84a96f64841c1982cc0bea8074312440584bb
 });
