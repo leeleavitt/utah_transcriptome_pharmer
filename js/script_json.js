@@ -1,6 +1,7 @@
 d3.json('data_preprocessing/final_data.json').then(data => {
 	/* convert json object to array */
 	dataTotal = Object.values(data);
+	dataTotal = dataTotal.filter(d=>d.cell_values!=null)
 	//////////////////////////////////////////////////////////
 	//Data Subsetting
 	//////////////////////////////////////////////////////////
@@ -30,43 +31,61 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 	genesNoZeroData = genes.filter(d=>{
 		let cellVals = Object.values(d.cell_values)
 		let cellValsTot = cellVals.reduce((a,b)=>a+b);
-		return cellValsTot >= 50000
+		return cellValsTot >= 20000
 	})
 
-	///////////////////////////////////////////////////
-	//Grab the first cell values, this contains cell types names
-	cells = Object.getOwnPropertyNames(dataTotal[0].cell_values)
-	//Remove the number identifier at the and and obtain a unique set
-	cellsUnique = [...new Set(cells.map(d=>d.slice(0,-2)))]
 
-	cellsLogic = []
-	cellsUnique.map((d,i)=>{
-		cellsUniqueLogic = {}
-		cellsUniqueLogic['cells']= d
-		cellsUniqueLogic['logic'] = true
-		cellsLogic[i] = cellsUniqueLogic
-	})
+	// ///////////////////////////////////////////////////
+	// //Grab the first cell values, this contains cell types names
+	// cells = Object.getOwnPropertyNames(dataTotal[0].cell_values)
+	// //Remove the number identifier at the and and obtain a unique set
+	// cellsUnique = [...new Set(cells.map(d=>d.slice(0,-2)))]
+
+	// cellsLogic = []
+	// cellsUnique.map((d,i)=>{
+	// 	cellsUniqueLogic = {}
+	// 	cellsUniqueLogic['cells']= d
+	// 	cellsUniqueLogic['logic'] = true
+	// 	cellsLogic[i] = cellsUniqueLogic
+	// })
 
 	///////////////////////////////////////////////////
 
 	/****************************************************************/
 	/*										  		Heat Map		  											*/
 	/****************************************************************/
-	let heatmap = new Heatmap(genesNoZeroData);
+	let heatmap = new Heatmap(dataTotal, genesNoZeroData);
 	heatmap.createHeatmap();
+
 	/****************************************************************/
 	/*									Dimensional Reduction Plot									*/
 	/****************************************************************/
-	let drplot = new drPlot(genesNoZeroData, heatmap);
-	drplot.pcaCompute(cellsLogic);
-	drplot.createPlot();
-	drplot.drawPlot();
+	let drplot = new drPlot(dataTotal, heatmap);
+	// drplot.pcaCompute(cellsLogic);
 
 	/****************************************************************/
 	/*					  Button Setup and Data Manipulation  							*/
 	/****************************************************************/
-	let setup = new Setup(genesNoZeroData, heatmap, drplot);
+	bob=1
+	let setup = new Setup(dataTotal, heatmap, drplot);
+
+	//First subset the data. There are 2 default search values
+	setup.goTermGeneFinder()
+	//Now initialize the buttons
 	setup.initial();
+	//Find which cells are ready and selected
+	setup.gotermDataValueSelector([50000,3212092])
+	setup.cellOps()
+	//Subset the matrix
+	setup.matrixSubsetter()
+	//ensure the data operation are goin
+	setup.dataOps()
+	//Initialize the dimensional reduction plot
+	drplot.createPlot();
+	//drplot.drawPlot();
+	//Execute and plot the pca
+	setup.pcaExecutor()
+
 
 	/****************************************************************/
 	/*										  		Summary Plot	 											*/
@@ -131,31 +150,31 @@ d3.json('data_preprocessing/final_data.json').then(data => {
 
 
 
-	///////////////////////////////////////////////////////
-	//PROVING GROUND
-	//////////////////////////////////////////////////////
-	//Testing out the hcluster method
-	geneMatrix = genesNoZeroData.map(d=>Object.values(d.cell_values))
+	// ///////////////////////////////////////////////////////
+	// //PROVING GROUND
+	// //////////////////////////////////////////////////////
+	// //Testing out the hcluster method
+	// geneMatrix = genesNoZeroData.map(d=>Object.values(d.cell_values))
 
-	//Find all genes
-	geneSet = genesNoZeroData.map(d=>d['Gene.name'])
-	console.log(geneSet)
-	//Find all cells
-	cells = Object.getOwnPropertyNames(genesNoZeroData[0].cell_values)
-	console.log(cells)
+	// //Find all genes
+	// geneSet = genesNoZeroData.map(d=>d['Gene.name'])
+	// console.log(geneSet)
+	// //Find all cells
+	// cells = Object.getOwnPropertyNames(genesNoZeroData[0].cell_values)
+	// console.log(cells)
 
-	geneMat = new ML.Matrix(geneMatrix)
-	geneMat = geneMat.transpose()
+	// geneMat = new ML.Matrix(geneMatrix)
+	// geneMat = geneMat.transpose()
 
-	//COmpute the euclidean distance matrix for the clustering
-	geneMatDistEuc = ML.distanceMatrix(geneMat.transpose().data, ML.Distance.euclidean)
+	// //COmpute the euclidean distance matrix for the clustering
+	// geneMatDistEuc = ML.distanceMatrix(geneMat.transpose().data, ML.Distance.euclidean)
 
-	//Now compute the agnes heirarchal clsutering
-	bob = ML.HClust.agnes(geneMatDistEuc, {isDistanceMatrix:true})
+	// //Now compute the agnes heirarchal clsutering
+	// //bob = ML.HClust.agnes(geneMatDistEuc, {isDistanceMatrix:true})
 
-	buttonClasses = 0
-	buttonLogic = 0
-	//////////////////////////////////////////////////////
+	// buttonClasses = 0
+	// buttonLogic = 0
+	// //////////////////////////////////////////////////////
 
 <<<<<<< HEAD
 

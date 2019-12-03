@@ -1,3 +1,4 @@
+/* heatmap */
 div.tooltip {
     position: absolute;
     text-align: center;
@@ -20,8 +21,15 @@ div.tooltip {
     opacity: 0.8;
 }
 
+/* PCA */
 text.selected{
   fill: red;
+  font-weight: bold; 
+  opacity:1;
+}
+
+text.selectedTrace{
+  fill: blue;
   font-weight: bold; 
   opacity:1;
 }
@@ -31,5 +39,18 @@ line.selected{
   stroke-width:2;
 }
 
+.genePlotText {
+	  cursor: pointer;
+}
 
 
+/* buttons */
+text.selectedSearch{
+  fill: green;
+  font-weight: bold; 
+  opacity:1;
+}
+
+.bucketStyle {
+	  cursor: pointer;
+}

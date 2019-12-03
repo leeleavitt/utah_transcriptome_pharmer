@@ -3,6 +3,7 @@ class SummaryPlot {
 	constructor(data) {
 
 		let that = this;
+		this.summaryPlotLoc = d3.select("#summaryPlot");
 
 		/* pre process */
 		this.clear();
@@ -10,8 +11,8 @@ class SummaryPlot {
 
 		/* set size */
 		this.margin = {top: 30, right: 30, bottom: 30, left: 30};
-		this.height = 700;
-		this.width = 700;
+		this.height = 260;
+		this.width = 290;
 
 		/* scale */
 		this.colorScale = d3.scaleOrdinal()
@@ -75,10 +76,20 @@ class SummaryPlot {
 		layout.start();
 
 		function draw(words) {
+			let summaryPlotWrap = that.summaryPlotLoc
+				.append("div")
+				.attr("class", "alert alert-info mx-2")
+				.attr("style", "height:363px; margin-bottom:0px");
+
+			summaryPlotWrap
+				.append("h5")
+				.attr("class", "alert-heading")
+				.text("Go Term Summary");
+
 			/* set summary plot */
-			d3.select("#summaryPlot")
+			summaryPlotWrap
 				.append("svg")
-				.attr("viewBox", '0 0 2000 2000')
+				//.attr("viewBox", '0 0 2000 2000')
 				.attr("preserveAspectRatio","xMidYMid meet")
 				.attr("width", that.width + that.margin.left + that.margin.right)
 				.attr("height", that.height + that.margin.top + that.margin.bottom)
@@ -101,7 +112,7 @@ class SummaryPlot {
 	}
 
 	clear() {
-		d3.select("#summaryPlot").selectAll("*").remove();
+		this.summaryPlotLoc.selectAll("*").remove();
 	}
 
 
@@ -115,7 +126,7 @@ class SummaryPlot {
 			let width = document.getElementById('summaryPlot').offsetWidth;
 			let height = document.getElementById('summaryPlot').offsetHeight;
 
-			d3.select("#summaryPlot").select('svg')
+			that.summaryPlotLoc.select('svg')
 				.attr("width", width + that.margin.left + that.margin.right)
 				.attr("height", height + that.margin.top + that.margin.bottom)
 			d3.select("#wordcloud")
