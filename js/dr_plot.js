@@ -614,9 +614,9 @@ class drPlot{
             .text(d=>d.gene)
             .on('end', () => d3.select(this).transition().duration(500));
 
-				d3.select('#geneContainer')
-						.selectAll('text')
-						.on('click',d => this.heatmapObject.highlightGene(d.gene));
+        d3.select('#geneContainer')
+                .selectAll('text')
+                .on('click',d => this.heatmapObject.highlightGene(d.gene));
 
         ///////////////////////////////////////////////////////////////////
         //Cell Labels
