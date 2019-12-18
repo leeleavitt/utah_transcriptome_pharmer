@@ -35,6 +35,8 @@ class Heatmap{
 
 		this.geneList = [];
 
+		this.geneDescription = new GeneDescription();
+
 
 	}
 
@@ -372,7 +374,11 @@ class Heatmap{
 
 		d3.select("#rectGroup")
 			.selectAll('rect')
-			.on('click',d => this.highlightGene(d.gene))
+			.on('click',d =>{ 
+				this.highlightGene(d.gene)
+				console.log(d.gene)
+				that.drawGeneDescription(d.gene)
+			})
 			.on("mouseover", d => 
 				d3.select('.tooltip').html(this.tooltipRender(d))
 					.style("opacity",1)
@@ -411,6 +417,16 @@ class Heatmap{
 			d3.select('#lineGroup').selectAll('line').remove();
 		}
 
+	}
+
+	drawGeneDescription(selectGene) {
+		console.log(selectGene)
+		let that = this;
+		this.heatmapDataAll.filter(gene => {
+			if(selectGene === gene['Gene.name']) {
+				that.geneDescription.drawGeneDescription(gene);
+			}
+		})
 	}
 
 	sortCols(col){

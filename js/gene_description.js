@@ -15,7 +15,7 @@ class GeneDescription {
 		this.cleanGeneDescription();
 		let that = this;
 		let re = /\[(.*?)\]/;
-
+		console.log(that.selectGene)
 		let content = that.selectGene.description;
 
 		let details = content.replace(re, '');
@@ -43,6 +43,24 @@ class GeneDescription {
 			.attr("class", "font-italic font-weight-light")
 			.attr("style", "font-size: smaller")
 			.text(source[0]);
+		
+	
+		//Add Go term description to the Gene Description
+		let tmpGTD = tmpGDL
+			.append('div')
+			.attr('id', 'goTermDesc')
+		
+		let goTermString = ''
+		
+		that.selectGene['GO.term.name'].map(d=>{ goTermString = goTermString + ' /// '+ d})
+
+		console.log(goTermString)
+
+		tmpGTD
+			.append('div')
+			.attr("class", "font-weight-light")
+			.attr("style", "font-size: xx-small")
+			.text(goTermString)
 
 	}
 

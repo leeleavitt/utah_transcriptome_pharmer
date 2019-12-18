@@ -670,7 +670,6 @@ class drPlot{
     /*************************/
 	drawGeneDescription(selectGene) {
 		let that = this;
-
 		this.dataSet.filter(gene => {
 			if(selectGene === gene['Gene.name']) {
 				that.geneDescription.drawGeneDescription(gene);
